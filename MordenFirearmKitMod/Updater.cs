@@ -59,21 +59,6 @@ namespace MordenFirearmKitMod
             LatestReleaseName = release["name"].Value;
             LatestReleaseBody = release["body"].Value.Replace(@"\r\n", "\n");
 
-            //            //中间变量
-            //            string str = value;
-
-            //            //取项目名 确定版本号大致位置（去除主域名 且 在后面加/v）
-            //            string versionKey = url.Substring(url.IndexOf("https://git.oschina.net/") + "https://git.oschina.net/".Length) + "/v";
-
-            //            //字符位置 确定版本号准确位置（通过项目名长度确定分割字符串起点位置）
-            //            int a = str.IndexOf(versionKey) + versionKey.Length;
-
-            //            //新版Mod版本号
-            //            LatestVersion = new Version(str.Substring(a, 5));
-            //#if DEBUG
-            //            Debug.Log(LatestVersion + "||" + CurrentVersion+"||"+LatestReleaseName+"||"+LatestReleaseBody);
-            //#endif
-
             //比较最新版本和当前版本
             if (LatestVersion > CurrentVersion)
             {
@@ -107,24 +92,6 @@ namespace MordenFirearmKitMod
         {
             url = "https://git.oschina.net/api/v5/repos/" + owner + "/" + path + "/releases/latest";
         }
-
-        //获取相关信息
-        //        private string GetData(string key)
-        //        {
-        //            key = "'" + key + "'>";
-        //            int a = value.IndexOf(key);
-        //            string str = value.Remove(0, a + key.Length);
-
-        //            a = str.IndexOf(">");
-        //            str = str.Remove(0, a + 1);
-
-        //            a = str.IndexOf("<");
-        //            str = str.Substring(0, a).Replace("&#x000A;", "\n");
-        //#if DEBUG
-        //            Debug.Log(str);
-        //#endif
-        //            return str;
-        //        }
 
         private void OnGUI()
         {
