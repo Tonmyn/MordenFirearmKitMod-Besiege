@@ -7,5 +7,7 @@ namespace MordenFirearmKitMod
 {
     class BulletBase : BlockScript
     {
+
+
     }
 }

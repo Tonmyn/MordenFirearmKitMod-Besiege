@@ -39,7 +39,7 @@ namespace MordenFirearmKitMod
 
         private int WindowID = Util.GetWindowID();
 
-        private IEnumerator Start()
+        public IEnumerator Start()
         {
             var www = new WWW(url);
             yield return www;
