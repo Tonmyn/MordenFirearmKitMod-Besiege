@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using spaar.ModLoader;
 using TheGuysYouDespise;
 using UnityEngine;
+using Blocks;
 
 namespace MordenFirearmKitMod
 {
@@ -11,7 +12,7 @@ namespace MordenFirearmKitMod
     // in general, take a look at https://spaar.github.io/besiege-modloader.
 
 
-    public partial class MordenFirearmKitMod : Mod
+    public partial class MordenFirearmKitMod : BlockMod
     {
         public override string Name { get; } = "MordenFirearmKitMod";
         public override string DisplayName { get; } = "Morden Firearm Kit";
@@ -56,7 +57,12 @@ namespace MordenFirearmKitMod
         public override void OnLoad()
         {
             // Your initialization code here
+
+            //添加MOD更新推送功能
             updater.AddComponent<Updater>().Url("XultimateX", "MordenFirearmKitMod");
+
+            LoadBlock(Butt);
+            
         }
 
 

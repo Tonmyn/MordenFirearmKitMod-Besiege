@@ -17,14 +17,29 @@ namespace MordenFirearmKitMod
         //声明 滑条 爆炸威力
         protected MSlider power_slider;
 
+        //声明 滑条 推力大小
+        protected MSlider thrust_slider;
+
         //声明 滑条 阻力大小
         protected MSlider drag_slider;
+
+        //声明 滑条 碰撞开启时间
+        protected MSlider timeopen_slider;
+
+        //声明 碰撞开启时间
+        public float timeopen = 2f;
+
+        //声明 碰撞开启
+        public bool canBeCollision = false;
 
         //声明 爆炸类型
         public int explosiontype;
 
         //声明 爆炸威力
         public float power = 5f;
+
+        //声明 推力大小
+        public float thrust = 4f;
 
         //声明 阻力大小
         public float drag = 0.5f;
@@ -63,6 +78,29 @@ namespace MordenFirearmKitMod
 
         #endregion
 
+        public override void SafeAwake()
+        {
+            base.SafeAwake();
+
+            //添加 菜单 参数
+            explosiontype_menu = AddMenu("ExplosionType", explosiontype, new System.Collections.Generic.List<string> { "炸弹", "手雷", "烟花" });
+
+            //添加 滑条 参数
+            power_slider = AddSlider("爆炸威力", "POWER", power, 3f, 8f);
+            thrust_slider = AddSlider("推力大小", "THRUST", thrust, 3f, 10f);
+            drag_slider = AddSlider("阻力大小", "DRAG", drag, 0.2f, 3f);
+            timeopen_slider = AddSlider("碰撞开启 0.05s", "TIMEOPEN", timeopen, 1f, 5f);
+
+            //委托 菜单改变 事件
+            explosiontype_menu.ValueChanged += new ValueHandler(explosiontype_valueChanged);
+
+            //委托 滑条改变 事件
+
+            power_slider.ValueChanged += new ValueChangeHandler(power_valueChanged);
+            thrust_slider.ValueChanged += new ValueChangeHandler(thrust_valueChanged);
+            drag_slider.ValueChanged += new ValueChangeHandler(drag_valueChanged);
+            timeopen_slider.ValueChanged += new ValueChangeHandler(timeopen_valueChanged);
+        }
 
         //改变 爆炸类型 事件
         protected void explosiontype_valueChanged(int value)
@@ -76,33 +114,22 @@ namespace MordenFirearmKitMod
             power = value;
         }
 
+        //改变 推力大小 事件
+        protected void thrust_valueChanged(float value)
+        {
+            thrust = value;
+        }
+
         //改变 阻力大小 事件
         protected void drag_valueChanged(float value)
         {
             drag = value;
         }
 
-        protected virtual System.Collections.IEnumerator UpdateMapper()
+        //改变 碰撞开启时间 事件
+        protected void timeopen_valueChanged(float value)
         {
-            if (BlockMapper.CurrentInstance == null)
-                yield break;
-            while (Input.GetMouseButton(0))
-                yield return null;
-            BlockMapper.CurrentInstance.Copy();
-            BlockMapper.CurrentInstance.Paste();
-            yield break;
-        }
-
-        public override void OnSave(XDataHolder stream)
-        {
-            base.OnSave(stream);
-            SaveMapperValues(stream);
-        }
-
-        public override void OnLoad(XDataHolder stream)
-        {
-            base.OnLoad(stream);
-            LoadMapperValues(stream);
+            timeopen = value;
         }
 
 
@@ -155,159 +182,9 @@ namespace MordenFirearmKitMod
 
         }
 
-        protected override void OnSimulateUpdate()
-        {
-            base.OnSimulateUpdate();
-#if DEBUG
-            //move();
-#endif
-            if (key.IsDown && !launched)
-            {
-                Rocket_LaunchPlan();
-            }
-
-            if (delayed && !fired)
-            {
-                ps.Emit(2);
-            }
-
-        }
-
-        protected override void OnSimulateExit()
-        {
-            base.OnSimulateExit();
-
-#if DEBUG
-            //destroy();
-#endif
-
-        }
-
-
-
         protected override void OnSimulateFixedStart()
         {
             base.OnSimulateFixedStart();
-
-        }
-
-        protected override void OnSimulateFixedUpdate()
-        {
-            base.OnSimulateFixedUpdate();
-
-
-            if (launched && delayed)
-            {
-                StartCoroutine(Rocket_Launch());
-            }
-
-        }
-
-
-
-        protected override void StartedBurning()
-        {
-            base.StartedBurning();
-            //Rocket_Explodey();
-            StartCoroutine(Rocket_Explodey());
-        }
-
-        protected override void OnSimulateCollisionEnter(Collision collision)
-        {
-            base.OnSimulateCollisionEnter(collision);
-
-            if (launched && canBeCollision)
-            {
-
-                //Rocket_Explodey();
-                StartCoroutine(Rocket_Explodey());
-            }
-
-        }
-
-
-        //发射准备
-        public void Rocket_LaunchPlan()
-        {
-            //发射许可
-            launched = true;
-
-            //计时协同函数
-            StartCoroutine(Timer(timeopen, time, delay));
-
-            //阻力角阻力设为0和3
-            rigidbody.drag = 0f;
-            rigidbody.angularDrag = 3f;
-
-            //推力位置
-            pos_thrust = transform.TransformDirection(new Vector3(1f, rigidbody.centerOfMass.y, rigidbody.centerOfMass.z)) + transform.position;
-
-            //阻力位置
-            pos_drag = transform.TransformDirection(new Vector3(0.5f, rigidbody.centerOfMass.y, rigidbody.centerOfMass.z)) + transform.position;
-        }
-
-        //发射函数
-        public IEnumerator Rocket_Launch()
-        {
-
-            
-
-            //推力
-            if (!fired)
-            {
-                Vector3 force_thrust = -transform.right * thrust;
-                rigidbody.AddForceAtPosition(force_thrust, pos_thrust, ForceMode.VelocityChange);
-            }
-
-            //阻力
-            Vector3 force_drag = transform.TransformDirection(Vector3.Scale(this.transform.InverseTransformDirection(-rigidbody.velocity), new Vector3(0, 1, 1))) * Mathf.Clamp(rigidbody.velocity.sqrMagnitude, 0, drag);
-            rigidbody.AddForceAtPosition(force_drag, pos_drag);
-
-            yield return new WaitForFixedUpdate();
-        }
-
-        //计时函数
-        protected IEnumerator Timer(float topen, float t, float d)
-        {
-
-            //延时发射
-            while (d-- > 0 && !delayed)
-            {
-                yield return new WaitForSeconds(0.1f);
-                //time--;
-            }
-            if (d <= 0)
-            {
-                if (GetComponent<ConfigurableJoint>())
-                {
-                    //销毁连接点
-                    Destroy(GetComponent<ConfigurableJoint>());
-                }
-                yield return new WaitForSeconds(0.01f);
-                delayed = true;
-            }
-
-            //碰撞开启
-            while (topen-- > 0 && !canBeCollision && delayed)
-            {
-                yield return new WaitForSeconds(0.05f);
-                //time--;
-            }
-            if (topen <= 0)
-            {
-                canBeCollision = true;
-            }
-
-            //燃烧时间
-            while (t-- > 0 && !fired && delayed)
-            {
-                yield return new WaitForSeconds(1f);
-                //time--;
-            }
-            if (t <= 0)
-            {
-                fired = true;
-            }
 
         }
 
