@@ -9,10 +9,11 @@ namespace MordenFirearmKitMod
 {
     partial class MordenFirearmKitMod
     {
+        
         //机枪模块
         public Block MachineGun = new Block()
             ///ID of the Block
-            .ID(606)
+            .ID(652)
 
             ///Name of the Block
             .BlockName("MachineGun")

@@ -48,9 +48,6 @@ namespace MordenFirearmKitMod
         // a directory called "Release" will be created in your project directory. You just need to put into a .zip file or similiar
         // archive and you're ready to publish your mod. (Put the _contents_ of the folder into a .zip file, not the Release folder itself)
 
-      
-
-
 
         private GameObject updater = new GameObject();
 
