@@ -9,7 +9,7 @@ namespace MordenFirearmKitMod
 {
     partial class MordenFirearmKitMod
     {
-        
+        //机枪模块
         public Block MachineGun = new Block()
             ///ID of the Block
             .ID(606)
@@ -71,7 +71,7 @@ namespace MordenFirearmKitMod
 
            ///Setup where on your block you can add other blocks.
            .AddingPoints(new List<AddingPoint> {
-                              (AddingPoint) new BasePoint(false, true)         //The base point is unique compared to the other adding points, the two booleans represent whether you can add to the base, and whether it sticks automatically.
+                              (AddingPoint) new BasePoint(false,true)         //The base point is unique compared to the other adding points, the two booleans represent whether you can add to the base, and whether it sticks automatically.
                                                .Motionable(true,false,false) //Set each of these booleans to "true" to Let the block rotate around X, Y, Z accordingly
                                                .SetStickyRadius(0.5f),        //Set the radius of which the base point will connect to others
            //                  //new AddingPoint(new Vector3(0f, 0f, 0.5f), new Vector3(-90f, 0f, 0f),true).SetStickyRadius(0.3f), <---Example: Top sticky adding point
@@ -95,7 +95,7 @@ namespace MordenFirearmKitMod
         //int shootableMask;
         //ParticleSystem gunParticles;
         LineRenderer gunLine;
-        AudioSource gunAudio;
+        private AudioSource gunAudio;
         Light gunLight;
         float timer;
         float effectsDisplayTime = 0.05f;
@@ -106,8 +106,9 @@ namespace MordenFirearmKitMod
             //shootableMask = LayerMask.GetMask("Shootable");
             //gunParticles = GetComponent<ParticleSystem>();
             //gunLine = GetComponent<LineRenderer>();
-            gunAudio = audio.AddComponent<AudioSource>();
+            gunAudio = gameObject.AddComponent<AudioSource>();
             //gunLight = GetComponent<Light>();
+            
             
         }
 
