@@ -79,7 +79,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\other\MordenFirearmKitMod\MachineGun.wav" />
-    <Content Include="Resources\other\MordenFirearmKitMod\Rocket1.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\RocketFire.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\RocketSmoke.png" />
     <Content Include="Resources\tex\MordenFirearmKitMod\Rocket.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

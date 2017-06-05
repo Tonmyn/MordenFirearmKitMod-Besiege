@@ -88,8 +88,11 @@ namespace MordenFirearmKitMod
         public float timeBetweenBullets = 0.05f;
         private float rotationspeed = 0;
 
+        GameObject line = new GameObject();
         GameObject light = new GameObject();
         GameObject audio = new GameObject();
+
+        Collider c = new Collider();
 
         Ray shootRay = new Ray();
         RaycastHit shootHit;
@@ -109,19 +112,18 @@ namespace MordenFirearmKitMod
             //gunLine = GetComponent<LineRenderer>();
             gunAudio = gameObject.AddComponent<AudioSource>();
             //gunLight = GetComponent<Light>();
-            
-            
+
+
         }
 
 
         protected override void OnSimulateStart()
         {
             base.OnSimulateStart();
-            //gunAudio = GetComponent<AudioSource>();
-            //gunAudio.clip = resources["/MordenFirearmKitMod/MachineGun.wav"].audioClip;
-            
-            //c.material.staticFriction = 200;
+
+
             renderset();
+            
         }
 
         protected override void OnSimulateUpdate()
@@ -204,7 +206,7 @@ namespace MordenFirearmKitMod
             light.transform.localEulerAngles = new Vector3(0, 0, 180);
             //light.transform.LookAt(transform.position);
 
-            gunLine = gameObject.AddComponent<LineRenderer>();
+            gunLine = line.AddComponent<LineRenderer>();
 
             gunLine.useWorldSpace = true;
             gunLine.SetWidth(0.15f, 0.15f);
@@ -263,21 +265,21 @@ namespace MordenFirearmKitMod
         }
     }
 
-    //到时自毁脚本
-    public class TimedSelfDestruct : MonoBehaviour
-    {
-        float timer = 0;
-        void FixedUpdate()
-        {
-            ++timer;
-            if (timer > 260)
-            {
-                Destroy(gameObject);
-                if (this.GetComponent<TimedRocket>())
-                {
-                    Destroy(this.GetComponent<TimedRocket>());
-                }
-            }
-        }
-    }
+    ////到时自毁脚本
+    //public class TimedSelfDestruct : MonoBehaviour
+    //{
+    //    float timer = 0;
+    //    void FixedUpdate()
+    //    {
+    //        ++timer;
+    //        if (timer > 260)
+    //        {
+    //            Destroy(gameObject);
+    //            if (this.GetComponent<TimedRocket>())
+    //            {
+    //                Destroy(this.GetComponent<TimedRocket>());
+    //            }
+    //        }
+    //    }
+    //}
 }

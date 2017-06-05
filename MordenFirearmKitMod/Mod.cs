@@ -58,6 +58,8 @@ namespace MordenFirearmKitMod
             //添加MOD更新推送功能
             updater.AddComponent<Updater>().Url("XultimateX", "MordenFirearmKitMod");
 
+            LoadBlock(RocketBlock);
+            LoadBlock(RocketPodBlock);
             LoadBlock(MachineGun);
             
             
