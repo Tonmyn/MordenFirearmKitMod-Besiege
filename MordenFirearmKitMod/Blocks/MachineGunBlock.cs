@@ -92,7 +92,7 @@ namespace MordenFirearmKitMod
         GameObject light = new GameObject();
         GameObject audio = new GameObject();
 
-        Collider c = new Collider();
+        public Collider c ;
 
         Ray shootRay = new Ray();
         RaycastHit shootHit;
@@ -121,6 +121,13 @@ namespace MordenFirearmKitMod
         {
             base.OnSimulateStart();
 
+            //c = gameObject.GetComponentInChildren<CapsuleCollider>();
+            //PhysicMaterial pm = c.material = new PhysicMaterial("Ice");
+            
+            //pm.dynamicFriction = Mathf.Infinity;
+            //pm.staticFriction = Mathf.Infinity;
+            //pm.frictionCombine =  PhysicMaterialCombine.Maximum;
+            
 
             renderset();
             
@@ -265,21 +272,5 @@ namespace MordenFirearmKitMod
         }
     }
 
-    ////到时自毁脚本
-    //public class TimedSelfDestruct : MonoBehaviour
-    //{
-    //    float timer = 0;
-    //    void FixedUpdate()
-    //    {
-    //        ++timer;
-    //        if (timer > 260)
-    //        {
-    //            Destroy(gameObject);
-    //            if (this.GetComponent<TimedRocket>())
-    //            {
-    //                Destroy(this.GetComponent<TimedRocket>());
-    //            }
-    //        }
-    //    }
-    //}
+   
 }
