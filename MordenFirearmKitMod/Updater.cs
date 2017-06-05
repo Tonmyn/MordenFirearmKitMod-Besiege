@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
 using System.Reflection;
 using UnityEngine;
 using System.Collections;
@@ -15,9 +11,7 @@ namespace MordenFirearmKitMod
     //Mod更新检查组件
     public class Updater : MonoBehaviour
     {
-        //当前Mod版本号
-        private Version CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
-
+        
         //最新Mod版本号
         public Version LatestVersion { get; private set; }
 
@@ -31,14 +25,36 @@ namespace MordenFirearmKitMod
         public string url { get; set; }
 
         //更新Mod可用
-        public bool UpdaterEnable = false;
+        public bool UpdaterEnable { get; private set; }
 
-        private string value;
+        //当前Mod版本号
+        private Version CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
 
+        //提示窗口大小
         private Rect windowDialog = new Rect(300, 300, 320, 150);
 
-        private int WindowID = Util.GetWindowID();
+        //提示窗口ID
+        private int windowID = Util.GetWindowID();
 
+        //组件构造函数
+        public Updater()
+        {
+            UpdaterEnable = false;
+        }
+
+        public Updater(string address)
+        {
+            UpdaterEnable = false;
+            Url(address);
+        }
+
+        public Updater(string owner, string path)
+        {
+            UpdaterEnable = false;
+            Url(owner, path);
+        }
+
+        //组件更新检查函数
         public IEnumerator Start()
         {
             var www = new WWW(url);
@@ -51,7 +67,7 @@ namespace MordenFirearmKitMod
                 yield break;
             }
 
-            value = www.text;
+            string value = www.text;
 
             var release = SimpleJSON.JSON.Parse(value);
 
@@ -65,12 +81,6 @@ namespace MordenFirearmKitMod
 #if DEBUG
                 Debug.Log(Assembly.GetExecutingAssembly().GetName().Name + "有新版可以更新");
 #endif
-                ////取更新内容标题
-                //LatestReleaseName = GetData("release-header");
-
-                ////取更新内容
-                //LatestReleaseBody = GetData("markdown-body");
-
                 //更新可用为真
                 UpdaterEnable = true;
             }
@@ -83,6 +93,7 @@ namespace MordenFirearmKitMod
 
         }
 
+        //设置更新地址
         public void Url(string str)
         {
             url = str;
@@ -93,6 +104,7 @@ namespace MordenFirearmKitMod
             url = "https://git.oschina.net/api/v5/repos/" + owner + "/" + path + "/releases/latest";
         }
 
+        //画提示更新窗口
         private void OnGUI()
         {
             if (!UpdaterEnable) return;
@@ -100,10 +112,11 @@ namespace MordenFirearmKitMod
             GUI.skin = ModGUI.Skin;
             GUI.backgroundColor = new Color(0.7f, 0.7f, 0.7f, 0.7f);
 
-            windowDialog = GUI.Window(WindowID, windowDialog, doWindow, Assembly.GetExecutingAssembly().GetName().Name + " 更新提示");
+            windowDialog = GUI.Window(windowID, windowDialog, doWindow, Assembly.GetExecutingAssembly().GetName().Name + " 更新提示");
 
         }
 
+        //画窗口组件
         private void doWindow(int windowId)
         {
             //画新版资料
