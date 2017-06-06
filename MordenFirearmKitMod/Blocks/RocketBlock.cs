@@ -773,7 +773,14 @@ namespace MordenFirearmKitMod
             sl.enabled = true;
 
             ParticleSystem.ColorOverLifetimeModule colm = ps_fire.colorOverLifetime;
-            colm.color = new Gradient() { alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(0.2f, 0f), new GradientAlphaKey(0.8f, lifetime) }, colorKeys = new GradientColorKey[] { new GradientColorKey(Color.blue, 0), new GradientColorKey(ps_fire.startColor, lifetime) } };
+            colm.color = new Gradient()
+            {
+
+                alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(0.2f, 0f), new GradientAlphaKey(0.8f, lifetime) },
+
+                colorKeys = new GradientColorKey[] { new GradientColorKey(Color.blue, 0), new GradientColorKey(ps_fire.startColor, lifetime) }
+
+            };
             colm.enabled = true;
 
             psr_fire = particle_fire.GetComponent<ParticleSystemRenderer>();
