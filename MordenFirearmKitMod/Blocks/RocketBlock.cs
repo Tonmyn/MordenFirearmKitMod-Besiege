@@ -188,10 +188,15 @@ namespace MordenFirearmKitMod
     class RocketBlockScript : BlockScript
     {
 
-        #region 功能变量 声明
+      
 
-        //声明 开关 基本功能
-        protected MToggle Function_toggle;
+        //声明 菜单 功能页
+        protected MMenu page_menu ;
+
+        //声明 功能页码
+        public int page = 0;
+
+        #region 功能变量 声明
 
         //声明 按键 发射火箭
         internal MKey key;
@@ -265,17 +270,51 @@ namespace MordenFirearmKitMod
         //声明 尾焰粒子组件
         protected GameObject particle_fire = new GameObject();
 
-        //声明 粒子系统
+        //声明 尾焰粒子系统
         protected ParticleSystem ps_fire;
 
-        //声明 粒子渲染器
+        //声明 尾焰粒子渲染器
         protected ParticleSystemRenderer psr_fire;
 
-        //声明 开关 尾焰效果
-        protected MToggle toggle_fire;
+        //声明 尾焰粒子属性
+        protected ParticleSystemProperties psp_fire;
 
+        //声明 开关 显示尾焰效果菜单
+        //protected MToggle toggle_fire;
 
+        //声明 滑条 粒子存活时间
+        //protected MSlider lifetime_fire;
 
+        //声明 滑条 半径
+        protected MSlider radius_fire;
+
+        //声明 滑条 角度
+        protected MSlider angle_fire;
+
+        //声明 滑条 尺寸
+        protected MSlider size_fire;
+
+        //声明 滑条 初始尺寸
+        protected MSlider sizeStart_fire;
+
+        //声明 滑条 结束尺寸
+        protected MSlider sizeEnd_fire;
+
+        protected MSlider alphaStart_fire;
+
+        protected MSlider alphaEnd_fire;
+
+        protected MSlider alphaStartTime_fire;
+
+        protected MSlider alphaEndTime_fire;
+
+        protected MColourSlider colorStart_fire;
+
+        protected MColourSlider colorEnd_fire;
+
+        protected MSlider colorStartTime_fire;
+
+        protected MSlider colorEndTime_fire;
 
         #endregion
 
@@ -300,16 +339,50 @@ namespace MordenFirearmKitMod
 
 
 
-
+        //声明 推力位置
         internal Vector3 pos_thrust;
 
+        //声明 阻力位置
         internal Vector3 pos_drag;
+        
+        //声明 粒子属性结构体
+        internal struct ParticleSystemProperties
+        {
+
+            public float radius;
+            public float angle;
+            public float lifetime;
+
+            public float size;
+            public float size_start;
+            public float size_end;
+
+            public float alpha_start;
+            public float alpha_end;
+            public float alpha_startTime;
+            public float alpha_endTime;
+
+            public Color color_start;
+            public Color color_end;
+            public float color_startTime;
+            public float color_endTime;
+
+
+        }
 
         #endregion
 
         public override void SafeAwake()
         {
             base.SafeAwake();
+
+            //添加 菜单 功能页
+            page_menu = AddMenu("Page",page,new List<string> { "火箭参数","尾焰参数","尾烟参数"});
+            
+            //委托 页码改变 事件
+            page_menu.ValueChanged += new ValueHandler(function_valuechanged);
+
+            #region 基本参数初始化
 
             //添加 按键 参数
             key = AddKey("发射", "ROCKET", KeyCode.L);
@@ -323,7 +396,7 @@ namespace MordenFirearmKitMod
             power_slider = AddSlider("爆炸威力", "POWER", power, 3f, 8f);
             thrust_slider = AddSlider("推力大小", "THRUST", thrust, 3f, 10f);
             drag_slider = AddSlider("阻力大小", "DRAG", drag, 0.2f, 3f);
-            timeopen_slider = AddSlider("碰撞开启 0.05s", "TIMEOPEN", timeopen, 1f, 5f);
+            timeopen_slider = AddSlider("碰撞开启 0.05s", "TIMEOPEN", timeopen, 1f, 5f);         
 
             //委托 菜单改变 事件
             explosiontype_menu.ValueChanged += new ValueHandler(explosiontype_valueChanged);
@@ -336,7 +409,156 @@ namespace MordenFirearmKitMod
             drag_slider.ValueChanged += new ValueChangeHandler(drag_valueChanged);
             timeopen_slider.ValueChanged += new ValueChangeHandler(timeopen_valueChanged);
 
+            #endregion
+
+            #region 尾焰组件初始化
+
+           // toggle_fire = AddToggle("尾焰生效", "FireIsActive", true);
+
+            radius_fire = AddSlider("半径", "Radius", psp_fire.radius = 0, 0, 2);
+
+            angle_fire = AddSlider("角度", "Angle", psp_fire.angle = 2, 0, 5);
+
+            size_fire = AddSlider("尺寸", "Size", psp_fire.size = (transform.localScale.y + transform.localScale.z) / 2, 0, 5);
+
+            sizeStart_fire = AddSlider("初始尺寸", "SizeStart", psp_fire.size_start = 1, 0, 5);
+
+            sizeEnd_fire = AddSlider("结束尺寸", "SizeEnd", psp_fire.size_end = 0, 0, 5);
+
+            colorStart_fire = AddColourSlider("渐变初始颜色", "ColorStart", psp_fire.color_start = Color.yellow);
+
+            colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEnd", psp_fire.color_end = Color.blue);
+
+            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTime", psp_fire.color_startTime = 0, 0, psp_fire.lifetime = 0.5f);
+
+            colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTime", psp_fire.color_endTime = psp_fire.lifetime, 0, psp_fire.lifetime);
+
+            //alphaStart_fire = AddSlider("渐变初始透明", "AlphaStart", psp_fire.alpha_start = 0.2f, 0f, 1f);
+
+            //alphaEnd_fire = AddSlider("渐变结束透明", "AlphaEnd", psp_fire.alpha_end = 0.8f, 0f, 1f);
+
+            //alphaStartTime_fire = AddSlider("渐变初始时间", "AlphaStartTime", psp_fire.alpha_startTime = 0, 0, psp_fire.lifetime);
+
+            //alphaEndTime_fire = AddSlider("渐变结束时间", "AlphaEndTime", psp_fire.alpha_endTime = psp_fire.lifetime, 0, psp_fire.lifetime);
+            psp_fire.alpha_start = 0.2f; psp_fire.alpha_end = 0.8f; psp_fire.alpha_startTime = 0; psp_fire.alpha_endTime = psp_fire.lifetime;
+
+
+            //toggle_fire.Toggled += new ToggleHandler(toggleFire_valueChanged);
+
+            radius_fire.ValueChanged += new ValueChangeHandler(radiusFire_valueChanged);
+
+            angle_fire.ValueChanged += new ValueChangeHandler(angleFire_valueChanged);
+
+            size_fire.ValueChanged += new ValueChangeHandler(sizeFire_valueChanged);
+
+            sizeStart_fire.ValueChanged += new ValueChangeHandler(sizeStartFire_valueChanged);
+
+            sizeEnd_fire.ValueChanged += new ValueChangeHandler(sizeEndFire_valueChanged);
+
+            colorStart_fire.ValueChanged += new ColourChangeHandler(colorStartFire_valueChanged);
+
+            colorEnd_fire.ValueChanged += new ColourChangeHandler(colorEndFire_valueChanged);
+
+            colorStartTime_fire.ValueChanged += new ValueChangeHandler(colorStartTimeFire_valueChanged);
+
+            colorEndTime_fire.ValueChanged += new ValueChangeHandler(colorEndTimeFire_valueChanged);
+
+            //alphaStart_fire.ValueChanged += new ValueChangeHandler(alphaStartFire_valueChanged);
+
+            //alphaEnd_fire.ValueChanged += new ValueChangeHandler(alphaEndFire_valueChanged);
+
+            //alphaStartTime_fire.ValueChanged += new ValueChangeHandler(alphaStartTimeFire_valueChanged);
+
+            //alphaEndTime_fire.ValueChanged += new ValueChangeHandler(alphaEndTimeFire_valueChanged);
+
+            #endregion
+
+            function_valuechanged(0);
+
+            //ps_fire = particle_fire.AddComponent<ParticleSystem>();
+
         }
+        
+        //改变 功能开关 事件
+        protected void function_valuechanged(int value)
+        {
+            bool show_0, show_1, show_2;
+
+            if (value == 0)
+            {
+                show_0 = true;
+                show_1 = false;
+                show_2 = false;
+            }
+            else if (value == 1)
+            {
+                show_0 = false;
+                show_1 = true;
+                show_2 = false;
+            }
+            else
+            {
+                show_0 = false;
+                show_1 = false;
+                show_2 = true;
+            }
+
+            #region 页码0控件
+
+            key.DisplayInMapper = show_0;
+
+            explosiontype_menu.DisplayInMapper = show_0;
+
+            delay_slider.DisplayInMapper = show_0;
+
+            time_slider.DisplayInMapper = show_0;
+
+            power_slider.DisplayInMapper = show_0;
+
+            thrust_slider.DisplayInMapper = show_0;
+
+            drag_slider.DisplayInMapper = show_0;
+
+            timeopen_slider.DisplayInMapper = show_0;
+
+            #endregion
+
+            #region 页码1控件   
+
+            //toggle_fire.DisplayInMapper = show_1;
+
+            radius_fire.DisplayInMapper = show_1;
+
+            angle_fire.DisplayInMapper = show_1;
+
+            size_fire.DisplayInMapper = show_1;
+
+            sizeStart_fire.DisplayInMapper = show_1;
+
+            sizeEnd_fire.DisplayInMapper = show_1;
+
+            colorStart_fire.DisplayInMapper = show_1;
+
+            colorEnd_fire.DisplayInMapper = show_1;
+
+            colorStartTime_fire.DisplayInMapper = show_1;
+
+            colorEndTime_fire.DisplayInMapper = show_1;
+
+            //alphaStart_fire.DisplayInMapper = show_1;
+
+            //alphaEnd_fire.DisplayInMapper = show_1;
+
+            //alphaStartTime_fire.DisplayInMapper = show_1;
+
+            //alphaEndTime_fire.DisplayInMapper = show_1;
+
+            #endregion
+        }
+
+        #region 基本参数事件
+
+
 
         //改变 爆炸类型 事件
         protected void explosiontype_valueChanged(int value)
@@ -353,7 +575,7 @@ namespace MordenFirearmKitMod
         //改变 燃烧时间 事件
         protected void time_valueChanged(float value)
         {
-            time = value;
+            psp_fire.lifetime = time = value;      
         }
 
         //改变 爆炸威力 事件
@@ -379,6 +601,83 @@ namespace MordenFirearmKitMod
         {
             timeopen = value;
         }
+
+        #endregion
+
+        #region 尾焰参数事件
+
+        //public void toggleFire_valueChanged(bool isActive)
+        //{
+        //    ParticleSystem.ShapeModule sm =  ps_fire.shape;
+        //    sm.enabled = isActive;
+        //}
+
+        public void radiusFire_valueChanged(float value)
+        {
+            psp_fire.radius = value;
+        }
+
+        public void angleFire_valueChanged(float value)
+        {
+            psp_fire.angle = value;
+        }
+
+        public void sizeFire_valueChanged(float value)
+        {
+            psp_fire.size = value;
+        }
+
+        public void sizeStartFire_valueChanged(float value)
+        {
+            psp_fire.size_start = value;
+        }
+
+        public void sizeEndFire_valueChanged(float value)
+        {
+            psp_fire.size_end = value;
+        }
+
+        public void colorStartFire_valueChanged(Color value)
+        {
+            psp_fire.color_start = value;
+        }
+
+        public void colorEndFire_valueChanged(Color value)
+        {
+            psp_fire.color_end = value;
+        }
+
+        public void colorStartTimeFire_valueChanged(float value)
+        {
+            psp_fire.color_startTime = value;
+        }
+
+        public void colorEndTimeFire_valueChanged(float value)
+        {
+            psp_fire.color_endTime = value;
+        }
+
+        public void alphaStartFire_valueChanged(float value)
+        {
+            psp_fire.alpha_start = value;
+        }
+
+        public void alphaEndFire_valueChanged(float value)
+        {
+            psp_fire.alpha_end = value;
+        }
+
+        public void alphaStartTimeFire_valueChanged(float value)
+        {
+            psp_fire.alpha_startTime = value;
+        }
+
+        public void alphaEndTimeFire_valueChanged(float value)
+        {
+            psp_fire.alpha_endTime = value;
+        }
+
+        #endregion
 
         protected virtual System.Collections.IEnumerator UpdateMapper()
         {
@@ -449,7 +748,7 @@ namespace MordenFirearmKitMod
 #endif
             //初始化粒子系统
             //particlesystem_init(new Vector3(1.25f, 0, 0.3f), new Quaternion(90, 0, 90, 0), 5f);
-            fire_ps_init();
+            fire_ps_init(psp_fire);
             Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
         }
@@ -748,13 +1047,11 @@ namespace MordenFirearmKitMod
 
         //}
 
-        protected void fire_ps_init()
+        protected void fire_ps_init(ParticleSystemProperties psp)
         {
-            float lifetime = 0.5f;
-
             ps_fire = particle_fire.AddComponent<ParticleSystem>();
             ps_fire.Stop();
-            ps_fire.startLifetime = lifetime;
+            ps_fire.startLifetime = psp.lifetime;
             particle_fire.transform.parent = transform;
             particle_fire.transform.localPosition = new Vector3(1.25f, 0, 0.3f);
             particle_fire.transform.localRotation = new Quaternion(90, 0, 90, 0);
@@ -768,17 +1065,17 @@ namespace MordenFirearmKitMod
             sm.enabled = true;
 
             ParticleSystem.SizeOverLifetimeModule sl = ps_fire.sizeOverLifetime;
-            float size = (transform.localScale.y + transform.localScale.z) / 2;
-            sl.size = new ParticleSystem.MinMaxCurve(size, AnimationCurve.Linear(0f, 1f, lifetime, 0));
+            //float size = (transform.localScale.y + transform.localScale.z) / 2;
+            sl.size = new ParticleSystem.MinMaxCurve(psp.size, AnimationCurve.Linear(0f, psp.size_start, psp.lifetime, psp.size_end));
             sl.enabled = true;
 
             ParticleSystem.ColorOverLifetimeModule colm = ps_fire.colorOverLifetime;
             colm.color = new Gradient()
             {
 
-                alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(0.2f, 0f), new GradientAlphaKey(0.8f, lifetime) },
+                alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(psp.alpha_start, psp.alpha_startTime), new GradientAlphaKey(psp.alpha_end, psp.alpha_endTime) },
 
-                colorKeys = new GradientColorKey[] { new GradientColorKey(Color.blue, 0), new GradientColorKey(ps_fire.startColor, lifetime) }
+                colorKeys = new GradientColorKey[] { new GradientColorKey(psp.color_start, psp.color_startTime), new GradientColorKey(psp.color_end, psp.color_endTime) }
 
             };
             colm.enabled = true;
@@ -792,6 +1089,7 @@ namespace MordenFirearmKitMod
     //火箭巢 模块脚本
     class RocketPodBlockScript : RocketBlockScript
     {
+        
         #region 功能变量声明
 
         //声明 滑条 载弹数量
@@ -1079,5 +1377,28 @@ namespace MordenFirearmKitMod
                 }
             }
         }
+    }
+
+    public class ParticleSystemComponent : BlockScript
+    {
+        public MSlider test;
+
+        public override void SafeAwake()
+        {
+            base.SafeAwake();
+
+            base.SafeAwake();
+
+            test = AddSlider("test", "TEST", 0, 0, 1);
+            test.DisplayInMapper = true;
+            Debug.Log("!!|" );
+          
+        }
+
+        public bool HasSliders(BlockBehaviour block)
+        {
+            return block.MapperTypes.Exists(match => match.Key == "TEST");
+        }
+
     }
 }
