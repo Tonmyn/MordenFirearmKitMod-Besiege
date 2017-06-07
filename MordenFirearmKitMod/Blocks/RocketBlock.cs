@@ -45,7 +45,7 @@ namespace MordenFirearmKitMod
                        )
 
            //模块 组件
-           .Components(new Type[] { typeof(RocketBlockScript), })
+           .Components(new Type[] { typeof(RocketBlockScript),typeof(ParticleSystemComponent) })
 
            //模块 设置模块属性
            .Properties(
@@ -1403,7 +1403,7 @@ namespace MordenFirearmKitMod
             test = AddSlider("test", "TEST", 0, 0, 1);
             test.DisplayInMapper = true;
             Debug.Log("!!|" );
-          
+            test.ValueChanged += new ValueChangeHandler(valueChanged);
         }
 
         public bool HasSliders(BlockBehaviour block)
@@ -1411,5 +1411,9 @@ namespace MordenFirearmKitMod
             return block.MapperTypes.Exists(match => match.Key == "TEST");
         }
 
+        public void valueChanged(float value)
+        {
+
+        }
     }
 }
