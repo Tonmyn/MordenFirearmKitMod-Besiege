@@ -90,7 +90,7 @@ copy /Y "$(ProjectDir)Resources\obj\$(TargetName)\*" "%25BESIEGE_LOCATION%25Besi
 copy /Y "$(ProjectDir)Resources\tex\$(TargetName)\*" "%25BESIEGE_LOCATION%25Besiege_Data\Mods\Blocks\Textures\$(TargetName)\"
 copy /Y "$(ProjectDir)Resources\other\$(TargetName)\*" "%25BESIEGE_LOCATION%25Besiege_Data\Mods\Blocks\Resources\$(TargetName)\"
 
-if $(ConfigurationName) == Release "$(ProjectDir)PackageRelease.bat" "$(ProjectDir)" "$(TargetPath)" "$(ProjectDir)Release\"</PostBuildEvent>
+if $(ConfigurationName) == Release "$(ProjectDir)PackageRelease.bat" "$(ProjectDir)" "$(TargetPath)" "$(ProjectDir)Release\$(TargetName)\"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <StartAction>Program</StartAction>

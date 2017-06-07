@@ -283,7 +283,7 @@ namespace MordenFirearmKitMod
         //protected MToggle toggle_fire;
 
         //声明 滑条 粒子存活时间
-        //protected MSlider lifetime_fire;
+        protected MSlider lifetime_fire;
 
         //声明 滑条 半径
         protected MSlider radius_fire;
@@ -413,7 +413,9 @@ namespace MordenFirearmKitMod
 
             #region 尾焰组件初始化
 
-           // toggle_fire = AddToggle("尾焰生效", "FireIsActive", true);
+            // toggle_fire = AddToggle("尾焰生效", "FireIsActive", true);
+
+            lifetime_fire = AddSlider("时间", "LifeTime", psp_fire.lifetime = 0.5f, 0, 1);
 
             radius_fire = AddSlider("半径", "Radius", psp_fire.radius = 0, 0, 2);
 
@@ -429,7 +431,7 @@ namespace MordenFirearmKitMod
 
             colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEnd", psp_fire.color_end = Color.blue);
 
-            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTime", psp_fire.color_startTime = 0, 0, psp_fire.lifetime = 0.5f);
+            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTime", psp_fire.color_startTime = 0, 0, psp_fire.lifetime);
 
             colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTime", psp_fire.color_endTime = psp_fire.lifetime, 0, psp_fire.lifetime);
 
@@ -444,6 +446,8 @@ namespace MordenFirearmKitMod
 
 
             //toggle_fire.Toggled += new ToggleHandler(toggleFire_valueChanged);
+
+            lifetime_fire.ValueChanged += new ValueChangeHandler(lifeTimeFire_valueChanged);
 
             radius_fire.ValueChanged += new ValueChangeHandler(radiusFire_valueChanged);
 
@@ -527,6 +531,8 @@ namespace MordenFirearmKitMod
 
             //toggle_fire.DisplayInMapper = show_1;
 
+            lifetime_fire.DisplayInMapper = show_1;
+
             radius_fire.DisplayInMapper = show_1;
 
             angle_fire.DisplayInMapper = show_1;
@@ -575,7 +581,7 @@ namespace MordenFirearmKitMod
         //改变 燃烧时间 事件
         protected void time_valueChanged(float value)
         {
-            psp_fire.lifetime = time = value;      
+            time = value;      
         }
 
         //改变 爆炸威力 事件
@@ -611,6 +617,11 @@ namespace MordenFirearmKitMod
         //    ParticleSystem.ShapeModule sm =  ps_fire.shape;
         //    sm.enabled = isActive;
         //}
+
+        public void lifeTimeFire_valueChanged(float value)
+        {
+            psp_fire.lifetime = value;
+        }
 
         public void radiusFire_valueChanged(float value)
         {
