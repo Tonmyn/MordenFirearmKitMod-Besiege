@@ -45,7 +45,7 @@ namespace MordenFirearmKitMod
                        )
 
            //模块 组件
-           .Components(new Type[] { typeof(RocketBlockScript),typeof(ParticleSystemComponent) })
+           .Components(new Type[] { typeof(RocketBlockScript),typeof(ParticleSystemComponent), })
 
            //模块 设置模块属性
            .Properties(
@@ -189,7 +189,6 @@ namespace MordenFirearmKitMod
     {
 
       
-
         //声明 菜单 功能页
         protected MMenu page_menu ;
 
@@ -254,6 +253,9 @@ namespace MordenFirearmKitMod
 
         //声明 是否发射
         public bool launched = false;
+
+        //声明 是否爆炸
+        public bool isExplodey = false;
 
         //爆炸类型
         public enum ExplosionType
@@ -427,9 +429,9 @@ namespace MordenFirearmKitMod
 
             sizeEnd_fire = AddSlider("结束尺寸", "SizeEnd", psp_fire.size_end = 0, 0, 5);
 
-            colorStart_fire = AddColourSlider("渐变初始颜色", "ColorStart", psp_fire.color_start = Color.yellow);
+            colorStart_fire = AddColourSlider("渐变初始颜色", "ColorStart", psp_fire.color_start = Color.blue);
 
-            colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEnd", psp_fire.color_end = Color.blue);
+            colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEnd", psp_fire.color_end = Color.yellow);
 
             colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTime", psp_fire.color_startTime = 0, 0, psp_fire.lifetime);
 
@@ -775,7 +777,7 @@ namespace MordenFirearmKitMod
                 Rocket_LaunchPlan();
             }
 
-            if (delayed && !fired)
+            if (delayed && !fired && !isExplodey)
             {
                 ps_fire.Emit(2);
             }
@@ -923,7 +925,14 @@ namespace MordenFirearmKitMod
         public IEnumerator Rocket_Explodey()
         {
 
+            if (isExplodey)
+            {
+                yield break;
+            }
+
             yield return new WaitForFixedUpdate();
+
+            isExplodey = true;
 
             //爆炸范围
             float radius = power;
@@ -970,7 +979,20 @@ namespace MordenFirearmKitMod
                 explo.AddComponent<TimedSelfDestruct>();
             }
 
-            Destroy(gameObject);
+            foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>())
+            {
+                if (r.name == "Vis")
+                {
+                    r.enabled = false;
+                    Rigidbody.isKinematic = true;
+                    rigidbody.detectCollisions = false;
+                    Destroy(gameObject.GetComponentInChildren<FireController>());
+                    ps_fire.Stop();
+                }
+            }
+             gameObject.AddComponent<TimedSelfDestruct>().lifetime = psp_fire.lifetime * 120;
+            //gameObject.SetActive(false);
+            //Destroy(gameObject);
 
 
         }
@@ -1066,6 +1088,7 @@ namespace MordenFirearmKitMod
             particle_fire.transform.parent = transform;
             particle_fire.transform.localPosition = new Vector3(1.25f, 0, 0.3f);
             particle_fire.transform.localRotation = new Quaternion(90, 0, 90, 0);
+            ps_fire.simulationSpace = ParticleSystemSimulationSpace.World;
             
 
             ParticleSystem.ShapeModule sm = ps_fire.shape;
@@ -1074,6 +1097,7 @@ namespace MordenFirearmKitMod
             sm.angle = 2;
             sm.randomDirection = false;
             sm.enabled = true;
+            
 
             ParticleSystem.SizeOverLifetimeModule sl = ps_fire.sizeOverLifetime;
             //float size = (transform.localScale.y + transform.localScale.z) / 2;
@@ -1376,10 +1400,12 @@ namespace MordenFirearmKitMod
     public class TimedSelfDestruct : MonoBehaviour
     {
         float timer = 0;
+        public float lifetime = 260;
+
         void FixedUpdate()
         {
             ++timer;
-            if (timer > 260)
+            if (timer > lifetime)
             {
                 Destroy(gameObject);
                 if (this.GetComponent<TimedRocket>())
@@ -1390,17 +1416,15 @@ namespace MordenFirearmKitMod
         }
     }
 
-    public class ParticleSystemComponent : BlockScript
+    public class ParticleSystemComponent : MonoBehaviour
     {
         public MSlider test;
 
-        public override void SafeAwake()
+        void Start()
         {
-            base.SafeAwake();
 
-            base.SafeAwake();
-
-            test = AddSlider("test", "TEST", 0, 0, 1);
+            //test = AddSlider("test", "TEST", 0, 0, 1);
+            test = new MSlider("test","test",0,0,1);
             test.DisplayInMapper = true;
             Debug.Log("!!|" );
             test.ValueChanged += new ValueChangeHandler(valueChanged);
