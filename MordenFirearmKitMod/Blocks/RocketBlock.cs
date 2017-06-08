@@ -534,7 +534,7 @@ namespace MordenFirearmKitMod
 
             colorStart_smoke = AddColourSlider("渐变初始颜色", "ColorStartSmoke", psp_smoke.color_start = Color.blue);
 
-            colorEnd_smoke = AddColourSlider("渐变结束颜色", "ColorEndSmoke", psp_smoke.color_end = Color.yellow);
+            colorEnd_smoke = AddColourSlider("渐变结束颜色", "ColorEndSmoke", psp_smoke.color_end = Color.white);
 
             colorStartTime_smoke = AddSlider("渐变初始时间", "ColorStartTimeSmoke", psp_smoke.color_startTime = 0, 0, psp_smoke.lifetime);
 
@@ -1206,7 +1206,7 @@ namespace MordenFirearmKitMod
                     Rigidbody.isKinematic = true;
                     rigidbody.detectCollisions = false;
                     Destroy(gameObject.GetComponentInChildren<FireController>());
-                    //ps_fire.Stop();
+                    ps_fire.Stop();
                 }
             }
              gameObject.AddComponent<TimedSelfDestruct>().lifetime = psp_smoke.lifetime * 120;
