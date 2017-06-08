@@ -998,7 +998,7 @@ namespace MordenFirearmKitMod
             if (delayed && !fired && !isExplodey)
             {
                 ps_fire.Emit(2);
-                ps_smoke.Emit(20);
+                ps_smoke.Emit(10); 
             }
         }
 
@@ -1030,7 +1030,11 @@ namespace MordenFirearmKitMod
                 Rocket_Launch();
 
             }
-
+            if (delayed && !fired && !isExplodey)
+            {
+                //ps_fire.Emit(2);
+                ps_smoke.Emit(10);
+            }
         }
 
 
@@ -1344,7 +1348,7 @@ namespace MordenFirearmKitMod
             ps_smoke.Stop();
             ps_smoke.startLifetime = psp.lifetime;
             particle_smoke.transform.parent = transform;
-            particle_smoke.transform.localPosition = new Vector3(1.25f, 0, 0.3f);
+            particle_smoke.transform.localPosition = new Vector3(2.5f, 0, 0.3f);
             particle_smoke.transform.localRotation = new Quaternion(90, 0, 90, 0);
             ps_smoke.loop = true;
             ps_smoke.startColor = Color.white;
@@ -1352,13 +1356,16 @@ namespace MordenFirearmKitMod
             ps_smoke.maxParticles = 10240;
             ps_smoke.gravityModifier = -0.02f;
             ps_smoke.scalingMode = ParticleSystemScalingMode.Shape;
+            
 
             ParticleSystem.ShapeModule sm = ps_smoke.shape;
-            sm.shapeType = ParticleSystemShapeType.Cone;
+            sm.shapeType = ParticleSystemShapeType.ConeShell;
             sm.radius = 0.1f;
-            sm.angle = 5;
-            sm.arc = 360 ;
-            //sm.randomDirection = false;
+            sm.angle = 15;
+            sm.length = 10;
+            
+            //sm.arc = 360 ;
+            sm.randomDirection = true;
             sm.enabled = true;
 
 
@@ -1366,6 +1373,10 @@ namespace MordenFirearmKitMod
             //float size = (transform.localScale.y + transform.localScale.z) / 2;
             sl.size = new ParticleSystem.MinMaxCurve(psp.size, AnimationCurve.Linear(0f, psp.size_start, psp.lifetime, psp.size_end));
             sl.enabled = true;
+
+            ParticleSystem.RotationOverLifetimeModule rolm = ps_smoke.rotationOverLifetime;
+            rolm.enabled = true;
+            rolm.x = new ParticleSystem.MinMaxCurve(0, 360);
 
             ParticleSystem.ColorOverLifetimeModule colm = ps_smoke.colorOverLifetime;
             colm.color = new Gradient()
@@ -1377,6 +1388,11 @@ namespace MordenFirearmKitMod
 
             };
             colm.enabled = true;
+
+            ParticleSystem seb = ps_smoke.subEmitters.birth0;
+            //sem.birth0.simulationSpace = ParticleSystemSimulationSpace.World;
+            seb = GetComponent<ParticleSystem>();
+            //sem.enabled = true;
 
             psr_smoke = particle_smoke.GetComponent<ParticleSystemRenderer>();
             psr_smoke.sortMode = ParticleSystemSortMode.Distance;
