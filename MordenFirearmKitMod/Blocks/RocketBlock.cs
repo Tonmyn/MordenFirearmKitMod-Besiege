@@ -1347,7 +1347,7 @@ namespace MordenFirearmKitMod
             particle_smoke.transform.localPosition = new Vector3(1.25f, 0, 0.3f);
             particle_smoke.transform.localRotation = new Quaternion(90, 0, 90, 0);
             ps_smoke.loop = true;
-            ps_smoke.startColor = psp.color_start;
+            ps_smoke.startColor = Color.white;
             ps_smoke.simulationSpace = ParticleSystemSimulationSpace.World;
             ps_smoke.maxParticles = 10240;
             ps_smoke.gravityModifier = -0.02f;
