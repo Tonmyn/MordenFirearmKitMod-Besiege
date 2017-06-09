@@ -474,7 +474,7 @@ namespace MordenFirearmKitMod
             page_menu = AddMenu("Page",page,new List<string> { "火箭参数","尾焰参数","尾烟参数"});
             
             //委托 页码改变 事件
-            page_menu.ValueChanged += new ValueHandler(function_valuechanged);
+            page_menu.ValueChanged += new ValueHandler(page_valuechanged);
 
             #region 基本参数初始化
 
@@ -641,14 +641,14 @@ namespace MordenFirearmKitMod
 
             #endregion
 
-            function_valuechanged(0);
+            page_valuechanged(0);
 
             //ps_fire = particle_fire.AddComponent<ParticleSystem>();
 
         }
         
         //改变 功能开关 事件
-        protected void function_valuechanged(int value)
+        protected virtual void page_valuechanged(int value)
         {
             bool show_0, show_1, show_2;
 
@@ -1520,11 +1520,13 @@ namespace MordenFirearmKitMod
 
         //声明 连发开启
         private bool continued = false;
+
+        //声明 粒子属性
+        private ParticleSystemProperties psp_fire,psp_smoke;
         #endregion
 
         public override void SafeAwake()
         {
-
 
             //添加 滑条 参数
             number_slider = AddSlider("载弹数量", "NUMBER", number, 1, 18);
@@ -1537,6 +1539,20 @@ namespace MordenFirearmKitMod
             base.SafeAwake();
             delay_slider.DisplayInMapper = false;
             fired = true;
+         
+        }
+
+        protected override void page_valuechanged(int value)
+        {
+            base.page_valuechanged(value);
+            bool show = false;
+            if (value == 0)
+            {
+                show = true;
+            }
+
+            number_slider.DisplayInMapper = show;
+            interval_slider.DisplayInMapper = show;
         }
 
         //改变 载弹数量 事件
@@ -1578,7 +1594,11 @@ namespace MordenFirearmKitMod
         protected override void OnSimulateUpdate()
         {
             //base.OnSimulateUpdate();
-
+            //for (int i = 0; i < number; i++)
+            //{
+            //    if (!rocket[i].GetComponent<RocketBlockScript>().launched)
+            //    rocket[i].transform.position = transform.TransformVector(transform.InverseTransformVector(rigidbody.position) + position_rocket[i]);
+            //}
             //火箭弹重装
             Rocket_Reload();
 
@@ -1655,7 +1675,7 @@ namespace MordenFirearmKitMod
             Vector3 pos = transform.TransformVector(transform.InverseTransformVector(rigidbody.position) + position_rocket[label]);
 
             //火箭弹实例化 设置连接点失效
-            rocket[label] = (GameObject)Instantiate(PrefabMaster.BlockPrefabs[650].gameObject, pos, transform.rotation, transform);
+            rocket[label] = (GameObject)Instantiate(PrefabMaster.BlockPrefabs[650].gameObject, transform.position, transform.rotation, transform);
             Destroy(rocket[label].GetComponent<ConfigurableJoint>());
 
             //火箭弹刚体 不开启碰撞 不受物理影响
@@ -1676,6 +1696,9 @@ namespace MordenFirearmKitMod
             rbs.drag = drag;
             rbs.timeopen = timeopen;
 
+
+            //GameObject[] psa =  rocket[label].GetComponentsInChildren<GameObject>();
+            Debug.Log(rbs.GetComponentsInChildren<ParticleSystem>().Length);
         }
 
         //火箭弹发射准备

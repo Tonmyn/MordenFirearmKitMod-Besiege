@@ -67,7 +67,7 @@ namespace MordenFirearmKitMod
             ///Load resources that will be needed for the block.
             .NeededResources(new List<NeededResource> {
                                 new NeededResource(ResourceType.Audio, //Type of resource - types available are Audio, Texture, Mesh, and AssetBundle
-                                                   "MachineGun.wav")
+                                                   "/MordenFirearmKitMod/MachineGun.wav")
             })
 
            ///Setup where on your block you can add other blocks.
@@ -137,7 +137,7 @@ namespace MordenFirearmKitMod
         {
             base.OnSimulateUpdate();
             timer += Time.deltaTime;
-
+            gunAudio.Play();
             if (Input.GetKey(KeyCode.Y) )
             {
                
@@ -164,7 +164,7 @@ namespace MordenFirearmKitMod
         {
             gunLine.enabled = false;
             gunLight.enabled = false;
-            gunAudio.Stop();
+            //gunAudio.Stop();
         }
 
         private void shoot()
@@ -231,11 +231,12 @@ namespace MordenFirearmKitMod
 
             
             
-            gunAudio.clip = resources["MachineGun.wav"].audioClip;
-            gunAudio.playOnAwake = true;
-            gunAudio.loop = false;
+            gunAudio.clip = resources["/MordenFirearmKitMod/MachineGun.wav"].audioClip;
+            gunAudio.playOnAwake = false;
+            gunAudio.loop = true;
             gunAudio.mute = false;
             gunAudio.volume = 0.5f;
+            gunAudio.maxDistance = 100;
             gunAudio.enabled = true;
 
 
