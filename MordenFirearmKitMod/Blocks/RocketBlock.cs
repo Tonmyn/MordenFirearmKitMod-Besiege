@@ -279,7 +279,7 @@ namespace MordenFirearmKitMod
         protected ParticleSystemRenderer psr_fire;
 
         //声明 尾焰粒子属性
-        protected ParticleSystemProperties psp_fire = new ParticleSystemProperties().init_fire();
+        public ParticleSystemProperties psp_fire = new ParticleSystemProperties().init_fire();
 
         //声明 开关 显示尾焰效果菜单
         //protected MToggle toggle_fire;
@@ -332,7 +332,7 @@ namespace MordenFirearmKitMod
         protected ParticleSystemRenderer psr_smoke;
 
         //声明 尾焰粒子属性
-        protected ParticleSystemProperties psp_smoke = new ParticleSystemProperties().init_smoke();
+        public ParticleSystemProperties psp_smoke = new ParticleSystemProperties().init_smoke();
 
         //声明 菜单 尾烟颜色
         protected MMenu colorsmoke_menu;
@@ -1696,7 +1696,7 @@ namespace MordenFirearmKitMod
             rbs.drag = drag;
             rbs.timeopen = timeopen;
 
-
+            
             //GameObject[] psa =  rocket[label].GetComponentsInChildren<GameObject>();
             Debug.Log(rbs.GetComponentsInChildren<ParticleSystem>().Length);
         }
