@@ -279,7 +279,7 @@ namespace MordenFirearmKitMod
         protected ParticleSystemRenderer psr_fire;
 
         //声明 尾焰粒子属性
-        protected ParticleSystemProperties psp_fire;
+        protected ParticleSystemProperties psp_fire = new ParticleSystemProperties().init_fire();
 
         //声明 开关 显示尾焰效果菜单
         //protected MToggle toggle_fire;
@@ -332,7 +332,10 @@ namespace MordenFirearmKitMod
         protected ParticleSystemRenderer psr_smoke;
 
         //声明 尾焰粒子属性
-        protected ParticleSystemProperties psp_smoke;
+        protected ParticleSystemProperties psp_smoke = new ParticleSystemProperties().init_smoke();
+
+        //声明 菜单 尾烟颜色
+        protected MMenu colorsmoke_menu;
 
         //声明 滑条 粒子存活时间
         protected MSlider lifetime_smoke;
@@ -367,6 +370,8 @@ namespace MordenFirearmKitMod
         protected MSlider colorStartTime_smoke;
 
         protected MSlider colorEndTime_smoke;
+
+        public int color_smoke = 0;
 
         #endregion
 
@@ -406,6 +411,56 @@ namespace MordenFirearmKitMod
             public float color_startTime;
             public float color_endTime;
 
+            //尾焰数据初始化
+            public ParticleSystemProperties init_fire()
+            {
+                ParticleSystemProperties psp;
+
+                psp.radius = 0;
+                psp.angle = 2;
+                psp.lifetime = 0.5f;
+
+                psp.size = 1;
+                psp.size_start = 1;
+                psp.size_end = 0;
+
+                psp.color_start = Color.blue;
+                psp.color_end = Color.yellow;
+                psp.color_startTime = 0;
+                psp.color_endTime = lifetime;
+
+                psp.alpha_start = 1;
+                psp.alpha_end = 0;
+                psp.alpha_startTime = 0;
+                psp.alpha_endTime = lifetime;
+
+                return psp;
+            }
+
+            //尾烟数据初始化
+            public ParticleSystemProperties init_smoke()
+            {
+                ParticleSystemProperties psp;
+                psp.radius = 0.1f;
+                psp.angle = 15;
+                psp.lifetime = 3f;
+
+                psp.size = 1;
+                psp.size_start = 1;
+                psp.size_end = 3f;
+
+                psp.color_start = Color.gray;
+                psp.color_end = psp.color_start;
+                psp.color_startTime = 0;
+                psp.color_endTime = 0.15f;
+
+                psp.alpha_start = 1f;
+                psp.alpha_end = 0;
+                psp.alpha_startTime = 0;
+                psp.alpha_endTime = psp.lifetime*0.8f;
+
+                return psp;
+            }
 
         }
 
@@ -454,25 +509,25 @@ namespace MordenFirearmKitMod
 
             // toggle_fire = AddToggle("尾焰生效", "FireIsActiveFire", true);
 
-            lifetime_fire = AddSlider("时间", "LifeTimeFire", psp_fire.lifetime = 0.5f, 0, 1);
+            lifetime_fire = AddSlider("时间", "LifeTimeFire", psp_fire.lifetime, 0, 1);
 
-            radius_fire = AddSlider("半径", "RadiusFire", psp_fire.radius = 0, 0, 2);
+            radius_fire = AddSlider("半径", "RadiusFire", psp_fire.radius, 0, 2);
 
-            angle_fire = AddSlider("角度", "AngleFire", psp_fire.angle = 2, 0, 5);
+            angle_fire = AddSlider("角度", "AngleFire", psp_fire.angle, 0, 5);
 
-            size_fire = AddSlider("尺寸", "SizeFire", psp_fire.size = (transform.localScale.y + transform.localScale.z) / 2, 0, 5);
+            size_fire = AddSlider("尺寸", "SizeFire", psp_fire.size, 0, 5);
 
-            sizeStart_fire = AddSlider("初始尺寸", "SizeStartFire", psp_fire.size_start = 1, 0, 5);
+            sizeStart_fire = AddSlider("初始尺寸", "SizeStartFire", psp_fire.size_start, 0, 5);
 
-            sizeEnd_fire = AddSlider("结束尺寸", "SizeEndFire", psp_fire.size_end = 0, 0, 5);
+            sizeEnd_fire = AddSlider("结束尺寸", "SizeEndFire", psp_fire.size_end, 0, 5);
 
-            colorStart_fire = AddColourSlider("渐变初始颜色", "ColorStartFire", psp_fire.color_start = Color.blue);
+            colorStart_fire = AddColourSlider("渐变初始颜色", "ColorStartFire", psp_fire.color_start);
 
-            colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEndFire", psp_fire.color_end = Color.yellow);
+            colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEndFire", psp_fire.color_end);
 
-            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTimeFire", psp_fire.color_startTime = 0, 0, psp_fire.lifetime);
+            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTimeFire", psp_fire.color_startTime, 0, psp_fire.lifetime);
 
-            colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTimeFire", psp_fire.color_endTime = psp_fire.lifetime, 0, psp_fire.lifetime);
+            colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTimeFire", psp_fire.color_endTime, 0, psp_fire.lifetime);
 
             //alphaStart_fire = AddSlider("渐变初始透明", "AlphaStartFire", psp_fire.alpha_start = 0.2f, 0f, 1f);
 
@@ -481,7 +536,7 @@ namespace MordenFirearmKitMod
             //alphaStartTime_fire = AddSlider("渐变初始时间", "AlphaStartTimeFire", psp_fire.alpha_startTime = 0, 0, psp_fire.lifetime);
 
             //alphaEndTime_fire = AddSlider("渐变结束时间", "AlphaEndTimeFire", psp_fire.alpha_endTime = psp_fire.lifetime, 0, psp_fire.lifetime);
-            psp_fire.alpha_start = 0.2f; psp_fire.alpha_end = 0.8f; psp_fire.alpha_startTime = 0; psp_fire.alpha_endTime = psp_fire.lifetime;
+            //psp_fire.alpha_start = 0.2f; psp_fire.alpha_end = 0.8f; psp_fire.alpha_startTime = 0; psp_fire.alpha_endTime = psp_fire.lifetime;
 
 
             //toggle_fire.Toggled += new ToggleHandler(toggleFire_valueChanged);
@@ -518,37 +573,41 @@ namespace MordenFirearmKitMod
 
             #region 尾烟组件初始化
 
+            colorsmoke_menu = AddMenu("尾烟颜色", color_smoke, new System.Collections.Generic.List<string> { "灰色", "白色", "黑色" });
+
             // toggle_smoke = AddToggle("尾焰生效", "SmokeIsActiveSmoke", true);
 
-            lifetime_smoke = AddSlider("时间", "LifeTimeSmoke", psp_smoke.lifetime = 0.5f, 0, 1);
+            lifetime_smoke = AddSlider("时间", "LifeTimeSmoke", psp_smoke.lifetime, 0, 5);
 
             //radius_smoke = AddSlider("半径", "RadiusSmoke", psp_smoke.radius = 0, 0, 2);
 
-            //angle_smoke = AddSlider("角度", "AngleSmoke", psp_smoke.angle = 2, 0, 5);
+            angle_smoke = AddSlider("角度", "AngleSmoke", psp_smoke.angle, 0, 60);
 
-            size_smoke = AddSlider("尺寸", "SizeSmoke", psp_smoke.size = (transform.localScale.y + transform.localScale.z) / 2, 0, 5);
+            size_smoke = AddSlider("尺寸", "SizeSmoke", psp_smoke.size, 0, 3);
 
-            sizeStart_smoke = AddSlider("初始尺寸", "SizeStartSmoke", psp_smoke.size_start = 1, 0, 5);
+            sizeStart_smoke = AddSlider("初始尺寸", "SizeStartSmoke", psp_smoke.size_start, 0, 1);
 
-            sizeEnd_smoke = AddSlider("结束尺寸", "SizeEndSmoke", psp_smoke.size_end = 0, 0, 5);
+            sizeEnd_smoke = AddSlider("结束尺寸", "SizeEndSmoke", psp_smoke.size_end, 0, 10);
 
-            colorStart_smoke = AddColourSlider("渐变初始颜色", "ColorStartSmoke", psp_smoke.color_start = Color.blue);
+            //colorStart_smoke = AddColourSlider("渐变初始颜色", "ColorStartSmoke", psp_smoke.color_start);
 
-            colorEnd_smoke = AddColourSlider("渐变结束颜色", "ColorEndSmoke", psp_smoke.color_end = Color.white);
+            //colorEnd_smoke = AddColourSlider("渐变结束颜色", "ColorEndSmoke", psp_smoke.color_end);
 
-            colorStartTime_smoke = AddSlider("渐变初始时间", "ColorStartTimeSmoke", psp_smoke.color_startTime = 0, 0, psp_smoke.lifetime);
+            //colorStartTime_smoke = AddSlider("渐变初始时间", "ColorStartTimeSmoke", psp_smoke.color_startTime, 0, psp_smoke.lifetime);
 
-            colorEndTime_smoke = AddSlider("渐变结束时间", "ColorEndTimeSmoke", psp_smoke.color_endTime = psp_smoke.lifetime, 0, psp_smoke.lifetime);
+            //colorEndTime_smoke = AddSlider("渐变时间", "ColorEndTimeSmoke", psp_smoke.color_endTime, 0, psp_smoke.lifetime);
 
-            alphaStart_smoke = AddSlider("渐变初始透明", "AlphaStartSmoke", psp_smoke.alpha_start = 0.2f, 0f, 1f);
+            //alphaStart_smoke = AddSlider("渐变初始透明", "AlphaStartSmoke", psp_smoke.alpha_start, 0f, 1f);
 
-            alphaEnd_smoke = AddSlider("渐变结束透明", "AlphaEndSmoke", psp_smoke.alpha_end = 0.8f, 0f, 1f);
+            //alphaEnd_smoke = AddSlider("渐变结束透明", "AlphaEndSmoke", psp_smoke.alpha_end, 0f, 1f);
 
-            alphaStartTime_smoke = AddSlider("渐变初始时间", "AlphaStartTimeSmoke", psp_smoke.alpha_startTime = 0, 0, psp_smoke.lifetime);
+            //alphaStartTime_smoke = AddSlider("渐变初始时间", "AlphaStartTimeSmoke", psp_smoke.alpha_startTime, 0, psp_smoke.lifetime);
 
-            alphaEndTime_smoke = AddSlider("渐变结束时间", "AlphaEndTimeSmoke", psp_smoke.alpha_endTime = psp_smoke.lifetime, 0, psp_smoke.lifetime);
+            //alphaEndTime_smoke = AddSlider("渐变结束时间", "AlphaEndTimeSmoke", psp_smoke.alpha_endTime, 0, psp_smoke.lifetime);
             //psp_smoke.alpha_start = 0.2f; psp_smoke.alpha_end = 0.8f; psp_smoke.alpha_startTime = 0; psp_smoke.alpha_endTime = psp_smoke.lifetime;
 
+
+            colorsmoke_menu.ValueChanged += new ValueHandler(colorSmoke_valueChanged);
 
             //toggle_smoke.Toggled += new ToggleHandler(toggleSmoke_valueChanged);
 
@@ -556,7 +615,7 @@ namespace MordenFirearmKitMod
 
             //radius_smoke.ValueChanged += new ValueChangeHandler(radiusSmoke_valueChanged);
 
-            //angle_smoke.ValueChanged += new ValueChangeHandler(angleSmoke_valueChanged);
+            angle_smoke.ValueChanged += new ValueChangeHandler(angleSmoke_valueChanged);
 
             size_smoke.ValueChanged += new ValueChangeHandler(sizeSmoke_valueChanged);
 
@@ -564,21 +623,21 @@ namespace MordenFirearmKitMod
 
             sizeEnd_smoke.ValueChanged += new ValueChangeHandler(sizeEndSmoke_valueChanged);
 
-            colorStart_smoke.ValueChanged += new ColourChangeHandler(colorStartSmoke_valueChanged);
+            //colorStart_smoke.ValueChanged += new ColourChangeHandler(colorStartSmoke_valueChanged);
 
-            colorEnd_smoke.ValueChanged += new ColourChangeHandler(colorEndSmoke_valueChanged);
+            //colorEnd_smoke.ValueChanged += new ColourChangeHandler(colorEndSmoke_valueChanged);
 
-            colorStartTime_smoke.ValueChanged += new ValueChangeHandler(colorStartTimeSmoke_valueChanged);
+            //colorStartTime_smoke.ValueChanged += new ValueChangeHandler(colorStartTimeSmoke_valueChanged);
 
-            colorEndTime_smoke.ValueChanged += new ValueChangeHandler(colorEndTimeSmoke_valueChanged);
+            //colorEndTime_smoke.ValueChanged += new ValueChangeHandler(colorEndTimeSmoke_valueChanged);
 
-            alphaStart_smoke.ValueChanged += new ValueChangeHandler(alphaStartSmoke_valueChanged);
+            //alphaStart_smoke.ValueChanged += new ValueChangeHandler(alphaStartSmoke_valueChanged);
 
-            alphaEnd_smoke.ValueChanged += new ValueChangeHandler(alphaEndSmoke_valueChanged);
+            //alphaEnd_smoke.ValueChanged += new ValueChangeHandler(alphaEndSmoke_valueChanged);
 
-            alphaStartTime_smoke.ValueChanged += new ValueChangeHandler(alphaStartTimeSmoke_valueChanged);
+            //alphaStartTime_smoke.ValueChanged += new ValueChangeHandler(alphaStartTimeSmoke_valueChanged);
 
-            alphaEndTime_smoke.ValueChanged += new ValueChangeHandler(alphaEndTimeSmoke_valueChanged);
+            //alphaEndTime_smoke.ValueChanged += new ValueChangeHandler(alphaEndTimeSmoke_valueChanged);
 
             #endregion
 
@@ -668,13 +727,15 @@ namespace MordenFirearmKitMod
 
             #region 页码2控件   
 
+            colorsmoke_menu.DisplayInMapper = show_2;
+
             //toggle_smoke.DisplayInMapper = show_2;
 
             lifetime_smoke.DisplayInMapper = show_2;
 
             //radius_smoke.DisplayInMapper = show_2;
 
-            //angle_smoke.DisplayInMapper = show_2;
+            angle_smoke.DisplayInMapper = show_2;
 
             size_smoke.DisplayInMapper = show_2;
 
@@ -682,21 +743,21 @@ namespace MordenFirearmKitMod
 
             sizeEnd_smoke.DisplayInMapper = show_2;
 
-            colorStart_smoke.DisplayInMapper = show_2;
+            //colorStart_smoke.DisplayInMapper = show_2;
 
-            colorEnd_smoke.DisplayInMapper = show_2;
+            //colorEnd_smoke.DisplayInMapper = show_2;
 
-            colorStartTime_smoke.DisplayInMapper = show_2;
+            //colorStartTime_smoke.DisplayInMapper = show_2;
 
-            colorEndTime_smoke.DisplayInMapper = show_2;
+            //colorEndTime_smoke.DisplayInMapper = show_2;
 
-            alphaStart_smoke.DisplayInMapper = show_2;
+            //alphaStart_smoke.DisplayInMapper = show_2;
 
-            alphaEnd_smoke.DisplayInMapper = show_2;
+            //alphaEnd_smoke.DisplayInMapper = show_2;
 
-            alphaStartTime_smoke.DisplayInMapper = show_2;
+            //alphaStartTime_smoke.DisplayInMapper = show_2;
 
-            alphaEndTime_smoke.DisplayInMapper = show_2;
+            //alphaEndTime_smoke.DisplayInMapper = show_2;
 
             #endregion
         }
@@ -831,6 +892,23 @@ namespace MordenFirearmKitMod
 
         #region 尾烟参数事件
 
+        public void colorSmoke_valueChanged(int value)
+        {
+            color_smoke = value;
+            if (value == 0)
+            {
+                psp_smoke.color_start = psp_smoke.color_end = Color.gray;
+            }
+            else if (value == 1)
+            {
+                psp_smoke.color_start = psp_smoke.color_end = Color.white;
+            }
+            else
+            {
+                psp_smoke.color_start = psp_smoke.color_end = Color.black;
+            }
+        }
+
         //public void toggleSmoke_valueChanged(bool isActive)
         //{
         //    ParticleSystem.ShapeModule sm =  ps_smoke.shape;
@@ -840,6 +918,7 @@ namespace MordenFirearmKitMod
         public void lifeTimeSmoke_valueChanged(float value)
         {
             psp_smoke.lifetime = value;
+            psp_smoke.alpha_endTime = value * 0.8f;
         }
 
         public void radiusSmoke_valueChanged(float value)
@@ -959,7 +1038,6 @@ namespace MordenFirearmKitMod
         {
             base.BlockPlaced();
             com = rigidbody.centerOfMass;
-
         }
 
         protected override void BuildingUpdate()
@@ -1351,7 +1429,7 @@ namespace MordenFirearmKitMod
             particle_smoke.transform.localPosition = new Vector3(2.5f, 0, 0.3f);
             particle_smoke.transform.localRotation = new Quaternion(90, 0, 90, 0);
             ps_smoke.loop = true;
-            ps_smoke.startColor = Color.white;
+            ps_smoke.startColor = psp_smoke.color_start;
             ps_smoke.simulationSpace = ParticleSystemSimulationSpace.World;
             ps_smoke.maxParticles = 10240;
             ps_smoke.gravityModifier = -0.02f;
@@ -1360,9 +1438,9 @@ namespace MordenFirearmKitMod
 
             ParticleSystem.ShapeModule sm = ps_smoke.shape;
             sm.shapeType = ParticleSystemShapeType.ConeShell;
-            sm.radius = 0.1f;
-            sm.angle = 15;
-            sm.length = 10;
+            sm.radius = psp_smoke.radius;
+            sm.angle = psp_smoke.angle;
+            sm.length = 1;
             
             //sm.arc = 360 ;
             sm.randomDirection = true;
