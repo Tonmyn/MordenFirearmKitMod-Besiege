@@ -1288,13 +1288,12 @@ namespace MordenFirearmKitMod
                     Rigidbody.isKinematic = true;
                     rigidbody.detectCollisions = false;
                     Destroy(gameObject.GetComponentInChildren<FireController>());
+                    psp_fire.lifetime = 0;
                     ps_fire.Stop();
+                    ps_smoke.Stop();
                 }
             }
              gameObject.AddComponent<TimedSelfDestruct>().lifetime = psp_smoke.lifetime * 120;
-            //gameObject.SetActive(false);
-            //Destroy(gameObject);
-
 
         }
 
@@ -1521,8 +1520,6 @@ namespace MordenFirearmKitMod
         //声明 连发开启
         private bool continued = false;
 
-        //声明 粒子属性
-        private ParticleSystemProperties psp_fire,psp_smoke;
         #endregion
 
         public override void SafeAwake()
@@ -1696,9 +1693,42 @@ namespace MordenFirearmKitMod
             rbs.drag = drag;
             rbs.timeopen = timeopen;
 
-            
-            //GameObject[] psa =  rocket[label].GetComponentsInChildren<GameObject>();
-            Debug.Log(rbs.GetComponentsInChildren<ParticleSystem>().Length);
+            //火箭弹尾焰初始化
+            rbs.psp_fire.lifetime = lifetime_fire.Value;
+            rbs.psp_fire.radius = radius_fire.Value;
+            rbs.psp_fire.angle = angle_fire.Value;
+            rbs.psp_fire.size = size_fire.Value;
+            rbs.psp_fire.size_start = sizeStart_fire.Value;
+            rbs.psp_fire.size_end = sizeEnd_fire.Value;
+            rbs.psp_fire.color_start = colorStart_fire.Value;
+            rbs.psp_fire.color_end = colorEnd_fire.Value;
+            rbs.psp_fire.color_startTime = colorStartTime_fire.Value;
+            rbs.psp_fire.color_endTime = colorEndTime_fire.Value;
+
+            //火箭弹尾烟初始化
+            rbs.psp_smoke.color_start = rbs.psp_smoke.color_end = colorSmoke_valueChanged(colorsmoke_menu.Value);
+            rbs.psp_smoke.lifetime = lifetime_smoke.Value;
+            rbs.psp_smoke.angle = angle_smoke.Value;
+            rbs.psp_smoke.size = size_smoke.Value;
+            rbs.psp_smoke.size_start = sizeStart_smoke.Value;
+            rbs.psp_smoke.size_end = sizeEnd_smoke.Value;
+        }
+
+        public Color colorSmoke_valueChanged(int value)
+        {
+            color_smoke = value;
+            if (value == 0)
+            {
+                return Color.gray;
+            }
+            else if (value == 1)
+            {
+                return Color.white;
+            }
+            else
+            {
+                return Color.black;
+            }
         }
 
         //火箭弹发射准备
