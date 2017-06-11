@@ -270,7 +270,7 @@ namespace MordenFirearmKitMod
         #region 尾焰变量 声明
 
         //声明 尾焰粒子组件
-        protected GameObject particle_fire = new GameObject();
+        protected GameObject particle_fire = new GameObject("尾焰粒子组件");
 
         //声明 尾焰粒子系统
         protected ParticleSystem ps_fire;
@@ -312,7 +312,7 @@ namespace MordenFirearmKitMod
         #region 尾烟变量 声明
 
         //声明 尾烟粒子组件
-        protected GameObject particle_smoke = new GameObject();
+        protected GameObject particle_smoke = new GameObject("尾烟粒子组件");
 
         //声明 粒子系统
         protected ParticleSystem ps_smoke;
@@ -394,12 +394,12 @@ namespace MordenFirearmKitMod
                 psp.color_start = Color.blue;
                 psp.color_end = Color.yellow;
                 psp.color_startTime = 0;
-                psp.color_endTime = lifetime;
+                psp.color_endTime = psp.lifetime/2;
 
                 psp.alpha_start = 1;
                 psp.alpha_end = 0;
                 psp.alpha_startTime = 0;
-                psp.alpha_endTime = lifetime;
+                psp.alpha_endTime = psp.alpha_startTime;
 
                 return psp;
             }
@@ -478,7 +478,7 @@ namespace MordenFirearmKitMod
 
             radius_fire = AddSlider("半径", "RadiusFire", psp_fire.radius, 0, 2);
 
-            angle_fire = AddSlider("角度", "AngleFire", psp_fire.angle, 0, 5);
+            angle_fire = AddSlider("角度", "AngleFire", psp_fire.angle, 0, 60);
 
             size_fire = AddSlider("尺寸", "SizeFire", psp_fire.size, 0, 5);
 
@@ -1206,9 +1206,9 @@ namespace MordenFirearmKitMod
 
             ParticleSystem.ShapeModule sm = ps_fire.shape;
             sm.shapeType = ParticleSystemShapeType.Cone;
-            sm.radius = 0f;
-            sm.angle = 2;
-            //sm.randomDirection = true;
+            sm.radius = psp_fire.radius;
+            sm.angle = psp_fire.angle;
+            sm.randomDirection = false;
             sm.enabled = true;
             
 
