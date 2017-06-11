@@ -1486,7 +1486,7 @@ namespace MordenFirearmKitMod
             Vector3 pos = transform.TransformVector(transform.InverseTransformVector(rigidbody.position) + position_rocket[label]);
 
             //火箭弹实例化 设置连接点失效
-            rocket[label] = (GameObject)Instantiate(PrefabMaster.BlockPrefabs[650].gameObject, transform.position, transform.rotation, transform);
+            rocket[label] = (GameObject)Instantiate(PrefabMaster.BlockPrefabs[650].gameObject, pos, transform.rotation, transform);
             Destroy(rocket[label].GetComponent<ConfigurableJoint>());
 
             //火箭弹刚体 不开启碰撞 不受物理影响

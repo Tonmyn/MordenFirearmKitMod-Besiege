@@ -68,7 +68,7 @@ namespace MordenFirearmKitMod
             ///Load resources that will be needed for the block.
             .NeededResources(new List<NeededResource> {
                                 new NeededResource(ResourceType.Audio, //Type of resource - types available are Audio, Texture, Mesh, and AssetBundle
-                                                   "/MordenFirearmKitMod/MachineGun.wav")
+                                                   "/MordenFirearmKitMod/MachineGun.ogg")
             })
 
            ///Setup where on your block you can add other blocks.
@@ -86,24 +86,25 @@ namespace MordenFirearmKitMod
     public class MachineGunScript: BlockScript
     {
 
+
         public float timeBetweenBullets = 0.05f;
         private float rotationspeed = 0;
 
-        GameObject line = new GameObject();
-        GameObject light = new GameObject();
-        GameObject audio = new GameObject();
+        public GameObject line = new GameObject("射线组件");
+        public GameObject light = new GameObject("粒子组件");
+        public GameObject audio = new GameObject("声音组件");
 
-        public Collider c ;
 
         Ray shootRay = new Ray();
         RaycastHit shootHit;
         //int shootableMask;
         //ParticleSystem gunParticles;
         LineRenderer gunLine;
-        private AudioSource gunAudio;
+        public AudioSource gunAudio;
         Light gunLight;
         float timer;
         float effectsDisplayTime = 0.05f;
+
 
         public override void SafeAwake()
         {
@@ -111,12 +112,22 @@ namespace MordenFirearmKitMod
             //shootableMask = LayerMask.GetMask("Shootable");
             //gunParticles = GetComponent<ParticleSystem>();
             //gunLine = GetComponent<LineRenderer>();
-            gunAudio = gameObject.AddComponent<AudioSource>();
+            gunAudio = audio.AddComponent<AudioSource>();
             //gunLight = GetComponent<Light>();
-
 
         }
 
+        public override void OnSave(XDataHolder stream)
+        {
+            base.OnSave(stream);
+            SaveMapperValues(stream);
+        }
+
+        public override void OnLoad(XDataHolder stream)
+        {
+            base.OnLoad(stream);
+            LoadMapperValues(stream);
+        }
 
         protected override void OnSimulateStart()
         {
@@ -138,7 +149,9 @@ namespace MordenFirearmKitMod
         {
             base.OnSimulateUpdate();
             timer += Time.deltaTime;
-            gunAudio.Play();
+
+            
+
             if (Input.GetKey(KeyCode.Y) )
             {
                
@@ -158,9 +171,9 @@ namespace MordenFirearmKitMod
             {
                 DisableEffects();
             }
-            Debug.DrawLine(shootRay.origin, shootRay.direction, Color.red);
 
         }
+
         public void DisableEffects()
         {
             gunLine.enabled = false;
@@ -172,6 +185,7 @@ namespace MordenFirearmKitMod
         {
             timer = 0f;
 
+            gunAudio.volume = 5 / Vector3.Distance(this.transform.position, Camera.main.transform.position);
             gunAudio.Play();
 
             gunLight.enabled = true;
@@ -213,13 +227,15 @@ namespace MordenFirearmKitMod
             light.transform.localPosition = new Vector3(0,0,3f);
             light.transform.localEulerAngles = new Vector3(0, 0, 180);
             //light.transform.LookAt(transform.position);
-
+            
             gunLine = line.AddComponent<LineRenderer>();
+            //line.AddComponent<TrailRenderer>();
 
+            gunLine.SetVertexCount(2);
             gunLine.useWorldSpace = true;
             gunLine.SetWidth(0.15f, 0.15f);
-            gunLine.material = new Material(Shader.Find("Unlit/Color"));
-            gunLine.material.color = Color.yellow;
+            gunLine.sharedMaterial = new Material(Shader.Find("Unlit/Color"));
+            gunLine.SetColors(Color.yellow,new Color(0,0,0,0));
 
             gunLight = light.AddComponent<Light>();
             gunLight.range = 10;
@@ -232,12 +248,11 @@ namespace MordenFirearmKitMod
 
             
             
-            gunAudio.clip = resources["/MordenFirearmKitMod/MachineGun.wav"].audioClip;
+            gunAudio.clip = resources["/MordenFirearmKitMod/MachineGun.ogg"].audioClip;
             gunAudio.playOnAwake = false;
-            gunAudio.loop = true;
-            gunAudio.mute = false;
+            gunAudio.loop = false;
             gunAudio.volume = 0.5f;
-            gunAudio.maxDistance = 100;
+            //gunAudio.maxDistance = 50;
             gunAudio.enabled = true;
 
 
