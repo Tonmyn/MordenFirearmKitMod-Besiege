@@ -420,7 +420,7 @@ namespace MordenFirearmKitMod
                 psp.angle = 2;
                 psp.lifetime = 0.5f;
 
-                psp.size = 1;
+                psp.size = 0.5f;
                 psp.size_start = 1;
                 psp.size_end = 0;
 
