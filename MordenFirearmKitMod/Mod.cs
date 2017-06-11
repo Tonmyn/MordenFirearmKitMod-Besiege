@@ -61,8 +61,7 @@ namespace MordenFirearmKitMod
             LoadBlock(RocketBlock);
             LoadBlock(RocketPodBlock);
             LoadBlock(MachineGun);
-            
-            
+
         }
 
 

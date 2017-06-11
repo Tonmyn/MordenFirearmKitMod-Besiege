@@ -98,7 +98,7 @@ namespace MordenFirearmKitMod
         Ray shootRay = new Ray();
         RaycastHit shootHit;
         //int shootableMask;
-        //ParticleSystem gunParticles;
+        ParticleSystem gunParticles;
         LineRenderer gunLine;
         public AudioSource gunAudio;
         Light gunLight;
@@ -255,7 +255,15 @@ namespace MordenFirearmKitMod
             //gunAudio.maxDistance = 50;
             gunAudio.enabled = true;
 
+            gunParticles = line.AddComponent<ParticleSystem>();
+            ParticleSystem.ShapeModule sm = gunParticles.shape;
+            sm.shapeType = ParticleSystemShapeType.Cone;
+            sm.radius = 0.01f;
+            sm.angle = 4.65f;
+            sm.randomDirection = false;
+            sm.enabled = true;
 
+            ParticleSystem.VelocityOverLifetimeModule volm = gunParticles.velocityOverLifetime;
         }
 
 

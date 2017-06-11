@@ -474,7 +474,7 @@ namespace MordenFirearmKitMod
 
             #region 尾焰组件初始化
 
-            lifetime_fire = AddSlider("时间", "LifeTimeFire", psp_fire.lifetime, 0, 1);
+            lifetime_fire = AddSlider("时间", "LifeTimeFire", psp_fire.lifetime * transform.localScale.x, 0, 1);
 
             radius_fire = AddSlider("半径", "RadiusFire", psp_fire.radius, 0, 2);
 
@@ -548,6 +548,7 @@ namespace MordenFirearmKitMod
 
             page_valuechanged(0);
 
+            
         }
         
         //改变 功能开关 事件
@@ -1198,11 +1199,11 @@ namespace MordenFirearmKitMod
         {
             ps_fire = particle_fire.AddComponent<ParticleSystem>();
             ps_fire.Stop();
-            ps_fire.startLifetime = psp.lifetime;
+            ps_fire.startLifetime = psp.lifetime * Mathf.Sqrt( transform.localScale.x);
             particle_fire.transform.parent = transform;
             particle_fire.transform.localPosition = new Vector3(1.25f, 0, 0.3f);
             particle_fire.transform.localRotation = new Quaternion(90, 0, 90, 0);
-            
+            ps_fire.scalingMode = ParticleSystemScalingMode.Hierarchy;
 
             ParticleSystem.ShapeModule sm = ps_fire.shape;
             sm.shapeType = ParticleSystemShapeType.Cone;
@@ -1214,7 +1215,7 @@ namespace MordenFirearmKitMod
 
             ParticleSystem.SizeOverLifetimeModule sl = ps_fire.sizeOverLifetime;
             //float size = (transform.localScale.y + transform.localScale.z) / 2;
-            sl.size = new ParticleSystem.MinMaxCurve(psp.size, AnimationCurve.Linear(0f, psp.size_start, psp.lifetime, psp.size_end));
+            sl.size = new ParticleSystem.MinMaxCurve((transform.localScale.y + transform.localScale.z) / 2 * psp_fire.size, AnimationCurve.Linear(0f, psp.size_start, ps_fire.startLifetime, psp.size_end));
             sl.enabled = true;
 
             ParticleSystem.ColorOverLifetimeModule colm = ps_fire.colorOverLifetime;
@@ -1262,7 +1263,7 @@ namespace MordenFirearmKitMod
 
             ParticleSystem.SizeOverLifetimeModule sl = ps_smoke.sizeOverLifetime;
             //float size = (transform.localScale.y + transform.localScale.z) / 2;
-            sl.size = new ParticleSystem.MinMaxCurve(psp.size, AnimationCurve.Linear(0f, psp.size_start, psp.lifetime, psp.size_end));
+            sl.size = new ParticleSystem.MinMaxCurve(psp.size * (transform.localScale.y + transform.localScale.z) / 3, AnimationCurve.Linear(0f, psp.size_start, ps_fire.startLifetime, psp.size_end));
             sl.enabled = true;
 
             ParticleSystem.RotationOverLifetimeModule rolm = ps_smoke.rotationOverLifetime;
