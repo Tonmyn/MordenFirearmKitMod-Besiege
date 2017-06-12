@@ -90,9 +90,9 @@ namespace MordenFirearmKitMod
         public float timeBetweenBullets = 0.05f;
         private float rotationspeed = 0;
 
-        public GameObject line = new GameObject("射线组件");
-        public GameObject light = new GameObject("粒子组件");
-        public GameObject audio = new GameObject("声音组件");
+        protected GameObject line = new GameObject("射线组件");
+        protected GameObject light = new GameObject("粒子组件");
+        protected GameObject audio = new GameObject("声音组件");
 
 
         Ray shootRay = new Ray();
@@ -100,7 +100,7 @@ namespace MordenFirearmKitMod
         //int shootableMask;
         ParticleSystem gunParticles;
         LineRenderer gunLine;
-        public AudioSource gunAudio;
+        AudioSource gunAudio;
         Light gunLight;
         float timer;
         float effectsDisplayTime = 0.05f;
@@ -110,10 +110,7 @@ namespace MordenFirearmKitMod
         {
             base.SafeAwake();
             //shootableMask = LayerMask.GetMask("Shootable");
-            //gunParticles = GetComponent<ParticleSystem>();
-            //gunLine = GetComponent<LineRenderer>();
-            gunAudio = audio.AddComponent<AudioSource>();
-            //gunLight = GetComponent<Light>();
+
 
         }
 
@@ -128,6 +125,7 @@ namespace MordenFirearmKitMod
             base.OnLoad(stream);
             LoadMapperValues(stream);
         }
+
 
         protected override void OnSimulateStart()
         {
@@ -151,7 +149,6 @@ namespace MordenFirearmKitMod
             timer += Time.deltaTime;
 
             
-
             if (Input.GetKey(KeyCode.Y) )
             {
                
@@ -179,6 +176,7 @@ namespace MordenFirearmKitMod
             gunLine.enabled = false;
             gunLight.enabled = false;
             //gunAudio.Stop();
+            gunParticles.Stop();
         }
 
         private void shoot()
@@ -189,9 +187,8 @@ namespace MordenFirearmKitMod
             gunAudio.Play();
 
             gunLight.enabled = true;
-            
-            //gunParticles.Stop();
-            //gunParticles.Play();
+                 
+            gunParticles.Play();
 
             gunLine.enabled = true;
             gunLine.SetPosition(0, transform.position);
@@ -222,26 +219,31 @@ namespace MordenFirearmKitMod
 
         private void renderset()
         {
+            
+            gunParticles = line.AddComponent<ParticleSystem>();
+            gunLight = light.AddComponent<Light>();
+            gunLine = line.AddComponent<LineRenderer>();
+            gunAudio = audio.AddComponent<AudioSource>();
 
             light.transform.SetParent(transform);
             light.transform.localPosition = new Vector3(0,0,3f);
             light.transform.localEulerAngles = new Vector3(0, 0, 180);
             //light.transform.LookAt(transform.position);
             
-            gunLine = line.AddComponent<LineRenderer>();
+            
             //line.AddComponent<TrailRenderer>();
 
             gunLine.SetVertexCount(2);
             gunLine.useWorldSpace = true;
             gunLine.SetWidth(0.15f, 0.15f);
             gunLine.sharedMaterial = new Material(Shader.Find("Unlit/Color"));
-            gunLine.SetColors(Color.yellow,new Color(0,0,0,0));
+            gunLine.SetColors(new Color32(250, 135, 0, 255), new Color(0,0,0,0));
 
-            gunLight = light.AddComponent<Light>();
+            
             gunLight.range = 10;
             gunLight.type = LightType.Spot;
             gunLight.spotAngle = 85;
-            gunLight.color = Color.yellow;
+            gunLight.color = new Color32(250, 135, 0, 255);
             gunLight.intensity = 100f;
             gunLight.shadows = LightShadows.Hard;
             gunLight.enabled = true;
@@ -251,11 +253,25 @@ namespace MordenFirearmKitMod
             gunAudio.clip = resources["/MordenFirearmKitMod/MachineGun.ogg"].audioClip;
             gunAudio.playOnAwake = false;
             gunAudio.loop = false;
-            gunAudio.volume = 0.5f;
-            //gunAudio.maxDistance = 50;
             gunAudio.enabled = true;
 
-            gunParticles = line.AddComponent<ParticleSystem>();
+            gunParticles.transform.SetParent(transform);
+            gunParticles.transform.position = transform.TransformVector(transform.position + new Vector3(0,0,4.75f));
+            //gunParticles.transform.rotation = Quaternion.identity;
+            gunParticles.playOnAwake = false;
+            gunParticles.Stop();
+            gunParticles.loop = false;
+            gunParticles.startSize = 5;
+            gunParticles.startSpeed = 4;
+            gunParticles.maxParticles = 25;
+            gunParticles.startLifetime = 0.1f;
+            gunParticles.startColor = new Color32(250,135,0,255);
+
+            ParticleSystem.EmissionModule em = gunParticles.emission;
+            em.rate = new ParticleSystem.MinMaxCurve(100);
+            em.SetBursts(new ParticleSystem.Burst[] {new ParticleSystem.Burst(0,8,30)});
+            em.enabled = true;
+
             ParticleSystem.ShapeModule sm = gunParticles.shape;
             sm.shapeType = ParticleSystemShapeType.Cone;
             sm.radius = 0.01f;
@@ -264,6 +280,40 @@ namespace MordenFirearmKitMod
             sm.enabled = true;
 
             ParticleSystem.VelocityOverLifetimeModule volm = gunParticles.velocityOverLifetime;
+            volm.z = 2;
+            volm.space = ParticleSystemSimulationSpace.Local;
+            volm.enabled = true;
+
+            ParticleSystem.ColorOverLifetimeModule colm = gunParticles.colorOverLifetime;
+            colm.color = new Gradient()
+            {
+                alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(255, gunParticles.startLifetime *0.65f), new GradientAlphaKey(70, gunParticles.startLifetime) },
+
+                colorKeys = new GradientColorKey[] { new GradientColorKey(Color.white, gunParticles.startLifetime * 0.35f), new GradientColorKey(new Color32(250, 135, 0, 255), gunParticles.startLifetime * 0.65f), new GradientColorKey(new Color(0,0,0), gunParticles.startLifetime) }
+            };
+            colm.enabled = true;
+
+            ParticleSystem.SizeOverLifetimeModule solm = gunParticles.sizeOverLifetime;
+            solm.separateAxes = false;
+            solm.size = new ParticleSystem.MinMaxCurve(1, new AnimationCurve(new Keyframe[] {new Keyframe(0,0.15f), new Keyframe(0.17f,0.9f), new Keyframe(0.25f,0.8f), new Keyframe(1,0) }));
+            solm.enabled = true;
+
+            ParticleSystemRenderer psr = gunParticles.GetComponent<ParticleSystemRenderer>();
+            psr.renderMode = ParticleSystemRenderMode.Billboard;
+            psr.normalDirection = 1;
+            psr.material = new Material(Shader.Find("Particles/Additive"));
+            psr.material.mainTexture = resources["/MordenFirearmKitMod/RocketSmoke.png"].texture;
+            psr.sortMode = ParticleSystemSortMode.None;
+            psr.sortingFudge = 0;
+            psr.minParticleSize = 0;
+            psr.maxParticleSize = 1;
+            psr.alignment = ParticleSystemRenderSpace.View;
+            psr.pivot = Vector3.zero;
+            psr.motionVectors = true;
+            psr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            psr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
+            
+
         }
 
 

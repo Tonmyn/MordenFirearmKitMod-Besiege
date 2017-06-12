@@ -1195,6 +1195,7 @@ namespace MordenFirearmKitMod
 
         }
 
+        //尾焰粒子组件初始化
         protected void fire_ps_init(ParticleSystemProperties psp)
         {
             ps_fire = particle_fire.AddComponent<ParticleSystem>();
@@ -1234,6 +1235,7 @@ namespace MordenFirearmKitMod
             psr_fire.sharedMaterial.mainTexture = (resources["/MordenFirearmKitMod/RocketFire.png"].texture);
         }
 
+        //尾烟粒子组件初始化
         protected void smoke_ps_init(ParticleSystemProperties psp)
         {
             ps_smoke = particle_smoke.AddComponent<ParticleSystem>();
@@ -1489,6 +1491,7 @@ namespace MordenFirearmKitMod
             //火箭弹实例化 设置连接点失效
             rocket[label] = (GameObject)Instantiate(PrefabMaster.BlockPrefabs[650].gameObject, pos, transform.rotation, transform);
             Destroy(rocket[label].GetComponent<ConfigurableJoint>());
+            //rocket[label].transform.localPosition = transform.InverseTransformVector(rigidbody.position) + position_rocket[label];
 
             //火箭弹刚体 不开启碰撞 不受物理影响
             rb[label] = rocket[label].GetComponent<Rigidbody>();
@@ -1628,7 +1631,7 @@ namespace MordenFirearmKitMod
     public class TimedSelfDestruct : MonoBehaviour
     {
         float timer = 0;
-        public float lifetime = 260;
+        public float lifetime = 300;
 
         void FixedUpdate()
         {
@@ -1668,4 +1671,5 @@ namespace MordenFirearmKitMod
 
         }
     }
+
 }
