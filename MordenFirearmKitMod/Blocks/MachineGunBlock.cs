@@ -94,6 +94,7 @@ namespace MordenFirearmKitMod
         protected GameObject light = new GameObject("粒子组件");
         protected GameObject audio = new GameObject("声音组件");
 
+        protected MVisual skin;
 
         Ray shootRay = new Ray();
         RaycastHit shootHit;
@@ -110,7 +111,7 @@ namespace MordenFirearmKitMod
         {
             base.SafeAwake();
             //shootableMask = LayerMask.GetMask("Shootable");
-
+            //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() { });
 
         }
 
