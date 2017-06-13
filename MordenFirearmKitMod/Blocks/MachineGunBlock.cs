@@ -87,22 +87,46 @@ namespace MordenFirearmKitMod
     {
 
 
-        public float timeBetweenBullets = 0.05f;
-        private float rotationspeed = 0;
+        #region 公共变量
 
-        protected GameObject line = new GameObject("射线组件");
-        protected GameObject light = new GameObject("粒子组件");
-        protected GameObject audio = new GameObject("声音组件");
+        //武器类型
+        public enum Caliber { 机枪, 机炮, 速射炮 }
 
-        protected MVisual skin;
+        //口径
+        public Caliber caliber = Caliber.机枪;
+
+        //射速
+        public float FireRate = 0.05f;
+
+
+
+        
+        #endregion
+
+        //加特林转速
+        private float RotationRate = 0;
+
+
+        #region 私有变量
+
+        
+
+        #endregion
+
+
+
+        //通用组件 存放粒子声音等组件
+        GameObject generic = new GameObject("通用组件");
 
         Ray shootRay = new Ray();
         RaycastHit shootHit;
         //int shootableMask;
+
         ParticleSystem gunParticles;
         LineRenderer gunLine;
         AudioSource gunAudio;
         Light gunLight;
+        
         float timer;
         float effectsDisplayTime = 0.05f;
 
@@ -111,7 +135,7 @@ namespace MordenFirearmKitMod
         {
             base.SafeAwake();
             //shootableMask = LayerMask.GetMask("Shootable");
-            //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() { });
+            //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() {resources["/MordenFirearmKitMod/Barrel.obj"].texture, });
 
         }
 
@@ -153,19 +177,19 @@ namespace MordenFirearmKitMod
             if (Input.GetKey(KeyCode.Y) )
             {
                
-                rotationspeed = Mathf.MoveTowards(rotationspeed, 60, 1);
-                if (rotationspeed == 60 && timer >= timeBetweenBullets && Time.timeScale != 0)
+                RotationRate = Mathf.MoveTowards(RotationRate, 60, 1);
+                if (RotationRate == 60 && timer >= FireRate && Time.timeScale != 0)
                 {
                     shoot();
                 }
             }
             else
             {
-                rotationspeed = Mathf.MoveTowards(rotationspeed, 0, Time.deltaTime*10);
+                RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.deltaTime*10);
             }
-            transform.Rotate(new Vector3(0, 0, rotationspeed));
+            transform.Rotate(new Vector3(0, 0, RotationRate));
 
-            if (timer >= timeBetweenBullets * effectsDisplayTime)
+            if (timer >= FireRate * effectsDisplayTime)
             {
                 DisableEffects();
             }
@@ -195,7 +219,7 @@ namespace MordenFirearmKitMod
             gunLine.SetPosition(0, transform.position);
 
             //gunLine.SetPosition(1, transform.position + transform.forward * 100);
-            shootRay.origin = transform.TransformPoint( light.transform.localPosition + new Vector3(0,0,1));
+            shootRay.origin = transform.TransformPoint( generic.transform.localPosition + new Vector3(0,0,1));
             shootRay.direction = transform.forward;
             
 
@@ -221,15 +245,15 @@ namespace MordenFirearmKitMod
         private void renderset()
         {
             
-            gunParticles = line.AddComponent<ParticleSystem>();
-            gunLight = light.AddComponent<Light>();
-            gunLine = line.AddComponent<LineRenderer>();
-            gunAudio = audio.AddComponent<AudioSource>();
+            gunParticles = generic.AddComponent<ParticleSystem>();
+            gunLight = generic.AddComponent<Light>();
+            gunLine = generic.AddComponent<LineRenderer>();
+            gunAudio = generic.AddComponent<AudioSource>();
 
-            light.transform.SetParent(transform);
-            light.transform.localPosition = new Vector3(0,0,3f);
-            light.transform.localEulerAngles = new Vector3(0, 0, 180);
-            //light.transform.LookAt(transform.position);
+            generic.transform.SetParent(transform);
+            generic.transform.localPosition = new Vector3(0,0,3f);
+            generic.transform.localEulerAngles = new Vector3(0, 0, 180);
+            //generic.transform.LookAt(transform.position);
             
             
             //line.AddComponent<TrailRenderer>();
@@ -348,5 +372,10 @@ namespace MordenFirearmKitMod
         }
     }
 
+    public class Weapon
+    {
+
+
+    }
    
 }
