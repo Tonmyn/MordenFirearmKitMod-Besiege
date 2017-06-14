@@ -51,15 +51,15 @@ namespace MordenFirearmKitMod
 #endif
             ///Setup the collier of the block, which can consist of several different colliders.
             ///Therefore we have this CompoundCollider,
-            .CompoundCollider(new List<ColliderComposite> {                            
-                        
-                                ColliderComposite.Capsule(  0.2f, 
+            .CompoundCollider(new List<ColliderComposite> {
+
+                                ColliderComposite.Capsule(  0.2f,
                                                             3f,
                                                             Direction.Z,
-                                                            new Vector3(0f, 0f, 1.65f),           
+                                                            new Vector3(0f, 0f, 1.65f),
                                                             new Vector3(0f, 0f, 0f)),                
                                 
-                              //ColliderComposite.Box(new Vector3(0.35f, 0.35f, 0.15f), new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, 0f)).Trigger().Layer(2).IgnoreForGhost(),   <---Example: Box Trigger on specific Layer
+                              ColliderComposite.Box(new Vector3(0.35f, 0.35f, 0.15f), new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, 0f)).Trigger().Layer(2).IgnoreForGhost(),//   <---Example: Box Trigger on specific Layer
             })
 
             ///Make sure a block being placed on another block can intersect with it.
@@ -341,6 +341,10 @@ namespace MordenFirearmKitMod
 
         }
 
+        private void test()
+        {
+            Launcher launcher = new Launcher();
+        }
 
         //爆炸事件
         public IEnumerator Rocket_Explodey(Vector3 point)
@@ -370,12 +374,86 @@ namespace MordenFirearmKitMod
 
 
         }
+
     }
 
+
+    //武器类
     public class Weapon
+    {
+        //发射器
+        public Launcher launcher;
+
+        //子弹
+        public Bullet bullet;
+
+
+    }
+    
+    
+    //发射器类
+    public class Launcher 
+    {
+       
+
+        //子弹
+        public Bullet bullet;
+
+        //散布
+        //public float Diffuse;
+
+        //弹药量
+        public int bulletNumber;
+
+        //射速
+        public float FireRate;
+
+        //扳机
+        public KeyCode Trigger;
+
+        //质量
+        public float Mass;
+
+    }
+
+    //子弹类
+    public class Bullet 
     {
 
 
+        #region 物理参数
+
+        //威力
+        public float Force;
+
+        //口径
+        public float Caliber;
+
+        //后坐力
+        public float Recoil;
+
+        //阻力
+        public float Drag;
+
+        //射程
+        public float Distance;
+
+        //初速
+        public float MuzzleVelocity { get; }
+
+        //动能
+        public float KineticEnergy { get; }
+
+        //质量
+        public float Mass { get; }
+
+        #endregion
+
+
+        //类型
+        public BulletType bulletType;
+
+        //子弹种类
+        public enum BulletType { 高爆弹, 拽光弹, 穿甲弹 }
     }
-   
 }
