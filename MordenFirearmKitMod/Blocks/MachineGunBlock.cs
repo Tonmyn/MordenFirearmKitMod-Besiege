@@ -116,7 +116,7 @@ namespace MordenFirearmKitMod
 
 
         //通用组件 存放粒子声音等组件
-        GameObject generic = new GameObject("通用组件");
+        protected GameObject generic = new GameObject("通用组件");
 
         Ray shootRay = new Ray();
         RaycastHit shootHit;
@@ -130,12 +130,25 @@ namespace MordenFirearmKitMod
         float timer;
         float effectsDisplayTime = 0.05f;
 
+        GameObject test = new GameObject("test");
+
+        //用于存储绘制三角形的顶点坐标  
+        private Vector3[] vertices;
+        //用于记录绘制三角形所需要的顶点ID顺序  
+        private int[] triangles;
+        //记录顶点数  
+        private int count = 0;
+        //定义Mesh  
+        private Mesh mesh;
+        //定义一个链表用于记录所有点的坐标  
+        private List<Vector3> list;
 
         public override void SafeAwake()
         {
-            base.SafeAwake();
             //shootableMask = LayerMask.GetMask("Shootable");
             //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() {resources["/MordenFirearmKitMod/Barrel.obj"].texture, });
+
+          
 
         }
 
@@ -165,6 +178,26 @@ namespace MordenFirearmKitMod
             
 
             renderset();
+
+
+            MeshRenderer mr = test.AddComponent<MeshRenderer>();
+            mr.material.mainTexture = resources["/MordenFirearmKitMod/RocketFire.png"].texture;
+            MeshFilter mf = test.AddComponent<MeshFilter>();
+            mesh = mf.mesh;
+            //new一个链表  
+            list = new List<Vector3>();
+            //获得Mesh  
+            mesh = test.GetComponent<MeshFilter>().mesh;
+
+            //修改Mesh的颜色  
+            test.GetComponent<MeshRenderer>().material.color = Color.green;
+            //选择Mesh中的Shader  
+            test.GetComponent<MeshRenderer>().material.shader = Shader.Find("Transparent/Diffuse");
+            //清空所有点，用于初始化！  
+            mesh.Clear();
+
+            test.AddComponent<Rigidbody>();
+            test.AddComponent<Collider>();
             
         }
 
@@ -192,6 +225,50 @@ namespace MordenFirearmKitMod
             if (timer >= FireRate * effectsDisplayTime)
             {
                 DisableEffects();
+            }
+
+
+            //点击鼠标左键  
+            if (Input.GetMouseButton(0))
+            {
+                //顶点数+1  
+                count++;
+                //将获得的鼠标坐标转换为世界坐标，然后添加到list链表中。  
+                list.Add(Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0.8f)));
+
+
+
+            }
+
+            //如果顶点数>=3，那么就开始渲染Mesh  
+            if (count >= 3)
+            {
+                //根据顶点数来计算绘制出三角形的所以顶点数  
+                triangles = new int[3 * (count - 2)];
+                //根据顶点数来创建记录顶点坐标  
+                vertices = new Vector3[count];
+                //将链表中的顶点坐标赋值给vertices  
+                for (int i = 0; i < count; i++)
+                {
+                    vertices[i] = list[i];
+
+                }
+
+                //三角形个数  
+                int triangles_count = count - 2;
+                //根据三角形的个数，来计算绘制三角形的顶点顺序（索引）  
+                for (int i = 0; i < triangles_count; i++)
+                {
+                    //这个算法好好琢磨一下吧~  
+                    triangles[3 * i] = 0;
+                    triangles[3 * i + 1] = i + 2;
+                    triangles[3 * i + 2] = i + 1;
+                }
+                //设置顶点坐标  
+                mesh.vertices = vertices;
+                //设置顶点索引  
+                mesh.triangles = triangles;
+
             }
 
         }
@@ -341,10 +418,10 @@ namespace MordenFirearmKitMod
 
         }
 
-        private void test()
-        {
-            Launcher launcher = new Launcher();
-        }
+        //private void test()
+        //{
+        //    Launcher launcher = new Launcher();
+        //}
 
         //爆炸事件
         public IEnumerator Rocket_Explodey(Vector3 point)
@@ -417,7 +494,7 @@ namespace MordenFirearmKitMod
     }
 
     //子弹类
-    public class Bullet 
+    public class Bullet
     {
 
 
@@ -430,22 +507,22 @@ namespace MordenFirearmKitMod
         public float Caliber;
 
         //后坐力
-        public float Recoil;
-
-        //阻力
-        public float Drag;
+        public float Recoil { get; }
 
         //射程
-        public float Distance;
-
-        //初速
-        public float MuzzleVelocity { get; }
+        public float Distance { get; } 
 
         //动能
         public float KineticEnergy { get; }
 
-        //质量
-        public float Mass { get; }
+        //初速
+        public float MuzzleVelocity { get; }
+
+        ////阻力
+        //public float Drag { get; }
+
+        ////质量
+        //public float Mass { get; }
 
         #endregion
 
@@ -455,5 +532,47 @@ namespace MordenFirearmKitMod
 
         //子弹种类
         public enum BulletType { 高爆弹, 拽光弹, 穿甲弹 }
+
+        public GameObject gameobject = new GameObject("bullet");
+
+        protected Rigidbody rigidbody;
+
+        public Bullet()
+        {
+
+            
+
+            #region 物理参数
+
+            Force = 1;
+
+            Caliber = 1;
+
+            Recoil = 1;
+
+            Distance = 20;
+
+            #endregion
+
+            rigidbody = gameobject.AddComponent<Rigidbody>();
+        }
+
+        public float getKineticEnergy()
+        {
+            return 0.5f * rigidbody.mass * rigidbody.velocity.sqrMagnitude;
+        }
+
+        public float getBuzzleVelocity(float force)
+        {
+            return Mathf.Sqrt(2 * force / rigidbody.mass);
+        }
+
+        public float getMass(float caliber)
+        {
+            return 0.5f * Mathf.Sqrt(caliber);
+        }
+        
+
+
     }
 }
