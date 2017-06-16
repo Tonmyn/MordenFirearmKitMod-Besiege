@@ -149,7 +149,6 @@ namespace MordenFirearmKitMod
             //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() {resources["/MordenFirearmKitMod/Barrel.obj"].texture, });
 
           
-
         }
 
         public override void OnSave(XDataHolder stream)
@@ -171,30 +170,36 @@ namespace MordenFirearmKitMod
 
             //c = gameObject.GetComponentInChildren<CapsuleCollider>();
             //PhysicMaterial pm = c.material = new PhysicMaterial("Ice");
-            
+
             //pm.dynamicFriction = Mathf.Infinity;
             //pm.staticFriction = Mathf.Infinity;
             //pm.frictionCombine =  PhysicMaterialCombine.Maximum;
+
             
 
-            renderset();
+            //renderset();
+            Obj obj = new Obj("/MordenFirearmKitMod/Barrel.obj");
 
+            mesh = obj.importedMesh;
+            mesh.RecalculateBounds();
 
-            MeshRenderer mr = test.AddComponent<MeshRenderer>();
-            mr.material.mainTexture = resources["/MordenFirearmKitMod/RocketFire.png"].texture;
+            
+            //mr.material.mainTexture = resources["/MordenFirearmKitMod/RocketFire.png"].texture;
             MeshFilter mf = test.AddComponent<MeshFilter>();
-            mesh = mf.mesh;
+            //mesh = mf.mesh;
+            mf.mesh = mesh;
+            MeshRenderer mr = test.AddComponent<MeshRenderer>();
             //new一个链表  
             list = new List<Vector3>();
             //获得Mesh  
-            mesh = test.GetComponent<MeshFilter>().mesh;
+            //mesh = test.GetComponent<MeshFilter>().mesh;
 
             //修改Mesh的颜色  
             test.GetComponent<MeshRenderer>().material.color = Color.green;
             //选择Mesh中的Shader  
             test.GetComponent<MeshRenderer>().material.shader = Shader.Find("Transparent/Diffuse");
             //清空所有点，用于初始化！  
-            mesh.Clear();
+            //mesh.Clear();
 
             test.AddComponent<Rigidbody>();
             test.AddComponent<Collider>();
@@ -555,6 +560,8 @@ namespace MordenFirearmKitMod
             #endregion
 
             rigidbody = gameobject.AddComponent<Rigidbody>();
+
+            gameobject = GameObject.CreatePrimitive(PrimitiveType.Cube);
         }
 
         public float getKineticEnergy()
