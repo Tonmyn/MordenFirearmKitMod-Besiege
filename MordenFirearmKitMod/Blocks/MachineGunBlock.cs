@@ -33,7 +33,7 @@ namespace MordenFirearmKitMod
                               new Vector3(  0f,   0f,   0f))) //Rotation
 
             ///Script, Components, etc. you want to be on your block.
-            .Components(new Type[] {typeof(MachineGunScript)
+            .Components(new Type[] {typeof(MachineGunScript),typeof(BulletScript)
               })
 
             ///Properties such as keywords for searching and setting up how how this block behaves to other elements.
@@ -68,7 +68,9 @@ namespace MordenFirearmKitMod
             ///Load resources that will be needed for the block.
             .NeededResources(new List<NeededResource> {
                                 new NeededResource(ResourceType.Audio, //Type of resource - types available are Audio, Texture, Mesh, and AssetBundle
-                                                   "/MordenFirearmKitMod/MachineGun.ogg")
+                                                   "/MordenFirearmKitMod/MachineGun.ogg"),
+                                new NeededResource(ResourceType.Mesh,
+                                                   "/MordenFirearmKitMod/Rocket.obj")
             })
 
            ///Setup where on your block you can add other blocks.
@@ -130,7 +132,7 @@ namespace MordenFirearmKitMod
         float timer;
         float effectsDisplayTime = 0.05f;
 
-        GameObject test = new GameObject("test");
+        public GameObject bullet;
 
         //用于存储绘制三角形的顶点坐标  
         private Vector3[] vertices;
@@ -148,7 +150,7 @@ namespace MordenFirearmKitMod
             //shootableMask = LayerMask.GetMask("Shootable");
             //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() {resources["/MordenFirearmKitMod/Barrel.obj"].texture, });
 
-          
+            
         }
 
         public override void OnSave(XDataHolder stream)
@@ -166,7 +168,17 @@ namespace MordenFirearmKitMod
 
         protected override void OnSimulateStart()
         {
-            base.OnSimulateStart();
+
+            //GetComponentInChildren<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            GetComponent<BulletScript>().bullet.GetComponent<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            //bullet_init();
+
+            Debug.Log(GetComponent<BulletScript>().bulletType);
+
+            //MeshFilter mf = bullet.AddComponent<MeshFilter>();
+            //mf.sharedMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            //MeshRenderer mr = bullet.AddComponent<MeshRenderer>();
+
 
             //c = gameObject.GetComponentInChildren<CapsuleCollider>();
             //PhysicMaterial pm = c.material = new PhysicMaterial("Ice");
@@ -175,107 +187,115 @@ namespace MordenFirearmKitMod
             //pm.staticFriction = Mathf.Infinity;
             //pm.frictionCombine =  PhysicMaterialCombine.Maximum;
 
-            
+
 
             //renderset();
-            Obj obj = new Obj("/MordenFirearmKitMod/Barrel.obj");
+            //Obj obj = new Obj("/MordenFirearmKitMod/Barrel.obj");
 
-            mesh = obj.importedMesh;
-            mesh.RecalculateBounds();
+            // mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            //mesh.RecalculateBounds();
 
-            
+
             //mr.material.mainTexture = resources["/MordenFirearmKitMod/RocketFire.png"].texture;
-            MeshFilter mf = test.AddComponent<MeshFilter>();
-            //mesh = mf.mesh;
-            mf.mesh = mesh;
-            MeshRenderer mr = test.AddComponent<MeshRenderer>();
+            //MeshFilter mf = test.AddComponent<MeshFilter>();
+            ////mesh = mf.mesh;
+            //mf.sharedMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            //MeshRenderer mr = test.AddComponent<MeshRenderer>();
+
+
             //new一个链表  
-            list = new List<Vector3>();
+            //list = new List<Vector3>();
             //获得Mesh  
             //mesh = test.GetComponent<MeshFilter>().mesh;
 
             //修改Mesh的颜色  
-            test.GetComponent<MeshRenderer>().material.color = Color.green;
+            //test.GetComponent<MeshRenderer>().material.color = Color.green;
             //选择Mesh中的Shader  
-            test.GetComponent<MeshRenderer>().material.shader = Shader.Find("Transparent/Diffuse");
+            //test.GetComponent<MeshRenderer>().material.shader = Shader.Find("Transparent/Diffuse");
             //清空所有点，用于初始化！  
             //mesh.Clear();
 
-            test.AddComponent<Rigidbody>();
-            test.AddComponent<Collider>();
-            
+
+
+
+
         }
 
         protected override void OnSimulateUpdate()
         {
-            base.OnSimulateUpdate();
-            timer += Time.deltaTime;
+
+            //timer += Time.deltaTime;
 
             
-            if (Input.GetKey(KeyCode.Y) )
-            {
+            //if (Input.GetKey(KeyCode.Y) )
+            //{
                
-                RotationRate = Mathf.MoveTowards(RotationRate, 60, 1);
-                if (RotationRate == 60 && timer >= FireRate && Time.timeScale != 0)
-                {
-                    shoot();
-                }
-            }
-            else
-            {
-                RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.deltaTime*10);
-            }
-            transform.Rotate(new Vector3(0, 0, RotationRate));
+            //    RotationRate = Mathf.MoveTowards(RotationRate, 60, 1);
+            //    if (RotationRate == 60 && timer >= FireRate && Time.timeScale != 0)
+            //    {
+            //        shoot();
+            //    }
+            //}
+            //else
+            //{
+            //    RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.deltaTime*10);
+            //}
+            //transform.Rotate(new Vector3(0, 0, RotationRate));
 
-            if (timer >= FireRate * effectsDisplayTime)
-            {
-                DisableEffects();
-            }
-
-
-            //点击鼠标左键  
-            if (Input.GetMouseButton(0))
-            {
-                //顶点数+1  
-                count++;
-                //将获得的鼠标坐标转换为世界坐标，然后添加到list链表中。  
-                list.Add(Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0.8f)));
+            //if (timer >= FireRate * effectsDisplayTime)
+            //{
+            //    DisableEffects();
+            //}
 
 
+            ////点击鼠标左键  
+            //if (Input.GetMouseButton(0))
+            //{
+            //    //顶点数+1  
+            //    count++;
+            //    //将获得的鼠标坐标转换为世界坐标，然后添加到list链表中。  
+            //    list.Add(Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0.8f)));
 
-            }
 
-            //如果顶点数>=3，那么就开始渲染Mesh  
-            if (count >= 3)
-            {
-                //根据顶点数来计算绘制出三角形的所以顶点数  
-                triangles = new int[3 * (count - 2)];
-                //根据顶点数来创建记录顶点坐标  
-                vertices = new Vector3[count];
-                //将链表中的顶点坐标赋值给vertices  
-                for (int i = 0; i < count; i++)
-                {
-                    vertices[i] = list[i];
 
-                }
+            //}
 
-                //三角形个数  
-                int triangles_count = count - 2;
-                //根据三角形的个数，来计算绘制三角形的顶点顺序（索引）  
-                for (int i = 0; i < triangles_count; i++)
-                {
-                    //这个算法好好琢磨一下吧~  
-                    triangles[3 * i] = 0;
-                    triangles[3 * i + 1] = i + 2;
-                    triangles[3 * i + 2] = i + 1;
-                }
-                //设置顶点坐标  
-                mesh.vertices = vertices;
-                //设置顶点索引  
-                mesh.triangles = triangles;
+            ////如果顶点数>=3，那么就开始渲染Mesh  
+            //if (count >= 3)
+            //{
+            //    //根据顶点数来计算绘制出三角形的所以顶点数  
+            //    triangles = new int[3 * (count - 2)];
+            //    //根据顶点数来创建记录顶点坐标  
+            //    vertices = new Vector3[count];
+            //    //将链表中的顶点坐标赋值给vertices  
+            //    for (int i = 0; i < count; i++)
+            //    {
+            //        vertices[i] = list[i];
 
-            }
+            //    }
 
+            //    //三角形个数  
+            //    int triangles_count = count - 2;
+            //    //根据三角形的个数，来计算绘制三角形的顶点顺序（索引）  
+            //    for (int i = 0; i < triangles_count; i++)
+            //    {
+            //        //这个算法好好琢磨一下吧~  
+            //        triangles[3 * i] = 0;
+            //        triangles[3 * i + 1] = i + 2;
+            //        triangles[3 * i + 2] = i + 1;
+            //    }
+            //    //设置顶点坐标  
+            //    mesh.vertices = vertices;
+            //    //设置顶点索引  
+            //    mesh.triangles = triangles;
+
+            //}
+
+        }
+
+        protected override void OnSimulateExit()
+        {
+            Destroy(bullet);
         }
 
         public void DisableEffects()
@@ -457,6 +477,18 @@ namespace MordenFirearmKitMod
 
         }
 
+        private void bullet_init()
+        {
+            bullet = new GameObject("bullet");
+            bullet.AddComponent<test>();
+            bullet.AddComponent<MeshFilter>().sharedMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            MeshRenderer mr = bullet.AddComponent<MeshRenderer>();
+
+            bullet.AddComponent<Rigidbody>();
+            CapsuleCollider cc = bullet.AddComponent<CapsuleCollider>();
+            bullet.transform.position = new Vector3(0, 5, 0);
+        }
+
     }
 
 
@@ -464,22 +496,22 @@ namespace MordenFirearmKitMod
     public class Weapon
     {
         //发射器
-        public Launcher launcher;
+        //public Launcher launcher;
 
         //子弹
-        public Bullet bullet;
+        //public Bullet bullet;
 
 
     }
     
     
     //发射器类
-    public class Launcher 
+    public class LauncherScript : MonoBehaviour
     {
        
 
         //子弹
-        public Bullet bullet;
+        //public Bullet bullet;
 
         //散布
         //public float Diffuse;
@@ -499,7 +531,7 @@ namespace MordenFirearmKitMod
     }
 
     //子弹类
-    public class Bullet
+    public class BulletScript : MonoBehaviour
     {
 
 
@@ -538,31 +570,60 @@ namespace MordenFirearmKitMod
         //子弹种类
         public enum BulletType { 高爆弹, 拽光弹, 穿甲弹 }
 
-        public GameObject gameobject = new GameObject("bullet");
+        public GameObject bullet = new GameObject("bullet");
 
         protected Rigidbody rigidbody;
 
-        public Bullet()
+        private Mesh mesh;
+
+        private Texture texture;
+                
+        private void Awake()
         {
-
-            
-
-            #region 物理参数
-
-            Force = 1;
-
-            Caliber = 1;
-
-            Recoil = 1;
-
-            Distance = 20;
-
-            #endregion
-
-            rigidbody = gameobject.AddComponent<Rigidbody>();
-
-            gameobject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            bullet_init();
+            Debug.Log("bullet");
         }
+
+        private void Update()
+        {
+            
+        }
+
+
+        public void bullet_init()
+        {
+            bullet = new GameObject("bullet");
+            bullet.AddComponent<test>();
+            bullet.AddComponent<MeshFilter>();
+            //bullet.AddComponent<MeshFilter>().sharedMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            MeshRenderer mr = bullet.AddComponent<MeshRenderer>();
+
+            bullet.AddComponent<Rigidbody>();
+            CapsuleCollider cc = bullet.AddComponent<CapsuleCollider>();
+            bullet.transform.position = new Vector3(0, 5, 0);
+        }
+
+        //public Bullet()
+        //{
+
+
+
+        //    #region 物理参数
+
+        //    Force = 1;
+
+        //    Caliber = 1;
+
+        //    Recoil = 1;
+
+        //    Distance = 20;
+
+        //    #endregion
+
+        //    rigidbody = gameobject.AddComponent<Rigidbody>();
+
+        //    gameobject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //}
 
         public float getKineticEnergy()
         {
@@ -581,5 +642,16 @@ namespace MordenFirearmKitMod
         
 
 
+    }
+
+    
+
+    public class test : MonoBehaviour
+    {
+
+        private void Awake()
+        {
+
+        }
     }
 }
