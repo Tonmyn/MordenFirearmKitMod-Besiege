@@ -33,7 +33,7 @@ namespace MordenFirearmKitMod
                               new Vector3(  0f,   0f,   0f))) //Rotation
 
             ///Script, Components, etc. you want to be on your block.
-            .Components(new Type[] {typeof(MachineGunScript),typeof(BulletScript)
+            .Components(new Type[] {typeof(BulletScript),typeof(MachineGunScript)
               })
 
             ///Properties such as keywords for searching and setting up how how this block behaves to other elements.
@@ -100,7 +100,7 @@ namespace MordenFirearmKitMod
         //射速
         public float FireRate = 0.05f;
 
-
+        public MKey Fire;
 
         
         #endregion
@@ -149,8 +149,9 @@ namespace MordenFirearmKitMod
         {
             //shootableMask = LayerMask.GetMask("Shootable");
             //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() {resources["/MordenFirearmKitMod/Barrel.obj"].texture, });
-
-            
+            Fire = AddKey("发射", "Launch", KeyCode.Y);
+            GetComponent<BulletScript>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            Debug.Log("blockscript");
         }
 
         public override void OnSave(XDataHolder stream)
@@ -170,7 +171,7 @@ namespace MordenFirearmKitMod
         {
 
             //GetComponentInChildren<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
-            GetComponent<BulletScript>().bullet.GetComponent<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            
             //bullet_init();
 
             Debug.Log(GetComponent<BulletScript>().bulletType);
@@ -295,7 +296,7 @@ namespace MordenFirearmKitMod
 
         protected override void OnSimulateExit()
         {
-            Destroy(bullet);
+            //GetComponent<BulletScript>().bullet.SetActive(false);
         }
 
         public void DisableEffects()
@@ -477,17 +478,6 @@ namespace MordenFirearmKitMod
 
         }
 
-        private void bullet_init()
-        {
-            bullet = new GameObject("bullet");
-            bullet.AddComponent<test>();
-            bullet.AddComponent<MeshFilter>().sharedMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
-            MeshRenderer mr = bullet.AddComponent<MeshRenderer>();
-
-            bullet.AddComponent<Rigidbody>();
-            CapsuleCollider cc = bullet.AddComponent<CapsuleCollider>();
-            bullet.transform.position = new Vector3(0, 5, 0);
-        }
 
     }
 
@@ -534,7 +524,6 @@ namespace MordenFirearmKitMod
     public class BulletScript : MonoBehaviour
     {
 
-
         #region 物理参数
 
         //威力
@@ -564,6 +553,9 @@ namespace MordenFirearmKitMod
         #endregion
 
 
+
+        #region 属性变量
+
         //类型
         public BulletType bulletType;
 
@@ -574,35 +566,62 @@ namespace MordenFirearmKitMod
 
         protected Rigidbody rigidbody;
 
-        private Mesh mesh;
+        public Mesh mesh;
 
-        private Texture texture;
-                
+        public Texture texture;
+
+
+        #endregion
+
         private void Awake()
         {
-            bullet_init();
+            if (StatMaster.isSimulating && !bullet.GetComponent<MeshFilter>())
+            {
+                bullet_init();
+            }
+            
             Debug.Log("bullet");
+            
         }
 
         private void Update()
         {
+
+            if (!StatMaster.isSimulating)
+            {
+                bullet_Destroy();
+            }
+            else
+            {
+
+                bullet.SetActive(true);
+            }
+
+        }
+
+        
+
+        public void bullet_init()
+        {
+
+            bullet.AddComponent<MeshFilter>().mesh = mesh;
+            bullet.AddComponent<MeshRenderer>();
+
+            bullet.AddComponent<Rigidbody>();
+            GameObject collider = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            collider.transform.parent = bullet.transform;
+            
+            bullet.transform.position = new Vector3(0, 5, 0);
+
             
         }
 
 
-        public void bullet_init()
+        public void bullet_Destroy()
         {
-            bullet = new GameObject("bullet");
-            bullet.AddComponent<test>();
-            bullet.AddComponent<MeshFilter>();
-            //bullet.AddComponent<MeshFilter>().sharedMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
-            MeshRenderer mr = bullet.AddComponent<MeshRenderer>();
+            bullet.SetActive(false);
 
-            bullet.AddComponent<Rigidbody>();
-            CapsuleCollider cc = bullet.AddComponent<CapsuleCollider>();
-            bullet.transform.position = new Vector3(0, 5, 0);
         }
-
         //public Bullet()
         //{
 
@@ -642,16 +661,7 @@ namespace MordenFirearmKitMod
         
 
 
-    }
+    }   
 
-    
-
-    public class test : MonoBehaviour
-    {
-
-        private void Awake()
-        {
-
-        }
-    }
+ 
 }
