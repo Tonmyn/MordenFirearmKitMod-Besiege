@@ -33,7 +33,7 @@ namespace MordenFirearmKitMod
                               new Vector3(  0f,   0f,   0f))) //Rotation
 
             ///Script, Components, etc. you want to be on your block.
-            .Components(new Type[] {typeof(BulletScript),typeof(MachineGunScript)
+            .Components(new Type[] {typeof(BulletScript),typeof(MachineGunScript),
               })
 
             ///Properties such as keywords for searching and setting up how how this block behaves to other elements.
@@ -128,30 +128,24 @@ namespace MordenFirearmKitMod
         LineRenderer gunLine;
         AudioSource gunAudio;
         Light gunLight;
-        
+
+        LauncherScript ls;
+
         float timer;
         float effectsDisplayTime = 0.05f;
 
         public GameObject bullet;
 
-        //用于存储绘制三角形的顶点坐标  
-        private Vector3[] vertices;
-        //用于记录绘制三角形所需要的顶点ID顺序  
-        private int[] triangles;
-        //记录顶点数  
-        private int count = 0;
-        //定义Mesh  
-        private Mesh mesh;
-        //定义一个链表用于记录所有点的坐标  
-        private List<Vector3> list;
 
         public override void SafeAwake()
         {
             //shootableMask = LayerMask.GetMask("Shootable");
             //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() {resources["/MordenFirearmKitMod/Barrel.obj"].texture, });
-            Fire = AddKey("发射", "Launch", KeyCode.Y);
+            //Fire = AddKey("发射", "Launch", KeyCode.Y);
             GetComponent<BulletScript>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
             Debug.Log("blockscript");
+            
+            
         }
 
         public override void OnSave(XDataHolder stream)
@@ -496,7 +490,7 @@ namespace MordenFirearmKitMod
     
     
     //发射器类
-    public class LauncherScript : MonoBehaviour
+    public class LauncherScript : BlockBehaviour
     {
        
 
@@ -518,6 +512,28 @@ namespace MordenFirearmKitMod
         //质量
         public float Mass;
 
+        public MKey key;
+
+        public override void OnLoad(XDataHolder data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void OnSave(XDataHolder data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int GetBlockID()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Awake()
+        {
+            Debug.Log(name);
+            
+        }
     }
 
     //子弹类
