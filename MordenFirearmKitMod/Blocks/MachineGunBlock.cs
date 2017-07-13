@@ -33,7 +33,7 @@ namespace MordenFirearmKitMod
                               new Vector3(  0f,   0f,   0f))) //Rotation
 
             ///Script, Components, etc. you want to be on your block.
-            .Components(new Type[] {typeof(BulletScript),typeof(MachineGunScript),
+            .Components(new Type[] {typeof(MachineGunScript),
               })
 
             ///Properties such as keywords for searching and setting up how how this block behaves to other elements.
@@ -134,7 +134,11 @@ namespace MordenFirearmKitMod
         float timer;
         float effectsDisplayTime = 0.05f;
 
-        public GameObject bullet;
+        public GameObject bullets;
+
+        //public GameObject lunacher = new GameObject("lunacher");
+
+        private BulletScript bs;
 
 
         public override void SafeAwake()
@@ -142,8 +146,9 @@ namespace MordenFirearmKitMod
             //shootableMask = LayerMask.GetMask("Shootable");
             //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() {resources["/MordenFirearmKitMod/Barrel.obj"].texture, });
             //Fire = AddKey("发射", "Launch", KeyCode.Y);
-            GetComponent<BulletScript>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
-            Debug.Log("blockscript");
+            //bs = bullets. AddComponent<BulletScript>();
+            
+
             
             
         }
@@ -165,10 +170,10 @@ namespace MordenFirearmKitMod
         {
 
             //GetComponentInChildren<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
-            
+
             //bullet_init();
 
-            Debug.Log(GetComponent<BulletScript>().bulletType);
+            //Debug.Log(GetComponent<BulletScript>().bulletType);
 
             //MeshFilter mf = bullet.AddComponent<MeshFilter>();
             //mf.sharedMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
@@ -214,6 +219,11 @@ namespace MordenFirearmKitMod
 
 
 
+        }
+
+        protected override void BlockPlaced()
+        {
+            gameObject.AddComponent<LauncherScript>().bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
         }
 
         protected override void OnSimulateUpdate()
@@ -330,7 +340,7 @@ namespace MordenFirearmKitMod
                 //}
                 gunLine.SetPosition(1, shootHit.point);
                 Debug.Log(shootHit.collider.name);
-                StartCoroutine(Rocket_Explodey(shootHit.point));
+                //StartCoroutine(Rocket_Explodey(shootHit.point));
                 //gunLine.SetPosition(1, shootRay.origin + shootRay.direction * 100);
             }
             else
@@ -443,34 +453,7 @@ namespace MordenFirearmKitMod
         //    Launcher launcher = new Launcher();
         //}
 
-        //爆炸事件
-        public IEnumerator Rocket_Explodey(Vector3 point)
-        {
-
-            yield return new WaitForFixedUpdate();
-
-            //爆炸范围
-            float radius = 5;
-
-            //爆炸位置
-            Vector3 position_hit = point;
-
-
-                GameObject explo = (GameObject)GameObject.Instantiate(PrefabMaster.BlockPrefabs[54].gameObject, position_hit, transform.rotation);
-                explo.transform.localScale = Vector3.one * 0.01f;
-                ControllableBomb ac = explo.GetComponent<ControllableBomb>();
-                ac.radius = 2 + radius;
-                ac.power = 3000f * radius;
-                ac.randomDelay = 0.00001f;
-                ac.upPower = 0f;
-                ac.StartCoroutine_Auto(ac.Explode());
-                explo.AddComponent<TimedSelfDestruct>();
-
-
-            //Destroy(gameObject);
-
-
-        }
+        
 
 
     }
@@ -490,7 +473,7 @@ namespace MordenFirearmKitMod
     
     
     //发射器类
-    public class LauncherScript : BlockBehaviour
+    public class LauncherScript : MonoBehaviour
     {
        
 
@@ -514,25 +497,43 @@ namespace MordenFirearmKitMod
 
         public MKey key;
 
-        public override void OnLoad(XDataHolder data)
-        {
-            throw new NotImplementedException();
-        }
+        public GameObject bullets;
 
-        public override void OnSave(XDataHolder data)
-        {
-            throw new NotImplementedException();
-        }
+        public Mesh bulletMesh;
 
-        public override int GetBlockID()
-        {
-            throw new NotImplementedException();
-        }
+        float timer = 0;
+
+        float effectsDisplayTime = 1f;
 
         public void Awake()
         {
             Debug.Log(name);
-            
+
+        }
+
+        private void Update()
+        {
+            if (StatMaster.isSimulating)
+            {
+
+
+                if (Input.GetKeyDown(KeyCode.Q) && timer > effectsDisplayTime)
+                {
+                    timer = 0f;
+
+                    bullets = new GameObject("子弹");
+                    bullets.AddComponent<BulletScript>().mesh = bulletMesh;
+                }
+                else
+                {
+                    timer += Time.deltaTime;
+                }
+            }
+        }
+
+        private void FixedUpdate()
+        {
+           
         }
     }
 
@@ -578,9 +579,9 @@ namespace MordenFirearmKitMod
         //子弹种类
         public enum BulletType { 高爆弹, 拽光弹, 穿甲弹 }
 
-        public GameObject bullet = new GameObject("bullet");
+        //public GameObject bullet;
 
-        protected Rigidbody rigidbody;
+        public Rigidbody rigidbody;
 
         public Mesh mesh;
 
@@ -591,13 +592,21 @@ namespace MordenFirearmKitMod
 
         private void Awake()
         {
-            if (StatMaster.isSimulating && !bullet.GetComponent<MeshFilter>())
-            {
+            
+
+            //if (StatMaster.isSimulating && !bullet.GetComponent<MeshFilter>())
+            //{
+            //    bullet_init();
+            //}       
+            
+        }
+
+        private void Start()
+        {
+            //if (StatMaster.isSimulating && !bullet.GetComponent<MeshFilter>())
+            //{
                 bullet_init();
-            }
-            
-            Debug.Log("bullet");
-            
+            //}
         }
 
         private void Update()
@@ -610,7 +619,8 @@ namespace MordenFirearmKitMod
             else
             {
 
-                bullet.SetActive(true);
+                //bullet.SetActive(true);
+                rigidbody.AddForce(new Vector3(10, 1, 1));
             }
 
         }
@@ -619,23 +629,60 @@ namespace MordenFirearmKitMod
 
         public void bullet_init()
         {
+            //bullet = new GameObject("bullet");
+            gameObject.AddComponent<MeshFilter>().mesh = mesh;
+            gameObject.AddComponent<MeshRenderer>();
 
-            bullet.AddComponent<MeshFilter>().mesh = mesh;
-            bullet.AddComponent<MeshRenderer>();
+            rigidbody = gameObject.AddComponent<Rigidbody>();
+            rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-            bullet.AddComponent<Rigidbody>();
             GameObject collider = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            collider.transform.parent = bullet.transform;
+            collider.transform.parent = gameObject.transform;
             
-            bullet.transform.position = new Vector3(0, 5, 0);
+            gameObject.transform.position = new Vector3(0, 5, 0);
 
-            
         }
 
 
         public void bullet_Destroy()
         {
-            bullet.SetActive(false);
+            //bullet.SetActive(false);
+            Destroy(gameObject);
+
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+
+                //StartCoroutine(Rocket_Explodey(transform.position));
+
+        }
+
+        //爆炸事件
+        public IEnumerator Rocket_Explodey(Vector3 point)
+        {
+
+            yield return new WaitForFixedUpdate();
+
+            //爆炸范围
+            float radius = 5;
+
+            //爆炸位置
+            Vector3 position_hit = point;
+
+
+            GameObject explo = (GameObject)GameObject.Instantiate(PrefabMaster.BlockPrefabs[54].gameObject, position_hit, transform.rotation);
+            explo.transform.localScale = Vector3.one * 0.01f;
+            ControllableBomb ac = explo.GetComponent<ControllableBomb>();
+            ac.radius = 2 + radius;
+            ac.power = 30f * radius;
+            ac.randomDelay = 0.00001f;
+            ac.upPower = 0f;
+            ac.StartCoroutine_Auto(ac.Explode());
+            explo.AddComponent<TimedSelfDestruct>();
+
+            Destroy(gameObject);
+
 
         }
         //public Bullet()
@@ -677,7 +724,8 @@ namespace MordenFirearmKitMod
         
 
 
-    }   
+    }
 
- 
+
+   
 }
