@@ -223,7 +223,9 @@ namespace MordenFirearmKitMod
 
         protected override void BlockPlaced()
         {
-            gameObject.AddComponent<LauncherScript>().bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            LauncherScript ls = gameObject.AddComponent<LauncherScript>();
+            ls.bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            
         }
 
         protected override void OnSimulateUpdate()
@@ -473,7 +475,7 @@ namespace MordenFirearmKitMod
     
     
     //发射器类
-    public class LauncherScript : MonoBehaviour
+    public class LauncherScript : GenericBlock
     {
        
 
@@ -503,16 +505,22 @@ namespace MordenFirearmKitMod
 
         float timer = 0;
 
-        float effectsDisplayTime = 1f;
+        float effectsDisplayTime = 0.05f;
 
-        public void Awake()
+        public Vector3 GunPoint = new Vector3(0, 3, 0);
+
+        void Awake()
         {
             Debug.Log(name);
 
+            key = AddKey("发射", "发射", KeyCode.Q);
         }
+
 
         private void Update()
         {
+            
+
             if (StatMaster.isSimulating)
             {
 
@@ -521,8 +529,9 @@ namespace MordenFirearmKitMod
                 {
                     timer = 0f;
 
-                    bullets = new GameObject("子弹");
+                    bullets = new GameObject("子弹");               
                     bullets.AddComponent<BulletScript>().mesh = bulletMesh;
+                    bullets.GetComponent<BulletScript>().GunPoint = GunPoint;
                 }
                 else
                 {
@@ -531,10 +540,7 @@ namespace MordenFirearmKitMod
             }
         }
 
-        private void FixedUpdate()
-        {
-           
-        }
+        
     }
 
     //子弹类
@@ -587,6 +593,7 @@ namespace MordenFirearmKitMod
 
         public Texture texture;
 
+        public Vector3 GunPoint;
 
         #endregion
 
@@ -639,7 +646,9 @@ namespace MordenFirearmKitMod
             GameObject collider = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             collider.transform.parent = gameObject.transform;
             
-            gameObject.transform.position = new Vector3(0, 5, 0);
+
+            gameObject.transform.localScale = collider.transform.localScale = new Vector3(0.25f, 0.35f, 0.25f);
+            gameObject.transform.position = GunPoint;
 
         }
 
