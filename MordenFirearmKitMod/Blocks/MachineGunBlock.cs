@@ -118,7 +118,7 @@ namespace MordenFirearmKitMod
 
 
         //通用组件 存放粒子声音等组件
-        protected GameObject generic = new GameObject("通用组件");
+        protected GameObject generic;
 
         Ray shootRay = new Ray();
         RaycastHit shootHit;
@@ -168,6 +168,8 @@ namespace MordenFirearmKitMod
 
         protected override void OnSimulateStart()
         {
+
+
 
             //GetComponentInChildren<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
 
@@ -223,9 +225,10 @@ namespace MordenFirearmKitMod
 
         protected override void BlockPlaced()
         {
-            LauncherScript ls = gameObject.AddComponent<LauncherScript>();
-            ls.bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
-            
+
+                LauncherScript ls = gameObject.AddComponent<LauncherScript>();
+                ls.bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+
         }
 
         protected override void OnSimulateUpdate()
@@ -303,6 +306,7 @@ namespace MordenFirearmKitMod
         protected override void OnSimulateExit()
         {
             //GetComponent<BulletScript>().bullet.SetActive(false);
+
         }
 
         public void DisableEffects()
@@ -475,7 +479,7 @@ namespace MordenFirearmKitMod
     
     
     //发射器类
-    public class LauncherScript : GenericBlock
+    public class LauncherScript : MonoBehaviour
     {
        
 
@@ -507,13 +511,14 @@ namespace MordenFirearmKitMod
 
         float effectsDisplayTime = 0.05f;
 
-        public Vector3 GunPoint = new Vector3(0, 3, 0);
+        public Vector3 GunPoint = new Vector3(0, 0, 3.5f);
 
         void Awake()
         {
             Debug.Log(name);
 
-            key = AddKey("发射", "发射", KeyCode.Q);
+            //key = AddKey("发射", "发射", KeyCode.Q);
+            //create();
         }
 
 
@@ -524,23 +529,57 @@ namespace MordenFirearmKitMod
             if (StatMaster.isSimulating)
             {
 
+                
+
+                //move();
 
                 if (Input.GetKeyDown(KeyCode.Q) && timer > effectsDisplayTime)
                 {
                     timer = 0f;
 
-                    bullets = new GameObject("子弹");               
+                    bullets = new GameObject("子弹");
                     bullets.AddComponent<BulletScript>().mesh = bulletMesh;
-                    bullets.GetComponent<BulletScript>().GunPoint = GunPoint;
+                    BulletScript bs = bullets.GetComponent<BulletScript>();             
+                    bs.gameObject.transform.position = transform.TransformPoint(GunPoint);
+                    bs.transform.localEulerAngles = transform.localEulerAngles;
+                    //bs.gameObject.transform.localRotation = new Quaternion(90,90,90,0);
                 }
                 else
                 {
                     timer += Time.deltaTime;
                 }
             }
+            else
+            {
+                if (mark)
+                    destroy();
+            }
         }
 
         
+
+#if DEBUG
+
+        GameObject mark;
+
+
+        public void create()
+        {
+            mark = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Destroy(mark.GetComponent<SphereCollider>());
+        }
+
+        public void destroy()
+        {
+            Destroy(mark);
+        }
+
+        public void move()
+        {
+            mark.transform.position = transform.TransformPoint(GunPoint);
+        }
+#endif
+
     }
 
     //子弹类
@@ -595,6 +634,7 @@ namespace MordenFirearmKitMod
 
         public Vector3 GunPoint;
 
+
         #endregion
 
         private void Awake()
@@ -603,7 +643,7 @@ namespace MordenFirearmKitMod
 
             //if (StatMaster.isSimulating && !bullet.GetComponent<MeshFilter>())
             //{
-            //    bullet_init();
+                //bullet_init();
             //}       
             
         }
@@ -625,9 +665,8 @@ namespace MordenFirearmKitMod
             }
             else
             {
-
                 //bullet.SetActive(true);
-                rigidbody.AddForce(new Vector3(10, 1, 1));
+                rigidbody.AddRelativeForce(new Vector3(0,0,1) * 1000);
             }
 
         }
@@ -643,13 +682,34 @@ namespace MordenFirearmKitMod
             rigidbody = gameObject.AddComponent<Rigidbody>();
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-            GameObject collider = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            GameObject collider = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             collider.transform.parent = gameObject.transform;
+            collider.transform.position = gameObject.transform.position;
+            collider.transform.localEulerAngles = new Vector3(90,0,0);
+            transform.localScale = collider.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+
             
 
-            gameObject.transform.localScale = collider.transform.localScale = new Vector3(0.25f, 0.35f, 0.25f);
-            gameObject.transform.position = GunPoint;
+            //gameObject.transform.position = GunPoint;
 
+        }
+
+        public void bullet_init(Vector3 gunPoint,Vector3 rotation)
+        {
+            //bullet = new GameObject("bullet");
+            gameObject.AddComponent<MeshFilter>().mesh = mesh;
+            gameObject.AddComponent<MeshRenderer>();
+
+            rigidbody = gameObject.AddComponent<Rigidbody>();
+            rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+            GameObject collider = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            collider.transform.parent = transform;
+
+
+            gameObject.transform.localScale = collider.transform.localScale = new Vector3(0.25f, 0.35f, 0.25f);
+            gameObject.transform.position = gunPoint;
+            gameObject.transform.Rotate(rotation);
         }
 
 
@@ -663,7 +723,11 @@ namespace MordenFirearmKitMod
         private void OnCollisionEnter(Collision collision)
         {
 
-                //StartCoroutine(Rocket_Explodey(transform.position));
+            if (collision.gameObject.name != "MachineGun")
+            {
+                StartCoroutine(Rocket_Explodey(transform.position));
+            }
+
 
         }
 
