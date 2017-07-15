@@ -513,10 +513,12 @@ namespace MordenFirearmKitMod
 
         public Vector3 GunPoint = new Vector3(0, 0, 3.5f);
 
+        public Rigidbody rigidbody;
+
         void Awake()
         {
             Debug.Log(name);
-
+            rigidbody = gameObject.GetComponent<Rigidbody>();
             //key = AddKey("发射", "发射", KeyCode.Q);
             //create();
         }
@@ -538,10 +540,11 @@ namespace MordenFirearmKitMod
                     timer = 0f;
 
                     bullets = new GameObject("子弹");
-                    bullets.AddComponent<BulletScript>().mesh = bulletMesh;
-                    BulletScript bs = bullets.GetComponent<BulletScript>();             
+                    BulletScript bs = bullets.AddComponent<BulletScript>();
+                    bs.mesh = bulletMesh;             
                     bs.gameObject.transform.position = transform.TransformPoint(GunPoint);
                     bs.transform.localEulerAngles = transform.localEulerAngles;
+                    bs.GetComponent<Rigidbody>().velocity = rigidbody.velocity;
                     //bs.gameObject.transform.localRotation = new Quaternion(90,90,90,0);
                 }
                 else
@@ -634,18 +637,22 @@ namespace MordenFirearmKitMod
 
         public Vector3 GunPoint;
 
+        private MeshFilter mFilter;
 
+        private MeshRenderer mRenderer;
         #endregion
 
         private void Awake()
         {
-            
+            rigidbody = gameObject.AddComponent<Rigidbody>();
+            mFilter = gameObject.AddComponent<MeshFilter>();
+            mRenderer = gameObject.AddComponent<MeshRenderer>();
 
             //if (StatMaster.isSimulating && !bullet.GetComponent<MeshFilter>())
             //{
-                //bullet_init();
+            //bullet_init();
             //}       
-            
+
         }
 
         private void Start()
@@ -676,10 +683,9 @@ namespace MordenFirearmKitMod
         public void bullet_init()
         {
             //bullet = new GameObject("bullet");
-            gameObject.AddComponent<MeshFilter>().mesh = mesh;
-            gameObject.AddComponent<MeshRenderer>();
 
-            rigidbody = gameObject.AddComponent<Rigidbody>();
+            mFilter.mesh = mesh;
+
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             GameObject collider = GameObject.CreatePrimitive(PrimitiveType.Sphere);
