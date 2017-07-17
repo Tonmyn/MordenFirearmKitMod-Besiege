@@ -514,7 +514,7 @@ namespace MordenFirearmKitMod
 
             gunAudio.clip = gunAudioClip;
             gunAudio.playOnAwake = false;
-            gunAudio.loop = false;
+            gunAudio.loop = true;
             gunAudio.enabled = true;
 
             gunParticles.transform.SetParent(transform);
@@ -578,6 +578,17 @@ namespace MordenFirearmKitMod
 
         private void Update()
         {
+            if (RotationRate != 0)
+            {
+                gunAudio.volume = RotationRate / (Vector3.Distance(this.transform.position, Camera.main.transform.position) * 60f);
+                gunAudio.pitch = RotationRate/60f;
+                gunAudio.Play();
+            }
+            else
+            {
+                gunAudio.Stop();
+            }
+
             if (Trigger.IsDown)
             {
 
@@ -598,9 +609,12 @@ namespace MordenFirearmKitMod
 
                 RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.deltaTime * 10);
             }
+
+
             transform.Rotate(new Vector3(0, 0, RotationRate));
             gunLight.enabled = false;
             gunParticles.Stop();
+
         }
 
         public override void shoot()
@@ -608,6 +622,8 @@ namespace MordenFirearmKitMod
             base.shoot();
             gunLight.enabled = true;
             gunParticles.Play();
+
+
         }
 
     }
