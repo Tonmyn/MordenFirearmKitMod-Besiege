@@ -147,8 +147,8 @@ namespace MordenFirearmKitMod
             //skin = new MVisual(VisualController,0,new List<BlockSkinLoader.SkinPack.Skin>() {resources["/MordenFirearmKitMod/Barrel.obj"].texture, });
             //Fire = AddKey("发射", "Launch", KeyCode.Y);
             //bs = bullets. AddComponent<BulletScript>();
-            
-
+            Fire = AddKey("发射", "Launch", KeyCode.M);
+            Debug.Log(Fire.Key);
             
             
         }
@@ -226,8 +226,9 @@ namespace MordenFirearmKitMod
         protected override void BlockPlaced()
         {
 
-                LauncherScript ls = gameObject.AddComponent<LauncherScript>();
-                ls.bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            LauncherScript ls = gameObject.AddComponent<LauncherScript>();
+            ls.bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
+            ls.key = Fire.KeyCode;
 
         }
 
@@ -501,7 +502,7 @@ namespace MordenFirearmKitMod
         //质量
         public float Mass;
 
-        public MKey key;
+        public List<KeyCode> key;
 
         public GameObject bullets;
 
@@ -519,7 +520,6 @@ namespace MordenFirearmKitMod
         {
             Debug.Log(name);
             rigidbody = gameObject.GetComponent<Rigidbody>();
-            //key = AddKey("发射", "发射", KeyCode.Q);
             //create();
         }
 
@@ -528,35 +528,35 @@ namespace MordenFirearmKitMod
         {
             
 
-            if (StatMaster.isSimulating)
-            {
+            //if (StatMaster.isSimulating)
+            //{
 
                 
 
-                //move();
+            //    //move();
 
-                if (Input.GetKeyDown(KeyCode.Q) && timer > effectsDisplayTime)
-                {
-                    timer = 0f;
+            //    if (key.IsDown && timer > effectsDisplayTime)
+            //    {
+            //        timer = 0f;
 
-                    bullets = new GameObject("子弹");
-                    BulletScript bs = bullets.AddComponent<BulletScript>();
-                    bs.mesh = bulletMesh;             
-                    bs.gameObject.transform.position = transform.TransformPoint(GunPoint);
-                    bs.transform.localEulerAngles = transform.localEulerAngles;
-                    bs.GetComponent<Rigidbody>().velocity = rigidbody.velocity;
-                    //bs.gameObject.transform.localRotation = new Quaternion(90,90,90,0);
-                }
-                else
-                {
-                    timer += Time.deltaTime;
-                }
-            }
-            else
-            {
-                if (mark)
-                    destroy();
-            }
+            //        bullets = new GameObject("子弹");
+            //        BulletScript bs = bullets.AddComponent<BulletScript>();
+            //        bs.mesh = bulletMesh;             
+            //        bs.gameObject.transform.position = transform.TransformPoint(GunPoint);
+            //        bs.transform.localEulerAngles = transform.localEulerAngles;
+            //        bs.GetComponent<Rigidbody>().velocity = rigidbody.velocity;
+            //        //bs.gameObject.transform.localRotation = new Quaternion(90,90,90,0);
+            //    }
+            //    else
+            //    {
+            //        timer += Time.deltaTime;
+            //    }
+            //}
+            //else
+            //{
+            //    if (mark)
+            //        destroy();
+            //}
         }
 
         
