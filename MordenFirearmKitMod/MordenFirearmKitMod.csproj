@@ -62,7 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Blocks\MachineGunBlock.cs" />
+    <Compile Include="Blocks\GunBlock.cs" />
     <Compile Include="Blocks\RocketBlock.cs" />
     <Compile Include="BulletBase.cs" />
     <Compile Include="Blocks\BulletBlock.cs" />
