@@ -100,6 +100,9 @@ namespace MordenFirearmKitMod
         //开火
         public MKey Fire;
 
+        //武器类型菜单
+        public MMenu gunCaliber;
+
         //射速
         public MSlider fireRate;
 
@@ -144,9 +147,11 @@ namespace MordenFirearmKitMod
 
             //bs = bullets. AddComponent<BulletScript>();
             Fire = AddKey("发射", "Launch", KeyCode.M);
-           
+
+            gunCaliber = AddMenu("Caliber", 0, new List<string>() {Caliber.机枪.ToString(),Caliber.机炮.ToString(),Caliber.速射炮.ToString() });
             
         }
+
 
         public override void OnSave(XDataHolder stream)
         {
@@ -211,8 +216,12 @@ namespace MordenFirearmKitMod
             //test.GetComponent<MeshRenderer>().material.shader = Shader.Find("Transparent/Diffuse");
             //清空所有点，用于初始化！  
             //mesh.Clear();
+            
+            if (gunCaliber.Value == (int)Caliber.机枪)
+            {
+                MGLinit();
+            }
 
-            MGLinit();
 
 
         }
