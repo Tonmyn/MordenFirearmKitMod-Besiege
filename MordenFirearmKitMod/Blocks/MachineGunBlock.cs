@@ -91,8 +91,11 @@ namespace MordenFirearmKitMod
 
         #region 机枪组件
 
+        //武器类型
+        public enum Caliber { 机枪, 机炮, 速射炮 }
+
         //口径
-        public MGLauncher.Caliber caliber = MGLauncher.Caliber.机枪;
+        public Caliber caliber = Caliber.机枪;
 
         //开火
         public MKey Fire;
@@ -123,12 +126,9 @@ namespace MordenFirearmKitMod
         RaycastHit shootHit;
         //int shootableMask;
 
-        ParticleSystem gunParticles;
         LineRenderer gunLine;
-        AudioSource gunAudio;
-        Light gunLight;
 
-        MGLauncher MGL;
+        public MGLauncher MGL;
         
         float effectsDisplayTime = 0.1f;
 
@@ -212,13 +212,20 @@ namespace MordenFirearmKitMod
             //清空所有点，用于初始化！  
             //mesh.Clear();
 
+            MGLinit();
+
+
+        }
+
+        private void MGLinit()
+        {
             MGL = gameObject.AddComponent<MGLauncher>();
             MGL.bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
             MGL.gunAudioClip = resources["/MordenFirearmKitMod/MachineGun.ogg"].audioClip;
             MGL.gunParticleTexture = resources["/MordenFirearmKitMod/RocketSmoke.png"].texture;
             MGL.Trigger = Fire;
-
-
+            MGL.bulletLimit = 50;
+            MGL.FireRate = 0.05f;
         }
 
         protected override void BlockPlaced()
@@ -314,22 +321,22 @@ namespace MordenFirearmKitMod
 
         public void DisableEffects()
         {
-            gunLine.enabled = false;
-            gunLight.enabled = false;
+            //gunLine.enabled = false;
+            //gunLight.enabled = false;
             //gunAudio.Stop();
-            gunParticles.Stop();
+            //gunParticles.Stop();
         }
 
         private void shoot()
         {
             //timer = 0f;
 
-            gunAudio.volume = 5 / Vector3.Distance(this.transform.position, Camera.main.transform.position);
-            gunAudio.Play();
+            //gunAudio.volume = 5 / Vector3.Distance(this.transform.position, Camera.main.transform.position);
+            //gunAudio.Play();
 
-            gunLight.enabled = true;
+            //gunLight.enabled = true;
                  
-            gunParticles.Play();
+            //gunParticles.Play();
 
             gunLine.enabled = true;
             gunLine.SetPosition(0, transform.position);
@@ -361,10 +368,10 @@ namespace MordenFirearmKitMod
         private void renderset()
         {
             
-            gunParticles = generic.AddComponent<ParticleSystem>();
-            gunLight = generic.AddComponent<Light>();
+            //gunParticles = generic.AddComponent<ParticleSystem>();
+            //gunLight = generic.AddComponent<Light>();
             gunLine = generic.AddComponent<LineRenderer>();
-            gunAudio = generic.AddComponent<AudioSource>();
+            //gunAudio = generic.AddComponent<AudioSource>();
 
             generic.transform.SetParent(transform);
             generic.transform.localPosition = new Vector3(0,0,3f);
@@ -381,78 +388,78 @@ namespace MordenFirearmKitMod
             gunLine.SetColors(new Color32(250, 135, 0, 255), new Color(0,0,0,0));
 
             
-            gunLight.range = 10;
-            gunLight.type = LightType.Spot;
-            gunLight.spotAngle = 85;
-            gunLight.color = new Color32(250, 135, 0, 255);
-            gunLight.intensity = 100f;
-            gunLight.shadows = LightShadows.Hard;
-            gunLight.enabled = true;
+            //gunLight.range = 10;
+            //gunLight.type = LightType.Spot;
+            //gunLight.spotAngle = 85;
+            //gunLight.color = new Color32(250, 135, 0, 255);
+            //gunLight.intensity = 100f;
+            //gunLight.shadows = LightShadows.Hard;
+            //gunLight.enabled = true;
 
             
             
-            gunAudio.clip = resources["/MordenFirearmKitMod/MachineGun.ogg"].audioClip;
-            gunAudio.playOnAwake = false;
-            gunAudio.loop = false;
-            gunAudio.enabled = true;
+            //gunAudio.clip = resources["/MordenFirearmKitMod/MachineGun.ogg"].audioClip;
+            //gunAudio.playOnAwake = false;
+            //gunAudio.loop = false;
+            //gunAudio.enabled = true;
 
-            gunParticles.transform.SetParent(transform);
-            gunParticles.transform.position = transform.TransformVector(transform.position + new Vector3(0,0,4.75f));
-            //gunParticles.transform.rotation = Quaternion.identity;
-            gunParticles.playOnAwake = false;
-            gunParticles.Stop();
-            gunParticles.loop = false;
-            gunParticles.startSize = 5;
-            gunParticles.startSpeed = 4;
-            gunParticles.maxParticles = 25;
-            gunParticles.startLifetime = 0.1f;
-            gunParticles.startColor = new Color32(250,135,0,255);
+            //gunParticles.transform.SetParent(transform);
+            //gunParticles.transform.position = transform.TransformVector(transform.position + new Vector3(0,0,4.75f));
+            ////gunParticles.transform.rotation = Quaternion.identity;
+            //gunParticles.playOnAwake = false;
+            //gunParticles.Stop();
+            //gunParticles.loop = false;
+            //gunParticles.startSize = 5;
+            //gunParticles.startSpeed = 4;
+            //gunParticles.maxParticles = 25;
+            //gunParticles.startLifetime = 0.1f;
+            //gunParticles.startColor = new Color32(250,135,0,255);
 
-            ParticleSystem.EmissionModule em = gunParticles.emission;
-            em.rate = new ParticleSystem.MinMaxCurve(100);
-            em.SetBursts(new ParticleSystem.Burst[] {new ParticleSystem.Burst(0,8,30)});
-            em.enabled = true;
+            //ParticleSystem.EmissionModule em = gunParticles.emission;
+            //em.rate = new ParticleSystem.MinMaxCurve(100);
+            //em.SetBursts(new ParticleSystem.Burst[] {new ParticleSystem.Burst(0,8,30)});
+            //em.enabled = true;
 
-            ParticleSystem.ShapeModule sm = gunParticles.shape;
-            sm.shapeType = ParticleSystemShapeType.Cone;
-            sm.radius = 0.01f;
-            sm.angle = 4.65f;
-            sm.randomDirection = false;
-            sm.enabled = true;
+            //ParticleSystem.ShapeModule sm = gunParticles.shape;
+            //sm.shapeType = ParticleSystemShapeType.Cone;
+            //sm.radius = 0.01f;
+            //sm.angle = 4.65f;
+            //sm.randomDirection = false;
+            //sm.enabled = true;
 
-            ParticleSystem.VelocityOverLifetimeModule volm = gunParticles.velocityOverLifetime;
-            volm.z = 2;
-            volm.space = ParticleSystemSimulationSpace.Local;
-            volm.enabled = true;
+            //ParticleSystem.VelocityOverLifetimeModule volm = gunParticles.velocityOverLifetime;
+            //volm.z = 2;
+            //volm.space = ParticleSystemSimulationSpace.Local;
+            //volm.enabled = true;
 
-            ParticleSystem.ColorOverLifetimeModule colm = gunParticles.colorOverLifetime;
-            colm.color = new Gradient()
-            {
-                alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(255, gunParticles.startLifetime *0.65f), new GradientAlphaKey(70, gunParticles.startLifetime) },
+            //ParticleSystem.ColorOverLifetimeModule colm = gunParticles.colorOverLifetime;
+            //colm.color = new Gradient()
+            //{
+            //    alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(255, gunParticles.startLifetime *0.65f), new GradientAlphaKey(70, gunParticles.startLifetime) },
 
-                colorKeys = new GradientColorKey[] { new GradientColorKey(Color.white, gunParticles.startLifetime * 0.35f), new GradientColorKey(new Color32(250, 135, 0, 255), gunParticles.startLifetime * 0.65f), new GradientColorKey(new Color(0,0,0), gunParticles.startLifetime) }
-            };
-            colm.enabled = true;
+            //    colorKeys = new GradientColorKey[] { new GradientColorKey(Color.white, gunParticles.startLifetime * 0.35f), new GradientColorKey(new Color32(250, 135, 0, 255), gunParticles.startLifetime * 0.65f), new GradientColorKey(new Color(0,0,0), gunParticles.startLifetime) }
+            //};
+            //colm.enabled = true;
 
-            ParticleSystem.SizeOverLifetimeModule solm = gunParticles.sizeOverLifetime;
-            solm.separateAxes = false;
-            solm.size = new ParticleSystem.MinMaxCurve(1, new AnimationCurve(new Keyframe[] {new Keyframe(0,0.15f), new Keyframe(0.17f,0.9f), new Keyframe(0.25f,0.8f), new Keyframe(1,0) }));
-            solm.enabled = true;
+            //ParticleSystem.SizeOverLifetimeModule solm = gunParticles.sizeOverLifetime;
+            //solm.separateAxes = false;
+            //solm.size = new ParticleSystem.MinMaxCurve(1, new AnimationCurve(new Keyframe[] {new Keyframe(0,0.15f), new Keyframe(0.17f,0.9f), new Keyframe(0.25f,0.8f), new Keyframe(1,0) }));
+            //solm.enabled = true;
 
-            ParticleSystemRenderer psr = gunParticles.GetComponent<ParticleSystemRenderer>();
-            psr.renderMode = ParticleSystemRenderMode.Billboard;
-            psr.normalDirection = 1;
-            psr.material = new Material(Shader.Find("Particles/Additive"));
-            psr.material.mainTexture = resources["/MordenFirearmKitMod/RocketSmoke.png"].texture;
-            psr.sortMode = ParticleSystemSortMode.None;
-            psr.sortingFudge = 0;
-            psr.minParticleSize = 0;
-            psr.maxParticleSize = 1;
-            psr.alignment = ParticleSystemRenderSpace.View;
-            psr.pivot = Vector3.zero;
-            psr.motionVectors = true;
-            psr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
-            psr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
+            //ParticleSystemRenderer psr = gunParticles.GetComponent<ParticleSystemRenderer>();
+            //psr.renderMode = ParticleSystemRenderMode.Billboard;
+            //psr.normalDirection = 1;
+            //psr.material = new Material(Shader.Find("Particles/Additive"));
+            //psr.material.mainTexture = resources["/MordenFirearmKitMod/RocketSmoke.png"].texture;
+            //psr.sortMode = ParticleSystemSortMode.None;
+            //psr.sortingFudge = 0;
+            //psr.minParticleSize = 0;
+            //psr.maxParticleSize = 1;
+            //psr.alignment = ParticleSystemRenderSpace.View;
+            //psr.pivot = Vector3.zero;
+            //psr.motionVectors = true;
+            //psr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            //psr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
             
 
         }
@@ -467,43 +474,53 @@ namespace MordenFirearmKitMod
     public class MGLauncher : LauncherScript
     {
 
-        //武器类型
-        public enum Caliber { 机枪, 机炮, 速射炮 }
+
 
         //加特林转速
         private float RotationRate;
+        
+        //通用组件
+        private GameObject GenericObject;
 
-        private float timer;
-
+        //亮光组件
         private Light gunLight;
 
+        //音频组件
         private AudioSource gunAudio;
 
+        //
         internal AudioClip gunAudioClip;
 
-        private GameObject ParticleObject;
-
+        //粒子组件
         private ParticleSystem gunParticles;
 
+        //贴图组件
         internal Texture gunParticleTexture;
 
         
 
-        public override void SafeAwake()
+        public override void Awake()
         {
-            FireRate = 0.05f;
+            base.Awake();
+
             RotationRate = 0f;
 
-            gunLight = gameObject.AddComponent<Light>();
-            gunAudio = gameObject.AddComponent<AudioSource>();
-            ParticleObject = new GameObject();
-            gunParticles = ParticleObject.AddComponent<ParticleSystem>();
+            GunPoint = new Vector3(0, 0, 3.5f);
+
+            GenericObject = new GameObject();
+            GenericObject.transform.localEulerAngles = new Vector3(0,180,0);
+
+            gunLight = GenericObject.AddComponent<Light>();
+            gunAudio = GenericObject.AddComponent<AudioSource>();
+            gunParticles = GenericObject.AddComponent<ParticleSystem>();
 
 
         }
 
-        private void Start()
+        public override void Start()
         {
+            base.Start();
+
             gunLight.range = 10;
             gunLight.type = LightType.Spot;
             gunLight.spotAngle = 85;
@@ -576,12 +593,13 @@ namespace MordenFirearmKitMod
             psr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
         }
 
-        private void Update()
+        public override void Update()
         {
+            
             if (RotationRate != 0)
             {
                 gunAudio.volume = RotationRate / (Vector3.Distance(this.transform.position, Camera.main.transform.position) * 60f);
-                gunAudio.pitch = RotationRate/60f;
+                gunAudio.pitch = RotationRate / 60f;
                 gunAudio.Play();
             }
             else
@@ -589,32 +607,29 @@ namespace MordenFirearmKitMod
                 gunAudio.Stop();
             }
 
-            if (Trigger.IsDown)
+            if (Trigger.IsDown && bulletNumber >0)
             {
-
                 RotationRate = Mathf.MoveTowards(RotationRate, 60, 1);
-                if (RotationRate == 60 && timer >= FireRate && Time.timeScale != 0)
+                if (RotationRate == 60)
                 {
-                    timer = 0;
-                    shoot();
-                    return;
+                    shootable = true;
                 }
                 else
                 {
-                    timer += Time.deltaTime;
+                    shootable = false;
                 }
             }
             else
             {
-
                 RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.deltaTime * 10);
             }
-
 
             transform.Rotate(new Vector3(0, 0, RotationRate));
             gunLight.enabled = false;
             gunParticles.Stop();
 
+
+            base.Update();
         }
 
         public override void shoot()
@@ -622,7 +637,6 @@ namespace MordenFirearmKitMod
             base.shoot();
             gunLight.enabled = true;
             gunParticles.Play();
-
 
         }
 
@@ -632,7 +646,7 @@ namespace MordenFirearmKitMod
     //发射器类
     public class LauncherScript : MonoBehaviour
     {
-       
+
 
         //子弹
         //public Bullet bullet;
@@ -640,8 +654,11 @@ namespace MordenFirearmKitMod
         //散布
         //public float Diffuse;
 
-        //弹药量
-        public int bulletNumber;
+        //弹药量上限
+        public int bulletLimit { get; set; }
+
+        //实际弹药量
+        public int bulletNumber { get; private set; }
 
         //射速
         public float FireRate;
@@ -650,44 +667,85 @@ namespace MordenFirearmKitMod
         public MKey Trigger;
 
         //质量
-        public float Mass;
+        public float Mass = 0.5f;
 
+        //子弹组件
         public GameObject bullets;
 
+        //子弹网格
         public Mesh bulletMesh;
 
-        float timer = 0;
+        //发射时间间隔
+        public float timer;
 
-        float effectsDisplayTime = 0.1f;
+        //允许发射
+        public bool shootable = true;
 
-        public Vector3 GunPoint = new Vector3(0, 0, 3.5f);
+        //随机延时
+        public float randomDelay = 0.1f;
+
+        public Vector3 GunPoint;
 
         public Rigidbody rigidbody;
 
-        public void Awake()
+        public virtual void Awake()
         {
             Debug.Log(name);
+
             rigidbody = gameObject.GetComponent<Rigidbody>();
-
-            //Trigger.AddKey( KeyCode.M);
-            //create();
-            SafeAwake();
+            rigidbody.mass = Mass;
         }
-        public virtual void SafeAwake()
-        {
 
+
+        public virtual void Start()
+        {
+            bulletNumber = bulletLimit;
         }
 
         public virtual void shoot()
         {
+
             bullets = new GameObject("子弹");
             BulletScript bs = bullets.AddComponent<BulletScript>();
             bs.mesh = bulletMesh;
             bs.gameObject.transform.position = transform.TransformPoint(GunPoint);
             bs.transform.localEulerAngles = transform.localEulerAngles;
             bs.GetComponent<Rigidbody>().velocity = rigidbody.velocity;
+            bs.KineticEnergy = 500;
             //bs.gameObject.transform.localRotation = new Quaternion(90,90,90,0);
+
+            bulletNumber--;
+
+
+
         }
+
+        public virtual void Update()
+        {
+
+            if (StatMaster.GodTools.InfiniteAmmoMode)
+            {
+                bulletNumber = bulletLimit;
+            }
+
+            if (Trigger.IsDown && bulletNumber > 0 && shootable)
+            {
+
+                if (timer >= FireRate && Time.timeScale != 0)
+                {
+                    timer = 0;
+                    shoot();
+
+                    return;
+                }
+                else
+                {
+                    timer += Time.deltaTime;
+                }
+            }
+            
+        }
+
 
 
 #if DEBUG
@@ -720,20 +778,20 @@ namespace MordenFirearmKitMod
 
         #region 物理参数
 
-        //威力
+        /// <summary>威力</summary>
         public float Force;
 
         //口径
         public float Caliber;
 
         //后坐力
-        public float Recoil { get; }
+        public float Recoil { get; private set; }
 
         //射程
-        public float Distance { get; } 
+        public float Distance { get; }
 
-        //动能
-        public float KineticEnergy { get; }
+        /// <summary>动能</summary>
+        public float KineticEnergy;
 
         //初速
         public float MuzzleVelocity { get; }
@@ -741,8 +799,8 @@ namespace MordenFirearmKitMod
         ////阻力
         //public float Drag { get; }
 
-        ////质量
-        //public float Mass { get; }
+        //质量
+        public float Mass { get; }
 
         #endregion
 
@@ -777,7 +835,7 @@ namespace MordenFirearmKitMod
             rigidbody = gameObject.AddComponent<Rigidbody>();
             mFilter = gameObject.AddComponent<MeshFilter>();
             mRenderer = gameObject.AddComponent<MeshRenderer>();
-      
+
 
         }
 
@@ -909,6 +967,7 @@ namespace MordenFirearmKitMod
         {
             return 0.5f * rigidbody.mass * rigidbody.velocity.sqrMagnitude;
         }
+
 
         public float getBuzzleVelocity(float force)
         {
