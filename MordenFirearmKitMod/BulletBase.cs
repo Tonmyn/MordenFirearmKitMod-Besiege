@@ -132,29 +132,6 @@ namespace MordenFirearmKitMod
             timeopen = value;
         }
 
-
-#if DEBUG
-
-        GameObject mark;
-
-
-        public void create()
-        {
-            mark = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            Destroy(mark.GetComponent<SphereCollider>());
-        }
-
-        public void destroy()
-        {
-            Destroy(mark);
-        }
-
-        public void move()
-        {
-            mark.transform.position = transform.TransformDirection(rigidbody.centerOfMass) + transform.position;
-        }
-#endif
-
         protected override void BlockPlaced()
         {
             base.BlockPlaced();
