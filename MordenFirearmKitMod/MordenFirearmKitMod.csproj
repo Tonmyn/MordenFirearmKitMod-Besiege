@@ -66,6 +66,7 @@
     <Compile Include="Blocks\RocketBlock.cs" />
     <Compile Include="BulletBase.cs" />
     <Compile Include="Blocks\BulletBlock.cs" />
+    <Compile Include="GenericScript\GenericScripts.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Updater.cs" />

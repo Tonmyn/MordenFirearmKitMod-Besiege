@@ -22,15 +22,15 @@ namespace MordenFirearmKitMod
             ///Load the 3d model information
             .Obj(new List<Obj> { new Obj("/MordenFirearmKitMod/Barrel.obj", //Mesh name with extension (only works for .obj files)
                                          "/MordenFirearmKitMod/Butt.png", //Texture name with extension
-                                         new VisualOffset(new Vector3(0.5f, 0.5f, 0.5f), //Scale
-                                                          new Vector3(-0.191f,-0.4575f, 0.35f), //Position
-                                                          new Vector3(90f,  0f, 180f))),//Rotation
+                                         new VisualOffset(Vector3.one * 0.65f, //Scale
+                                                          new Vector3(0,0,1.55f), //Position                                                         
+                                                          Vector3.zero))//Rotation
             })
 
             ///For the button that we will create setup the visual offset needed
-            .IconOffset(new Icon(new Vector3(0.75f, 0.75f, 0.75f),  //Scale
-                              new Vector3(-0.11f, -0.13f, 0f),  //Position
-                              new Vector3(  0f,   0f,   0f))) //Rotation
+            .IconOffset(new Icon(Vector3.one * 0.65f,  //Scale
+                              Vector3.zero,  //Position
+                              new Vector3(  37.5f,   90f,   30f))) //Rotation
 
             ///Script, Components, etc. you want to be on your block.
             .Components(new Type[] {typeof(GunScript),
@@ -62,7 +62,7 @@ namespace MordenFirearmKitMod
                                 
                               //,ColliderComposite.Box(new Vector3(0.35f, 0.35f, 0.15f), new Vector3(0f, 0f, 0f), new Vector3(0f, 0f, 0f)).Trigger().Layer(2).IgnoreForGhost(),//   <---Example: Box Trigger on specific Layer
             })
-
+            
             ///Make sure a block being placed on another block can intersect with it.
             .IgnoreIntersectionForBase()
 
@@ -71,7 +71,7 @@ namespace MordenFirearmKitMod
                                 new NeededResource(ResourceType.Audio, //Type of resource - types available are Audio, Texture, Mesh, and AssetBundle
                                                    "/MordenFirearmKitMod/MachineGun.ogg"),
                                 new NeededResource(ResourceType.Mesh,
-                                                   "/MordenFirearmKitMod/Rocket.obj")
+                                                   "/MordenFirearmKitMod/Bullet.obj")
             })
 
            ///Setup where on your block you can add other blocks.
@@ -100,6 +100,9 @@ namespace MordenFirearmKitMod
         //武器类型菜单
         public MMenu CaliberMenu;
 
+        //威力
+        public MSlider StrengthSlider;
+            
         //射速滑条
         public MSlider FireRateSlider;
 
@@ -108,12 +111,6 @@ namespace MordenFirearmKitMod
 
         //武器类型
         public enum caliber { 机枪, 机炮, 速射炮 }
-
-        ////射速
-        //public float FireRate = 0.05f;
-
-        ////载弹量
-        //public float BulletNumber = 50;
 
         #endregion
 
@@ -128,22 +125,6 @@ namespace MordenFirearmKitMod
 
         #region 功能组件
 
-        //通用组件 存放粒子声音等组件
-        //protected GameObject generic;
-
-        //Ray shootRay = new Ray();
-        //RaycastHit shootHit;
-        //int shootableMask;
-
-        //LineRenderer gunLine;
-
-        //public MGLauncher MGL;
-
-        //float effectsDisplayTime = 0.1f;
-
-        //public GameObject bullets;
-
-        //public GameObject lunacher = new GameObject("lunacher");
 
         #endregion
 
@@ -153,11 +134,11 @@ namespace MordenFirearmKitMod
 
             CaliberMenu = AddMenu("Caliber", 0, new List<string>() {caliber.机枪.ToString(),caliber.机炮.ToString(),caliber.速射炮.ToString() });
 
+            StrengthSlider = AddSlider("威力", "Strength", 1f, 0f, 2f);
+
             FireRateSlider = AddSlider("射速", "FireRate", 0.05f, 0f, 0.5f);
-            //FireRateSlider.ValueChanged += (float value) => { FireRate = value; };
 
             BulletLimitSlider = AddSlider("载弹量", "BulletLimit", 50f, 0f, 500f);
-            //BulletNumberSlider.ValueChanged += (float value) => { BulletNumber = value; };
             
         }
 
@@ -202,17 +183,23 @@ namespace MordenFirearmKitMod
         private void MGLinit()
         {
             MGLauncher MGL = gameObject.AddComponent<MGLauncher>();
-            //MGL.bulletMesh = resources["/MordenFirearmKitMod/Rocket.obj"].mesh;
             MGL.gunAudioClip = resources["/MordenFirearmKitMod/MachineGun.ogg"].audioClip;
             MGL.gunParticleTexture = resources["/MordenFirearmKitMod/RocketSmoke.png"].texture;
             MGL.Trigger = Fire;         
             MGL.FireRate = FireRateSlider.Value;
+            MGL.KnockBack = StrengthSlider.Value * 0.2f;
             MGL.bulletLimit = (int)BulletLimitSlider.Value;
 
-            GameObject bullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            bullet.transform.localScale = Vector3.one * 0.25f;
+            GameObject bullet = new GameObject();
+            bullet.transform.position = new Vector3(0, -10, 0);
+            bullet.AddComponent<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Bullet.obj"].mesh;
+            bullet.AddComponent<MeshRenderer>().material.color = Color.gray;
+            bullet.transform.localScale = Vector3.one * 0.15f * Mathf.Min(transform.localScale.x, transform.localScale.y, transform.localScale.z);
             bullet.AddComponent<Rigidbody>().drag = 0.02f;
-            bullet.AddComponent<BulletScript>();
+            bullet.AddComponent<BulletScript>().Strength = StrengthSlider.Value;
+            bullet.GetComponent<Rigidbody>().collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            bullet.AddComponent<SphereCollider>().transform.localScale = bullet.transform.localScale * 0.25f;
+            bullet.AddComponent<DestroyIfEditMode>();
 
             MGL.Bullet = bullet;
 
@@ -225,7 +212,7 @@ namespace MordenFirearmKitMod
     {
         
         //通用组件
-        protected GameObject GenericObject;
+        GameObject GenericObject;
 
         //亮光组件
         Light gunLight;
@@ -254,7 +241,7 @@ namespace MordenFirearmKitMod
 
             RotationRate = 0f;
 
-            GunPoint = new Vector3(0, 0, 3.5f);
+            GunPoint = new Vector3(0, 0.1f, 3.5f);
 
             GenericObject = new GameObject();
             GenericObject.transform.parent = transform;
@@ -265,6 +252,7 @@ namespace MordenFirearmKitMod
             gunAudio = GenericObject.AddComponent<AudioSource>();
             gunParticles = GenericObject.AddComponent<ParticleSystem>();
 
+            CJ.angularXMotion = ConfigurableJointMotion.Locked;
 
         }
 
@@ -277,7 +265,7 @@ namespace MordenFirearmKitMod
             gunLight.spotAngle = 85;
             gunLight.color = new Color32(250, 135, 0, 255);
             gunLight.intensity = 100f;
-            gunLight.shadows = LightShadows.Hard;
+            //gunLight.shadows = LightShadows.Hard;
             //gunLight.enabled = true;
 
             gunAudio.clip = gunAudioClip;
@@ -344,6 +332,11 @@ namespace MordenFirearmKitMod
         public override void Update()
         {
 
+            if (CJ == null)
+            {
+                return;
+            }
+
             if (RotationRate != 0)
             {
                 gunAudio.volume = RotationRate / (Vector3.Distance(transform.position, Camera.main.transform.position) * RotationRateLimit);
@@ -373,7 +366,7 @@ namespace MordenFirearmKitMod
                 RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.deltaTime * 10);
             }
 
-            transform.Rotate(new Vector3(0, 0, RotationRate) * Time.timeScale);
+            GunVis.transform.Rotate(new Vector3(0 , RotationRate, 0) * Time.timeScale);
             gunLight.enabled = false;
             gunParticles.Stop();
 
@@ -391,113 +384,124 @@ namespace MordenFirearmKitMod
     }
 
 
-    //发射器类
-    public class LauncherScript : MonoBehaviour
-    {
+    ////发射器类
+    //public class LauncherScript : MonoBehaviour
+    //{
 
 
-        //子弹
-        //public Bullet bullet;
+    //    //子弹
+    //    //public Bullet bullet;
 
-        //散布
-        //public float Diffuse;
+    //    //散布
+    //    //public float Diffuse;
 
-        //弹药量上限
-        public int bulletLimit { get; set; }
+    //    //弹药量上限
+    //    public int bulletLimit { get; set; }
 
-        //实际弹药量
-        public int bulletNumber { get; private set; }
+    //    //实际弹药量
+    //    public int bulletNumber { get; private set; }
 
-        //射速
-        public float FireRate;
+    //    //射速
+    //    public float FireRate;
 
-        //后座力
-        public float KnockBack = 1;
+    //    //后座力
+    //    public float KnockBack = 1;
 
-        //扳机
-        public MKey Trigger;
+    //    //扳机
+    //    public MKey Trigger;
 
-        //质量
-        //public float Mass = 0.5f;
+    //    //质量
+    //    //public float Mass = 0.5f;
 
-        //子弹组件
-        public GameObject Bullet;
+    //    ///<summary>子弹组件</summary>
+    //    public GameObject Bullet;
 
-        //子弹网格
-        //public Mesh bulletMesh;
+    //    //子弹网格
+    //    //public Mesh bulletMesh;
 
-        //发射时间间隔
-        internal float timer;
+    //    //发射时间间隔
+    //    internal float timer;
 
-        //允许发射
-        public bool shootable = false;
+    //    //允许发射
+    //    public bool shootable = false;
 
-        //随机延时
-        //public float randomDelay = 0.1f;
+    //    //随机延时
+    //    //public float randomDelay = 0.1f;
 
-        //枪口位置
-        public Vector3 GunPoint;
+    //    //枪口位置
+    //    public Vector3 GunPoint;
 
-        //枪的刚体组件
-        public Rigidbody rigidbody;
+    //    //枪的刚体组件
+    //    public Rigidbody rigidbody;
 
-        //枪的关节组件
-        public ConfigurableJoint CJ;
+    //    //枪的关节组件
+    //    public ConfigurableJoint CJ;
 
-        public virtual void Awake()
-        {
-            rigidbody = GetComponent<Rigidbody>();
-            rigidbody.mass = 0.5f;
+    //    public GameObject GunVis;
 
-            CJ = GetComponent<ConfigurableJoint>();
-        }
+    //    public virtual void Awake()
+    //    {
+    //        foreach (MeshFilter mf in GetComponentsInChildren<MeshFilter>())
+    //        {
+                
+    //            if (mf.name == "Vis")
+    //            {
+    //                GunVis = mf.gameObject;break;
+    //            }
+    //        }
+
+    //        rigidbody = GetComponent<Rigidbody>();
+    //        rigidbody.mass = 0.5f;
+
+    //        CJ = GetComponent<ConfigurableJoint>();
+    //    }
 
 
-        public virtual void Start()
-        {
-            bulletNumber = bulletLimit;
-        }
+    //    public virtual void Start()
+    //    {
+    //        bulletNumber = bulletLimit;
+    //    }
 
-        public virtual void Update()
-        {
+    //    public virtual void Update()
+    //    {
 
-            if (StatMaster.GodTools.InfiniteAmmoMode)
-            {
-                bulletNumber = bulletLimit;
-            }
+    //        if (StatMaster.GodTools.InfiniteAmmoMode)
+    //        {
+    //            bulletNumber = bulletLimit;
+    //        }
 
-            if (Trigger.IsDown && bulletNumber > 0 && shootable)
-            {
+    //        if (Trigger.IsDown && bulletNumber > 0 && shootable)
+    //        {
 
-                if (timer >= FireRate && Time.timeScale != 0)
-                {
-                    timer = 0;
-                    shoot();
+    //            if (timer >= FireRate && Time.timeScale != 0)
+    //            {
+    //                timer = 0;
+    //                shoot();
 
-                    return;
-                }
-                else
-                {
-                    timer += Time.deltaTime;
-                }
-            }
+    //                return;
+    //            }
+    //            else
+    //            {
+    //                timer += Time.deltaTime;
+    //            }
+    //        }
             
-        }
+    //    }
 
-        public virtual void shoot()
-        {
+    //    public virtual void shoot()
+    //    {
 
-            bulletNumber--;          
+    //        bulletNumber--;          
 
-            rigidbody.AddForce(-transform.forward * KnockBack * 1000f);
+    //        rigidbody.AddForce(-transform.forward * KnockBack * 2000f);
 
-            Bullet.GetComponent<BulletScript>().Velocity = rigidbody.velocity;
+    //        //Bullet.GetComponent<BulletScript>().Velocity = rigidbody.velocity * ;
 
-            Instantiate(Bullet,transform.TransformPoint(GunPoint),transform.rotation);
+    //        Instantiate(Bullet,transform.TransformPoint(GunPoint),transform.rotation);
 
-        }
+    //    }
 
-    }
+    //}
 
 
     ////子弹类
@@ -680,17 +684,16 @@ namespace MordenFirearmKitMod
     //}
 
 
-    public class BulletScript : MonoBehaviour
-    {
+    //public class BulletScript : MonoBehaviour
+    //{
 
-        public Vector3 Velocity;
+    //    public float Strength;
 
-        private void Start()
-        {
-            gameObject.AddComponent<DestroyIfEditMode>();
-            GetComponent<Rigidbody>().velocity =  transform.forward * 300 ;
-        }
+    //    private void Start()
+    //    {
+    //        GetComponent<Rigidbody>().velocity =  transform.forward * 300 * Strength ;
+    //    }
 
-    }
+    //}
    
 }
