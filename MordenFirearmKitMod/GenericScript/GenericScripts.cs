@@ -319,5 +319,25 @@ namespace MordenFirearmKitMod
         }
 
     }
-   
+
+
+    /// <summary>到时自毁脚本 </summary> 
+    public class TimedSelfDestruct : MonoBehaviour
+    {
+        float timer = 0;
+        public float lifetime = 300;
+
+        void FixedUpdate()
+        {
+            ++timer;
+            if (timer > lifetime)
+            {
+                Destroy(gameObject);
+                if (this.GetComponent<TimedRocket>())
+                {
+                    Destroy(this.GetComponent<TimedRocket>());
+                }
+            }
+        }
+    }
 }
