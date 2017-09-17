@@ -48,15 +48,12 @@ namespace MordenFirearmKitMod
         // a directory called "Release" will be created in your project directory. You just need to put into a .zip file or similiar
         // archive and you're ready to publish your mod. (Put the _contents_ of the folder into a .zip file, not the Release folder itself)
 
-
-        private GameObject updater = new GameObject();
-
         public override void OnLoad()
         {
             // Your initialization code here
 
             //添加MOD更新推送功能
-            updater.AddComponent<Updater>().Url("XultimateX", "MordenFirearmKitMod");
+            new GameObject("Mod更新组件").AddComponent<Updater>().Url(Author, Name);
 
             LoadBlock(RocketBlock);
             LoadBlock(RocketPodBlock);

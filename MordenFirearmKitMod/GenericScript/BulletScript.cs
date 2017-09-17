@@ -1,133 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using spaar.ModLoader;
-using TheGuysYouDespise;
+using System.Linq;
+using System.Text;
 using UnityEngine;
-using System.Collections;
 
 namespace MordenFirearmKitMod
 {
-
-    //发射器类
-    public class LauncherScript : MonoBehaviour
-    {
-
-
-        //子弹
-        //public Bullet bullet;
-
-        //散布
-        //public float Diffuse;
-
-        //弹药量上限
-        public int bulletLimit { get; set; }
-
-        //实际弹药量
-        public int bulletNumber { get; private set; }
-
-        //射速
-        public float FireRate;
-
-        //后座力
-        public float KnockBack = 1;
-
-        //扳机
-        public MKey Trigger;
-
-        //质量
-        //public float Mass = 0.5f;
-
-        ///<summary>子弹组件</summary>
-        public GameObject Bullet;
-
-        //子弹网格
-        //public Mesh bulletMesh;
-
-        //发射时间间隔
-        internal float timer;
-
-        //允许发射
-        public bool shootable = false;
-
-        //随机延时
-        //public float randomDelay = 0.1f;
-
-        //枪口位置
-        public Vector3 GunPoint;
-
-        //枪的刚体组件
-        public Rigidbody rigidbody;
-
-        //枪的关节组件
-        public ConfigurableJoint CJ;
-
-        public GameObject GunVis;
-
-        public virtual void Awake()
-        {
-            foreach (MeshFilter mf in GetComponentsInChildren<MeshFilter>())
-            {
-                
-                if (mf.name == "Vis")
-                {
-                    GunVis = mf.gameObject;break;
-                }
-            }
-
-            rigidbody = GetComponent<Rigidbody>();
-            rigidbody.mass = 0.5f;
-
-            CJ = GetComponent<ConfigurableJoint>();
-        }
-
-
-        public virtual void Start()
-        {
-            bulletNumber = bulletLimit;
-        }
-
-        public virtual void Update()
-        {
-
-            if (StatMaster.GodTools.InfiniteAmmoMode)
-            {
-                bulletNumber = bulletLimit;
-            }
-
-            if (Trigger.IsDown && bulletNumber > 0 && shootable)
-            {
-
-                if (timer >= FireRate && Time.timeScale != 0)
-                {
-                    timer = 0;
-                    shoot();
-
-                    return;
-                }
-                else
-                {
-                    timer += Time.deltaTime;
-                }
-            }
-            
-        }
-
-        public virtual void shoot()
-        {
-
-            bulletNumber--;          
-
-            rigidbody.AddForce(-transform.forward * KnockBack * 2000f);
-
-            //Bullet.GetComponent<BulletScript>().Velocity = rigidbody.velocity * ;
-
-            Instantiate(Bullet,transform.TransformPoint(GunPoint),transform.rotation);
-
-        }
-
-    }
-
-
     ////子弹类
     //public class BulletScript : MonoBehaviour
     //{
@@ -307,37 +185,51 @@ namespace MordenFirearmKitMod
 
     //}
 
-
+    /// <summary>子弹基类</summary> 
     public class BulletScript : MonoBehaviour
     {
 
+        /// <summary>威力</summary>
         public float Strength;
 
-        private void Start()
+        /// <summary>推力</summary>
+        public float Thrust = 0;
+
+        /// <summary>碰撞</summary>
+        public bool Collisioned { get; private set; } = false;
+
+        /// <summary>子弹刚体</summary>
+        public Rigidbody rigibody;
+
+        void Awake()
         {
-            GetComponent<Rigidbody>().velocity =  transform.forward * 300 * Strength ;
+
+            rigibody = GetComponent<Rigidbody>();
+            rigibody.drag = 0.2f;
+            rigibody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+            gameObject.AddComponent<TimedSelfDestruct>().lifeTime = 100f;
         }
 
-    }
-
-
-    /// <summary>到时自毁脚本 </summary> 
-    public class TimedSelfDestruct : MonoBehaviour
-    {
-        float timer = 0;
-        public float lifetime = 300;
+        void Start()
+        {
+            rigibody.velocity = transform.forward * 300 * Strength;
+        }
 
         void FixedUpdate()
         {
-            ++timer;
-            if (timer > lifetime)
+            if (!Collisioned)
             {
-                Destroy(gameObject);
-                if (this.GetComponent<TimedRocket>())
-                {
-                    Destroy(this.GetComponent<TimedRocket>());
-                }
+                rigibody.AddForce(transform.forward * 300 * Thrust);
             }
         }
+
+        void OnCollisionEnter(Collision collision)
+        {
+            Collisioned = true;
+            if (GetComponent<TimedSelfDestruct>() != null)
+                gameObject.GetComponent<TimedSelfDestruct>().TimedDestroySelf(10f);
+        }
+
     }
 }

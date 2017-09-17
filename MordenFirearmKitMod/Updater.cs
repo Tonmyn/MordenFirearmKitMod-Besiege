@@ -6,12 +6,18 @@ using spaar.ModLoader;
 using spaar.ModLoader.UI;
 
 namespace MordenFirearmKitMod
-{
+{ 
     
     //Mod更新检查组件
     public class Updater : MonoBehaviour
     {
         
+        //Mod名字
+        public string ModName = Assembly.GetExecutingAssembly().GetName().Name;
+
+        //Mod作者
+        public string Author = "XultimateX";
+
         //最新Mod版本号
         public Version LatestVersion { get; private set; }
 
@@ -21,11 +27,14 @@ namespace MordenFirearmKitMod
         //最新Mod发布介绍
         public string LatestReleaseBody { get; private set; }
 
+        //Josn格式的版本地址
+        private string JosnUrl;
+
         //最新Mod发布地址
         public string url { get; set; }
 
         //更新Mod可用
-        public bool UpdaterEnable { get; private set; }
+        public bool UpdaterEnable { get; private set; } = false;
 
         //当前Mod版本号
         private Version CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
@@ -39,30 +48,30 @@ namespace MordenFirearmKitMod
         //组件构造函数
         public Updater()
         {
-            UpdaterEnable = false;
+            UrlToJosn(Author, ModName);
         }
 
         public Updater(string address)
         {
-            UpdaterEnable = false;
             Url(address);
         }
 
         public Updater(string owner, string path)
         {
-            UpdaterEnable = false;
             Url(owner, path);
         }
 
         //组件更新检查函数
         public IEnumerator Start()
         {
-            var www = new WWW(url);
+            Debug.Log("开始检查更新...");
+
+            var www = new WWW(JosnUrl);
             yield return www;
 
             if (!www.isDone || !string.IsNullOrEmpty(www.error))
             {
-                //if (verbose) Debug.Log("=> Unable to connect.");
+                Debug.Log("更新信息好像出问题了... " + ModName);
                 Destroy(this);
                 yield break;
             }
@@ -101,7 +110,14 @@ namespace MordenFirearmKitMod
 
         public void Url(string owner, string path)
         {
-            url = "https://git.oschina.net/api/v5/repos/" + owner + "/" + path + "/releases/latest";
+            url = "https://git.oschina.net/" + owner + "/" + path + "/releases";
+            UrlToJosn(owner, path);
+        }
+
+        public void UrlToJosn(string owner,string path)
+        {
+            JosnUrl = "https://git.oschina.net/api/v5/repos/" + owner + "/" + path + "/releases/latest";
+            url = "https://git.oschina.net/" + owner + "/" + path + "/releases";
         }
 
         //画提示更新窗口

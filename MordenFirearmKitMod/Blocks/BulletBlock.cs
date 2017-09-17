@@ -9,7 +9,7 @@ namespace MordenFirearmKitMod
     partial class MordenFirearmKitMod
     {
 
-        protected Block Bullet = new Block()
+        protected Block Missile = new Block()
             ///ID of the Block
             .ID(605)
 

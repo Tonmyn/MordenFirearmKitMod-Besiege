@@ -1191,7 +1191,7 @@ namespace MordenFirearmKitMod
             ps_smoke.Stop();
             
 
-            gameObject.AddComponent<TimedSelfDestruct>().lifetime = psp_smoke.lifetime * 120;
+            gameObject.AddComponent<TimedSelfDestruct>().lifeTime = psp_smoke.lifetime * 120;
 
         }
 
