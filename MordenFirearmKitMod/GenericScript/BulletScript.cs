@@ -199,16 +199,20 @@ namespace MordenFirearmKitMod
         public bool Collisioned { get; private set; } = false;
 
         /// <summary>子弹刚体</summary>
-        public Rigidbody rigibody;
+        public Rigidbody rigibody;        
+
 
         void Awake()
         {
+            gameObject.AddComponent<Rigidbody>();
+            gameObject.AddComponent<DestroyIfEditMode>();
+            gameObject.AddComponent<TimedSelfDestruct>().lifeTime = 100f;
 
             rigibody = GetComponent<Rigidbody>();
             rigibody.drag = 0.2f;
             rigibody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-            gameObject.AddComponent<TimedSelfDestruct>().lifeTime = 100f;
+            
         }
 
         void Start()

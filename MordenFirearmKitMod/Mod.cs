@@ -59,6 +59,9 @@ namespace MordenFirearmKitMod
             LoadBlock(RocketPodBlock);
             LoadBlock(MachineGun);
 
+            //增加灯关渲染数量
+            QualitySettings.pixelLightCount +=10;
+
         }
 
 

@@ -90,24 +90,24 @@ namespace MordenFirearmKitMod
     {
 
         //功能页菜单
-        public MMenu PageMenu;
+        MMenu PageMenu;
 
         #region 基本组件及相关变量
 
         //开火
-        public MKey Fire;
+        MKey Fire;
 
         //武器类型菜单
-        public MMenu CaliberMenu;
+        MMenu CaliberMenu;
 
         //威力
-        public MSlider StrengthSlider;
+        MSlider StrengthSlider;
             
         //射速滑条
-        public MSlider FireRateSlider;
+        MSlider FireRateSlider;
 
         //载弹量滑条
-        public MSlider BulletLimitSlider;
+        MSlider BulletLimitSlider;
 
         //武器类型
         public enum caliber { 机枪, 机炮, 速射炮 }
@@ -116,9 +116,8 @@ namespace MordenFirearmKitMod
 
 
 
-
         #region 私有变量
-        private GameObject Bullet;
+        GameObject Bullet;
 
 
         #endregion
@@ -192,18 +191,19 @@ namespace MordenFirearmKitMod
 
             #region 构造机枪子弹
 
-            Bullet = new GameObject("子弹");Bullet.SetActive(false);
+            MGL.Bullet = Bullet = new GameObject("子弹");Bullet.SetActive(false);
             Bullet.transform.localScale = Vector3.one * 0.15f * Mathf.Min(transform.localScale.x, transform.localScale.y, transform.localScale.z);
-            Bullet.AddComponent<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Bullet.obj"].mesh;
+            Bullet.AddComponent<MeshCollider>().sharedMesh = Bullet.AddComponent<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Bullet.obj"].mesh;
             Bullet.AddComponent<MeshRenderer>().material.color = Color.gray;
-            Bullet.AddComponent<Rigidbody>();
-            Bullet.AddComponent<DestroyIfEditMode>();
+            //Bullet.AddComponent<Rigidbody>();
+            //Bullet.AddComponent<DestroyIfEditMode>();
             Bullet.AddComponent<BulletScript>().Strength = StrengthSlider.Value;
-            Bullet.AddComponent<SphereCollider>().transform.localScale = Bullet.transform.localScale * 0.25f;
-
+            //Bullet.AddComponent<SphereCollider>().transform.localScale = Bullet.transform.localScale * 0.25f;
+            MeshCollider mc =  Bullet.GetComponent<MeshCollider>();
+            mc.convex = true;mc.transform.localScale = Bullet.transform.localScale * 0.25f;
             #endregion
-            
-            MGL.Bullet = Bullet;
+
+            //MGL.Bullet = Bullet;
 
         }
             
@@ -237,6 +237,7 @@ namespace MordenFirearmKitMod
         //贴图数据
         internal Texture gunParticleTexture;
 
+        //机枪可视组件
         GameObject GunVis;
 
         public override void Awake()
@@ -258,6 +259,8 @@ namespace MordenFirearmKitMod
 
             CJ.angularXMotion = ConfigurableJointMotion.Locked;
 
+           
+
             foreach (MeshFilter mf in GetComponentsInChildren<MeshFilter>())
             {
                 if (mf.name == "Vis")
@@ -274,11 +277,11 @@ namespace MordenFirearmKitMod
 
             gunLight.range = 10;
             gunLight.type = LightType.Spot;
-            gunLight.spotAngle = 85;
+            gunLight.spotAngle = 135;
             gunLight.color = new Color32(250, 135, 0, 255);
             gunLight.intensity = 100f;
             //gunLight.shadows = LightShadows.Hard;
-            //gunLight.enabled = true;
+            gunLight.enabled = false;
 
             gunAudio.clip = gunAudioClip;
             gunAudio.playOnAwake = false;
