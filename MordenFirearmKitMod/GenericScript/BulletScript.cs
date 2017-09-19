@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -199,32 +200,42 @@ namespace MordenFirearmKitMod
         public bool Collisioned { get; private set; } = false;
 
         /// <summary>子弹刚体</summary>
-        public Rigidbody rigibody;        
+        public Rigidbody rigidbody;
 
+        /// <summary>子弹种类</summary>
+        public enum BulletKind
+        {
+            破坏弹 = 0,
+            高爆弹 = 1,
+            云爆弹 = 2,
+            发烟弹 = 3
+        }
+
+        public BulletKind bulletKind = 0;
 
         void Awake()
         {
+
             gameObject.AddComponent<Rigidbody>();
             gameObject.AddComponent<DestroyIfEditMode>();
             gameObject.AddComponent<TimedSelfDestruct>().lifeTime = 100f;
 
-            rigibody = GetComponent<Rigidbody>();
-            rigibody.drag = 0.2f;
-            rigibody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-
+            rigidbody = GetComponent<Rigidbody>();
+            rigidbody.drag = 0.2f;
+            rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             
         }
 
         void Start()
         {
-            rigibody.velocity = transform.forward * 300 * Strength;
+            rigidbody.velocity = transform.forward * 300 * Strength;
         }
 
         void FixedUpdate()
         {
             if (!Collisioned)
             {
-                rigibody.AddForce(transform.forward * 300 * Thrust);
+                rigidbody.AddForce(transform.forward * 300 * Thrust);
             }
         }
 
@@ -233,6 +244,86 @@ namespace MordenFirearmKitMod
             Collisioned = true;
             if (GetComponent<TimedSelfDestruct>() != null)
                 gameObject.GetComponent<TimedSelfDestruct>().TimedDestroySelf(10f);
+
+            
+        }
+
+        public IEnumerator Explodey()
+        {
+            if (Collisioned)
+            {
+                yield break;
+            }
+
+            yield return new WaitForFixedUpdate();
+
+            Collisioned = true;
+
+            //爆炸范围
+            float radius = Strength;
+
+            //爆炸位置
+            Vector3 position_hit = transform.TransformDirection(new Vector3(-1f, rigidbody.centerOfMass.y, rigidbody.centerOfMass.z)) + transform.position;
+
+            //爆炸类型 炸弹
+            if (bulletKind == BulletKind.云爆弹)
+            {
+                GameObject explo = (GameObject)Instantiate(PrefabMaster.BlockPrefabs[23].gameObject, position_hit, transform.rotation);
+                explo.transform.localScale = Vector3.one * 0.01f;
+                ExplodeOnCollideBlock ac = explo.GetComponent<ExplodeOnCollideBlock>();
+                ac.radius = 2 + radius;
+                ac.power = 3000f * radius;
+                ac.torquePower = 5000f * radius;
+                ac.upPower = 0;
+                ac.Explodey();
+                explo.AddComponent<TimedSelfDestruct>();
+            }
+            else if (bulletKind == BulletKind.高爆弹)
+            {
+                GameObject explo = (GameObject)GameObject.Instantiate(PrefabMaster.BlockPrefabs[54].gameObject, position_hit, transform.rotation);
+                explo.transform.localScale = Vector3.one * 0.01f;
+                ControllableBomb ac = explo.GetComponent<ControllableBomb>();
+                ac.radius = 2 + radius;
+                ac.power = 3000f * radius;
+                ac.randomDelay = 0.00001f;
+                ac.upPower = 0f;
+                ac.StartCoroutine_Auto(ac.Explode());
+                explo.AddComponent<TimedSelfDestruct>();
+            }
+            else if (bulletKind == BulletKind.发烟弹)
+            {
+                GameObject explo = (GameObject)GameObject.Instantiate(PrefabMaster.BlockPrefabs[59].gameObject, position_hit, transform.rotation);
+                explo.transform.localScale = Vector3.one * 0.01f;
+                TimedRocket ac = explo.GetComponent<TimedRocket>();
+                ac.SetSlip(Color.white);
+                ac.radius = 2 + radius;
+                ac.power = 3000f * radius;
+                ac.randomDelay = 0.000001f;
+                ac.upPower = 0;
+                ac.StartCoroutine(ac.Explode(0.01f));
+                explo.AddComponent<TimedSelfDestruct>();
+            }
+
+            foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>())
+            {
+                if (r.name == "Vis")
+                {
+                    r.enabled = false;
+
+
+                }
+            }
+
+            //transform.localScale = Vector3.zero;
+            //rigidbody.isKinematic = true;
+            //rigidbody.detectCollisions = false;
+            //Destroy(gameObject.GetComponentInChildren<FireController>());
+            //psp_fire.lifetime = 0;
+            //ps_fire.Stop();
+            //ps_smoke.Stop();
+
+
+            //gameObject.AddComponent<TimedSelfDestruct>().lifeTime = psp_smoke.lifetime * 120;
         }
 
     }
