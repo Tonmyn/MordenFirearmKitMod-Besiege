@@ -213,22 +213,37 @@ namespace MordenFirearmKitMod
 
         public BulletKind bulletKind = 0;
 
+
+        /// <summary>子弹拖尾</summary>
+        public TrailRenderer BulletTrail;
+
+        /// <summary>拖尾长度</summary>
+        public float TrailLength = 1;
+
+
         void Awake()
         {
-
-            gameObject.AddComponent<Rigidbody>();
+            
             gameObject.AddComponent<DestroyIfEditMode>();
             gameObject.AddComponent<TimedSelfDestruct>().lifeTime = 100f;
 
-            rigidbody = GetComponent<Rigidbody>();
+            rigidbody = gameObject.AddComponent<Rigidbody>();
             rigidbody.drag = 0.2f;
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+            BulletTrail = gameObject.AddComponent<TrailRenderer>();
+            BulletTrail.endWidth = 0.1f;
+            BulletTrail.startWidth = 0.5f;
+            BulletTrail.time = TrailLength * 0.1f;
+            BulletTrail.material.shader = Shader.Find("Transparent/Diffuse");
+            BulletTrail.material.color = new Color(255f, 255f, 0f, 1f);
+            BulletTrail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             
         }
 
         void Start()
         {
-            rigidbody.velocity = transform.forward * 300 * Strength;
+            rigidbody.velocity = transform.forward * 350 * Strength;
         }
 
         void FixedUpdate()
@@ -241,7 +256,8 @@ namespace MordenFirearmKitMod
 
         void OnCollisionEnter(Collision collision)
         {
-            Collisioned = true;
+            StartCoroutine(Explodey());
+            BulletTrail.enabled = false;
             if (GetComponent<TimedSelfDestruct>() != null)
                 gameObject.GetComponent<TimedSelfDestruct>().TimedDestroySelf(10f);
 
@@ -303,7 +319,10 @@ namespace MordenFirearmKitMod
                 ac.StartCoroutine(ac.Explode(0.01f));
                 explo.AddComponent<TimedSelfDestruct>();
             }
-
+            else if (bulletKind == BulletKind.破坏弹)
+            {
+                yield break;
+            }
             foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>())
             {
                 if (r.name == "Vis")

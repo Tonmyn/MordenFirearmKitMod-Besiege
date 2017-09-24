@@ -12,7 +12,7 @@ namespace MordenFirearmKitMod
     // in general, take a look at https://spaar.github.io/besiege-modloader.
 
 
-    public partial class MordenFirearmKitMod : BlockMod
+    public partial class MordenFirearmKitBlockMod : BlockMod
     {
         public override string Name { get; } = "MordenFirearmKitMod";
         public override string DisplayName { get; } = "Morden Firearm Kit";
@@ -62,6 +62,7 @@ namespace MordenFirearmKitMod
             //增加灯关渲染数量
             QualitySettings.pixelLightCount +=10;
 
+
         }
 
 
@@ -71,6 +72,7 @@ namespace MordenFirearmKitMod
             // e.g. save configuration, destroy your objects if CanBeUnloaded is true etc
 
         }
+
 
     }
 

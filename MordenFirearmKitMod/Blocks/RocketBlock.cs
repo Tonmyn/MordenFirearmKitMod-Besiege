@@ -9,7 +9,7 @@ using System.ComponentModel;
 namespace MordenFirearmKitMod
 {
 
-    partial class MordenFirearmKitMod
+    partial class MordenFirearmKitBlockMod
     {
 
         //声明火箭弹模块

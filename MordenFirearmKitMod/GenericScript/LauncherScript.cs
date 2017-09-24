@@ -88,7 +88,7 @@ namespace MordenFirearmKitMod
                 }
                 else
                 {
-                    Interval += Time.deltaTime;
+                    Interval += Time.deltaTime * Time.timeScale;
                 }
             }
 
@@ -99,7 +99,7 @@ namespace MordenFirearmKitMod
 
             bulletNumber--;
 
-            rigidbody.AddForce(-transform.forward * KnockBack * 2000f);
+            rigidbody.AddForce(-transform.forward * KnockBack * 4000f);
 
             GameObject bullet = (GameObject)Instantiate(Bullet, transform.TransformPoint(GunPoint), transform.rotation);
 

@@ -4,11 +4,12 @@ using spaar.ModLoader;
 using TheGuysYouDespise;
 using UnityEngine;
 using System.Collections;
+using System.IO;
 
 namespace MordenFirearmKitMod
 {
 
-    partial class MordenFirearmKitMod
+    partial class MordenFirearmKitBlockMod
     {
         
         //机枪模块
@@ -20,11 +21,11 @@ namespace MordenFirearmKitMod
             .BlockName("MachineGun")
 
             ///Load the 3d model information
-            .Obj(new List<Obj> { new Obj("/MordenFirearmKitMod/Barrel.obj", //Mesh name with extension (only works for .obj files)
-                                         "/MordenFirearmKitMod/Butt.png", //Texture name with extension
+            .Obj(new List<Obj> { new Obj("/MordenFirearmKitMod/MachineGun.obj", //Mesh name with extension (only works for .obj files)
+                                         "/MordenFirearmKitMod/MachineGun.png", //Texture name with extension
                                          new VisualOffset(Vector3.one * 0.65f, //Scale
                                                           new Vector3(0,0,1.55f), //Position                                                         
-                                                          Vector3.zero))//Rotation
+                                                          Vector3.zero))//Rotation               
             })
 
             ///For the button that we will create setup the visual offset needed
@@ -67,11 +68,20 @@ namespace MordenFirearmKitMod
             .IgnoreIntersectionForBase()
 
             ///Load resources that will be needed for the block.
-            .NeededResources(new List<NeededResource> {
+            .NeededResources(new List<NeededResource> 
+            {
                                 new NeededResource(ResourceType.Audio, //Type of resource - types available are Audio, Texture, Mesh, and AssetBundle
                                                    "/MordenFirearmKitMod/MachineGun.ogg"),
                                 new NeededResource(ResourceType.Mesh,
                                                    "/MordenFirearmKitMod/Bullet.obj")
+                ,new NeededResource( ResourceType.Mesh,"/MordenFirearmKitMod/MachineGun.obj")
+                ,new NeededResource( ResourceType.Mesh,"/MordenFirearmKitMod/AutoCannon.obj")
+                ,new NeededResource( ResourceType.Mesh,"/MordenFirearmKitMod/QuickCannon.obj")
+                                
+                ,new NeededResource( ResourceType.Texture,"/MordenFirearmKitMod/MachineGun.png")
+                ,new NeededResource( ResourceType.Texture,"/MordenFirearmKitMod/AutoCannon.png")
+                ,new NeededResource( ResourceType.Texture,"/MordenFirearmKitMod/QuickCannon.png")
+
             })
 
            ///Setup where on your block you can add other blocks.
@@ -114,10 +124,27 @@ namespace MordenFirearmKitMod
 
         #endregion
 
+        #region 子弹组件及相关变量
+
+        //子弹种类
+        MMenu BulletMenu;
+
+        //拖尾长度
+        MSlider TrailLengthSlider;
+
+
+
+
+        #endregion
 
 
         #region 私有变量
+
+        //子弹组件
         GameObject Bullet;
+
+        //枪模型
+        public static Mesh[] GunMeshs;
 
 
         #endregion
@@ -129,19 +156,74 @@ namespace MordenFirearmKitMod
 
         public override void SafeAwake()
         {
+
+            PageMenu = AddMenu("", 0, new List<string>() { "基本属性", "子弹属性" });
+            PageMenu.ValueChanged += PageMenuChanged;
+
+            #region 基本功能组件
+
             Fire = AddKey("发射", "Launch", KeyCode.M);
 
-            CaliberMenu = AddMenu("Caliber", 0, new List<string>() {caliber.机枪.ToString(),caliber.机炮.ToString(),caliber.速射炮.ToString() });
+            CaliberMenu = AddMenu("Caliber", 0, new List<string> { caliber.机枪.ToString(), caliber.机炮.ToString(), caliber.速射炮.ToString() });
+            CaliberMenu.ValueChanged += CaliberMenuChanged;
 
-            StrengthSlider = AddSlider("威力", "Strength", 1f, 0f, 2f);
+            StrengthSlider = AddSlider("威力", "Strength", 1f, 0.5f, 2f);
 
             FireRateSlider = AddSlider("射速", "FireRate", 0.05f, 0f, 0.5f);
 
             BulletLimitSlider = AddSlider("载弹量", "BulletLimit", 50f, 0f, 500f);
 
+            #endregion
+
+            #region 子弹功能组件
+
+            BulletMenu = AddMenu("BulletKind", 0, new List<string>() { BulletScript.BulletKind.破坏弹.ToString(), BulletScript.BulletKind.高爆弹.ToString(), BulletScript.BulletKind.云爆弹.ToString(), BulletScript.BulletKind.发烟弹.ToString() });
+            TrailLengthSlider = AddSlider("尾迹长度", "TrailLength", 1f, 0f, 3f);
+
+            #endregion
+
+            GetGunMeshs();          
+            PageMenuChanged(0);
+            CaliberMenuChanged(0);
+
         }
 
+        void PageMenuChanged(int value)
+        {
+            bool gunBase = false, bullet = false;
 
+            if (value == 0)
+            {
+                gunBase = true;
+            }
+            else
+            {
+                bullet = true;
+            }
+
+            Fire.DisplayInMapper = gunBase;
+            CaliberMenu.DisplayInMapper = gunBase;
+            StrengthSlider.DisplayInMapper = gunBase;
+            FireRateSlider.DisplayInMapper = gunBase;
+            BulletLimitSlider.DisplayInMapper = gunBase;
+
+            BulletMenu.DisplayInMapper = bullet;
+            TrailLengthSlider.DisplayInMapper = bullet;
+
+        }
+
+        void CaliberMenuChanged(int value)
+        {
+            //GetComponent<MeshFilter>().mesh = GunMeshs[value];
+            foreach (MeshFilter mf in GetComponentsInChildren<MeshFilter>())
+            {
+                if (mf.name == "Vis")
+                {
+                    mf.mesh = GunMeshs[value];
+                    break;
+                }
+            }
+        }
 
         protected virtual IEnumerator UpdateMapper()
         {
@@ -186,8 +268,9 @@ namespace MordenFirearmKitMod
             MGL.gunParticleTexture = resources["/MordenFirearmKitMod/RocketSmoke.png"].texture;
             MGL.Trigger = Fire;         
             MGL.FireRate = FireRateSlider.Value;
-            MGL.KnockBack = StrengthSlider.Value * 0.2f;
+            MGL.KnockBack = StrengthSlider.Value;
             MGL.bulletLimit = (int)BulletLimitSlider.Value;
+            MGL.CJ.breakForce = 15000;
 
             #region 构造机枪子弹
 
@@ -197,7 +280,12 @@ namespace MordenFirearmKitMod
             Bullet.AddComponent<MeshRenderer>().material.color = Color.gray;
             //Bullet.AddComponent<Rigidbody>();
             //Bullet.AddComponent<DestroyIfEditMode>();
-            Bullet.AddComponent<BulletScript>().Strength = StrengthSlider.Value;
+            BulletScript bs = Bullet.AddComponent<BulletScript>();
+            bs.Strength = StrengthSlider.Value;
+            bs.bulletKind = (BulletScript.BulletKind)Enum.ToObject(typeof(BulletScript.BulletKind), BulletMenu.Value);
+            Debug.Log(bs.bulletKind.ToString());
+            bs.TrailLength = TrailLengthSlider.Value;
+            
             //Bullet.AddComponent<SphereCollider>().transform.localScale = Bullet.transform.localScale * 0.25f;
             MeshCollider mc =  Bullet.GetComponent<MeshCollider>();
             mc.convex = true;mc.transform.localScale = Bullet.transform.localScale * 0.25f;
@@ -206,7 +294,179 @@ namespace MordenFirearmKitMod
             //MGL.Bullet = Bullet;
 
         }
-            
+
+
+
+        void GetGunMeshs()
+        {
+            //GunMeshs = new Mesh[] {
+            //    //new Obj("/MordenFirearmKitMod/MachineGun.obj", "/MordenFirearmKitMod/MachineGun.png", new VisualOffset(Vector3.one * 0.65f, new Vector3(0, 0, 1.55f), Vector3.zero)).importedMesh
+            //    //,new Obj("/MordenFirearmKitMod/AutoCannon.obj", "/MordenFirearmKitMod/AutoCannon", new VisualOffset(Vector3.one * 0.65f, new Vector3(0, 0, 1.55f), Vector3.zero)).importedMesh
+            //    //,new Obj("/MordenFirearmKitMod/QuickCannon.obj", "/MordenFirearmKitMod/QuickCannon.png", new VisualOffset(Vector3.one * 0.65f, new Vector3(0, 0, 1.55f), Vector3.zero)).importedMesh
+
+            //};
+            //GunMeshs[0] = new Obj("/MordenFirearmKitMod/MachineGun.obj", "/MordenFirearmKitMod/MachineGun.png", new VisualOffset(Vector3.one * 0.65f, new Vector3(0, 0, 1.55f), Vector3.zero)).importedMesh;
+            //GunMeshs[1] = new Obj("/MordenFirearmKitMod/AutoCannon.obj", "/MordenFirearmKitMod/AutoCannon", new VisualOffset(Vector3.one * 0.65f, new Vector3(0, 0, 1.55f), Vector3.zero)).importedMesh;
+            // GunMeshs[2] = new Obj("/MordenFirearmKitMod/QuickCannon.obj", "/MordenFirearmKitMod/QuickCannon.png", new VisualOffset(Vector3.one * 0.65f, new Vector3(0, 0, 1.55f), Vector3.zero)).importedMesh;
+            //GunMeshs = new Mesh[]
+            //     {
+            //        new NeededResource(ResourceType.Mesh,"/MordenFirearmKitMod/AutoCannon.obj").mesh
+            //        ,new NeededResource(ResourceType.Mesh,"/MordenFirearmKitMod/AutoCannon.obj").mesh
+            //        ,new NeededResource(ResourceType.Mesh,"/MordenFirearmKitMod/AutoCannon.obj").mesh
+            //    };
+            //Mesh mesh = new Mesh();
+            //foreach (MeshFilter mf in GetComponentsInChildren<MeshFilter>())
+            //{
+            //    if (mf.name == "Vis")
+            //    {
+            //        mesh = mf.mesh;
+            //        break;
+            //    }
+            //}
+
+            //GunMeshs = new Mesh[]
+            //{
+            //    //MeshFromObj(Application.dataPath + "/Mods/Blocks/Obj/MordenFirearmKitMod/MachineGun.obj")
+            //    mesh
+            //    ,MeshFromObj(Application.dataPath + "/Mods/Blocks/Obj/MordenFirearmKitMod/AutoCannon.obj")
+            //    ,MeshFromObj(Application.dataPath + "/Mods/Blocks/Obj/MordenFirearmKitMod/QuickCannon.obj")
+            //};
+
+            GunMeshs = new Mesh[]
+            {
+                resources["/MordenFirearmKitMod/MachineGun.obj"].mesh
+                ,resources["/MordenFirearmKitMod/AutoCannon.obj"].mesh
+                ,resources["/MordenFirearmKitMod/QuickCannon.obj"].mesh
+            };
+        }
+
+        /// <summary>
+        /// 加载网格信息
+        /// </summary>
+        /// <param name="ObjPath">OBJ文件路径</param>
+        /// <returns>网格数据</returns>
+        public static Mesh MeshFromObj(string ObjPath)
+        {
+            List<Vector3> Normals = new List<Vector3>();
+            List<Vector2> UV = new List<Vector2>();
+            List<Vector3> newVertices = new List<Vector3>();
+            List<Vector3> Vertices = new List<Vector3>();
+            List<Vector2> newUV = new List<Vector2>();
+            List<int> triangleslist = new List<int>();
+            List<Vector3> newNormals = new List<Vector3>();
+            Mesh mesh = new Mesh();
+            StreamReader srd;
+
+            if (!File.Exists(ObjPath))
+            {
+                //return iteratorVariable1.LoadAsset<Mesh>(ObjPath);
+                Debug.Log("OBJ不存在");
+                return new AssetBundle().LoadAsset<Mesh>(ObjPath);
+            }
+            try
+            {
+                srd = File.OpenText(ObjPath);
+                while (srd.Peek() != -1)
+                {
+                    string str = srd.ReadLine();
+                    string[] chara = str.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                    if (chara.Length > 2)
+                    {
+                        if (chara[0] == "v")
+                        {
+                            Vector3 v1 = new Vector3(
+                              Convert.ToSingle(chara[1]),
+                              Convert.ToSingle(chara[2]),
+                              Convert.ToSingle(chara[3]));
+                            Vertices.Add(v1);
+                        }
+                        else if (chara[0] == "vt")
+                        {
+                            Vector2 uv1 = new Vector2(
+                              Convert.ToSingle(chara[1]),
+                              Convert.ToSingle(chara[2]));
+
+                            UV.Add(uv1);
+                        }
+                        else if (chara[0] == "vn")
+                        {
+                            Vector3 v2 = new Vector3(
+                              Convert.ToSingle(chara[1]),
+                              Convert.ToSingle(chara[2]),
+                              Convert.ToSingle(chara[3]));
+
+                            Normals.Add(v2);
+                        }
+                        else if (chara[0] == "f")
+                        {
+                            if (chara.Length == 4)
+                            {
+                                int a = Convert.ToInt32(chara[1].Split('/')[0]);
+                                int b = Convert.ToInt32(chara[2].Split('/')[0]);
+                                int c = Convert.ToInt32(chara[3].Split('/')[0]);
+                                triangleslist.Add(newVertices.Count);
+                                triangleslist.Add(newVertices.Count + 1);
+                                triangleslist.Add(newVertices.Count + 2);
+                                newVertices.Add(Vertices[a - 1]);
+                                newVertices.Add(Vertices[b - 1]);
+                                newVertices.Add(Vertices[c - 1]);
+                                newNormals.Add(Normals[Convert.ToInt32(chara[1].Split('/')[2]) - 1]);
+                                newNormals.Add(Normals[Convert.ToInt32(chara[2].Split('/')[2]) - 1]);
+                                newNormals.Add(Normals[Convert.ToInt32(chara[3].Split('/')[2]) - 1]);
+                                newUV.Add(UV[Convert.ToInt32(chara[1].Split('/')[1]) - 1]);
+                                newUV.Add(UV[Convert.ToInt32(chara[2].Split('/')[1]) - 1]);
+                                newUV.Add(UV[Convert.ToInt32(chara[3].Split('/')[1]) - 1]);
+                            }
+                            if (chara.Length == 5)
+                            {
+                                int a = Convert.ToInt32(chara[1].Split('/')[0]);
+                                int b = Convert.ToInt32(chara[2].Split('/')[0]);
+                                int c = Convert.ToInt32(chara[3].Split('/')[0]);
+                                int d = Convert.ToInt32(chara[4].Split('/')[0]);
+                                triangleslist.Add(newVertices.Count);
+                                triangleslist.Add(newVertices.Count + 1);
+                                triangleslist.Add(newVertices.Count + 2);
+                                triangleslist.Add(newVertices.Count);
+                                triangleslist.Add(newVertices.Count + 2);
+                                triangleslist.Add(newVertices.Count + 3);
+                                newVertices.Add(Vertices[a - 1]);
+                                newVertices.Add(Vertices[b - 1]);
+                                newVertices.Add(Vertices[c - 1]);
+                                newVertices.Add(Vertices[d - 1]);
+                                newNormals.Add(Normals[Convert.ToInt32(chara[1].Split('/')[2]) - 1]);
+                                newNormals.Add(Normals[Convert.ToInt32(chara[2].Split('/')[2]) - 1]);
+                                newNormals.Add(Normals[Convert.ToInt32(chara[3].Split('/')[2]) - 1]);
+                                newNormals.Add(Normals[Convert.ToInt32(chara[4].Split('/')[2]) - 1]);
+                                newUV.Add(UV[Convert.ToInt32(chara[1].Split('/')[1]) - 1]);
+                                newUV.Add(UV[Convert.ToInt32(chara[2].Split('/')[1]) - 1]);
+                                newUV.Add(UV[Convert.ToInt32(chara[3].Split('/')[1]) - 1]);
+                                newUV.Add(UV[Convert.ToInt32(chara[4].Split('/')[1]) - 1]);
+                            }
+                        }
+                    }
+                }
+                mesh.vertices = newVertices.ToArray();
+                mesh.uv = newUV.ToArray();
+                mesh.triangles = triangleslist.ToArray();
+                mesh.normals = newNormals.ToArray();
+#if DEBUG
+                Debug.Log("ReadFile " + ObjPath + " Completed!" + "Vertices:" + newVertices.Count.ToString());
+#endif
+                srd.Close();
+                mesh.RecalculateBounds();
+                mesh.RecalculateNormals();
+                mesh.Optimize();
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Obj model " + ObjPath + " error!");
+                Debug.Log("newUV==>" + newUV.Count.ToString());
+                Debug.Log("triangleslist==>" + triangleslist.Count.ToString());
+                Debug.Log("newNormals==>" + newNormals.Count.ToString());
+                Debug.Log(ex.ToString());
+            }
+            return mesh;
+        }
     }
 
     //机枪发射器

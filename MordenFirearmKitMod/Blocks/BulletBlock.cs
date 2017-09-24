@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MordenFirearmKitMod
 {
-    partial class MordenFirearmKitMod
+    partial class MordenFirearmKitBlockMod
     {
 
         protected Block Missile = new Block()
