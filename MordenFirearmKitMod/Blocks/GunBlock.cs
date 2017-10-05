@@ -78,10 +78,13 @@ namespace MordenFirearmKitMod
                 ,new NeededResource( ResourceType.Mesh,"/MordenFirearmKitMod/MachineGun.obj")
                 ,new NeededResource( ResourceType.Mesh,"/MordenFirearmKitMod/AutoCannon.obj")
                 ,new NeededResource( ResourceType.Mesh,"/MordenFirearmKitMod/QuickCannon.obj")
-                                
+                ,new NeededResource( ResourceType.Mesh,"/MordenFirearmKitMod/MuzzleFlashCone.obj")
+
                 ,new NeededResource( ResourceType.Texture,"/MordenFirearmKitMod/MachineGun.png")
                 ,new NeededResource( ResourceType.Texture,"/MordenFirearmKitMod/AutoCannon.png")
                 ,new NeededResource( ResourceType.Texture,"/MordenFirearmKitMod/QuickCannon.png")
+                ,new NeededResource( ResourceType.Texture,"/MordenFirearmKitMod/MuzzleFlash.png")
+                ,new NeededResource( ResourceType.Texture,"/MordenFirearmKitMod/Flame.png")
 
             })
 
@@ -185,7 +188,7 @@ namespace MordenFirearmKitMod
 
             GetGunMeshs();          
             PageMenuChanged(0);
-            CaliberMenuChanged(0);
+            CaliberMenuChanged(CaliberMenu.Value);
 
         }
 
@@ -249,6 +252,11 @@ namespace MordenFirearmKitMod
             LoadMapperValues(stream);
         }
 
+        protected override void BlockPlaced()
+        {
+            base.BlockPlaced();
+            CaliberMenuChanged(CaliberMenu.Value);
+        }
 
         protected override void OnSimulateStart()
         {
@@ -297,7 +305,9 @@ namespace MordenFirearmKitMod
         {
             MGLauncher MGL = gameObject.AddComponent<MGLauncher>();
             MGL.gunAudio.clip = MGL.RotationAudioSource.clip = resources["/MordenFirearmKitMod/MachineGun.ogg"].audioClip;
-            MGL.gunParticleTexture = resources["/MordenFirearmKitMod/RocketSmoke.png"].texture;
+            MGL.gunParticleTexture = resources["/MordenFirearmKitMod/MuzzleFlash.png"].texture;
+            MGL.gunParticleMesh = resources["/MordenFirearmKitMod/MuzzleFlashCone.obj"].mesh;
+            MGL.gunFlame = resources["/MordenFirearmKitMod/Flame.png"].texture;
             MGL.Trigger = Fire;         
             MGL.FireRate = FireRateSlider.Value;
             MGL.KnockBack = StrengthSlider.Value;
@@ -602,60 +612,60 @@ namespace MordenFirearmKitMod
             //gunAudio.loop = true;
             ////gunAudio.enabled = true;
 
-            gunParticles.playOnAwake = false;
-            gunParticles.Stop();
-            gunParticles.loop = false;
-            gunParticles.startSize = 2;
-            gunParticles.startSpeed = 4;
-            gunParticles.maxParticles = 25;
-            gunParticles.startLifetime = 0.2f;
-            gunParticles.startColor = new Color32(250, 135, 0, 255);
+            //gunParticles.playOnAwake = false;
+            //gunParticles.Stop();
+            //gunParticles.loop = false;
+            //gunParticles.startSize = 2;
+            //gunParticles.startSpeed = 4;
+            //gunParticles.maxParticles = 25;
+            //gunParticles.startLifetime = 0.2f;
+            //gunParticles.startColor = new Color32(250, 135, 0, 255);
 
-            ParticleSystem.EmissionModule em = gunParticles.emission;
-            em.rate = new ParticleSystem.MinMaxCurve(100);
-            em.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0, 8, 30) });
-            em.enabled = true;
+            //ParticleSystem.EmissionModule em = gunParticles.emission;
+            //em.rate = new ParticleSystem.MinMaxCurve(100);
+            //em.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0, 8, 30) });
+            //em.enabled = true;
 
-            ParticleSystem.ShapeModule sm = gunParticles.shape;
-            sm.shapeType = ParticleSystemShapeType.Cone;
-            sm.radius = 0.5f;
-            sm.angle = 4.65f;
-            //sm.randomDirection = false;
-            sm.enabled = true;
+            //ParticleSystem.ShapeModule sm = gunParticles.shape;
+            //sm.shapeType = ParticleSystemShapeType.Cone;
+            //sm.radius = 0.5f;
+            //sm.angle = 4.65f;
+            ////sm.randomDirection = false;
+            //sm.enabled = true;
 
-            ParticleSystem.VelocityOverLifetimeModule volm = gunParticles.velocityOverLifetime;
-            volm.z = 2;
-            volm.space = ParticleSystemSimulationSpace.Local;
-            volm.enabled = true;
+            //ParticleSystem.VelocityOverLifetimeModule volm = gunParticles.velocityOverLifetime;
+            //volm.z = 2;
+            //volm.space = ParticleSystemSimulationSpace.Local;
+            //volm.enabled = true;
 
-            ParticleSystem.ColorOverLifetimeModule colm = gunParticles.colorOverLifetime;
-            colm.color = new Gradient()
-            {
-                alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(255, gunParticles.startLifetime * 0.65f), new GradientAlphaKey(70, gunParticles.startLifetime) },
+            //ParticleSystem.ColorOverLifetimeModule colm = gunParticles.colorOverLifetime;
+            //colm.color = new Gradient()
+            //{
+            //    alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(255, gunParticles.startLifetime * 0.65f), new GradientAlphaKey(70, gunParticles.startLifetime) },
 
-                colorKeys = new GradientColorKey[] { new GradientColorKey(Color.white, gunParticles.startLifetime * 0.35f), new GradientColorKey(new Color32(250, 135, 0, 255), gunParticles.startLifetime * 0.65f), new GradientColorKey(new Color(0, 0, 0), gunParticles.startLifetime) }
-            };
-            colm.enabled = true;
+            //    colorKeys = new GradientColorKey[] { new GradientColorKey(Color.white, gunParticles.startLifetime * 0.35f), new GradientColorKey(new Color32(250, 135, 0, 255), gunParticles.startLifetime * 0.65f), new GradientColorKey(new Color(0, 0, 0), gunParticles.startLifetime) }
+            //};
+            //colm.enabled = true;
 
-            ParticleSystem.SizeOverLifetimeModule solm = gunParticles.sizeOverLifetime;
-            solm.separateAxes = false;
-            solm.size = new ParticleSystem.MinMaxCurve(1, new AnimationCurve(new Keyframe[] { new Keyframe(0, 0.15f), new Keyframe(0.17f, 0.9f), new Keyframe(0.25f, 0.8f), new Keyframe(1, 0) }));
-            solm.enabled = true;
+            //ParticleSystem.SizeOverLifetimeModule solm = gunParticles.sizeOverLifetime;
+            //solm.separateAxes = false;
+            //solm.size = new ParticleSystem.MinMaxCurve(1, new AnimationCurve(new Keyframe[] { new Keyframe(0, 0.15f), new Keyframe(0.17f, 0.9f), new Keyframe(0.25f, 0.8f), new Keyframe(1, 0) }));
+            //solm.enabled = true;
 
-            ParticleSystemRenderer psr = gunParticles.GetComponent<ParticleSystemRenderer>();
-            psr.renderMode = ParticleSystemRenderMode.Billboard;
-            psr.normalDirection = 1;
-            psr.material = new Material(Shader.Find("Particles/Additive"));
-            psr.material.mainTexture = gunParticleTexture;
-            psr.sortMode = ParticleSystemSortMode.None;
-            psr.sortingFudge = 0;
-            psr.minParticleSize = 0;
-            psr.maxParticleSize = 1;
-            psr.alignment = ParticleSystemRenderSpace.View;
-            psr.pivot = Vector3.zero;
-            psr.motionVectors = true;
-            psr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
-            psr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
+            //ParticleSystemRenderer psr = gunParticles.GetComponent<ParticleSystemRenderer>();
+            //psr.renderMode = ParticleSystemRenderMode.Billboard;
+            //psr.normalDirection = 1;
+            //psr.material = new Material(Shader.Find("Particles/Additive"));
+            //psr.material.mainTexture = gunParticleTexture;
+            //psr.sortMode = ParticleSystemSortMode.None;
+            //psr.sortingFudge = 0;
+            //psr.minParticleSize = 0;
+            //psr.maxParticleSize = 1;
+            //psr.alignment = ParticleSystemRenderSpace.View;
+            //psr.pivot = Vector3.zero;
+            //psr.motionVectors = true;
+            //psr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            //psr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
         }
 
         public override void Update()
@@ -732,70 +742,70 @@ namespace MordenFirearmKitMod
             CJ.linearLimit = new SoftJointLimit { limit = 0.5f };
             CJ.xDrive = new JointDrive { positionSpring = 5000, maximumForce = 5000, positionDamper = 1000 };
 
-            //定义开炮特效
-            gunParticles.playOnAwake = false;
-            gunParticles.Stop();
-            gunParticles.loop = false;
-            gunParticles.startSize = 5;
-            gunParticles.startSpeed = 4;
-            gunParticles.maxParticles = 500;
-            gunParticles.startLifetime = 3f;          
-            gunParticles.startColor = new Color32(250, 135, 0, 150);
-            gunParticles.simulationSpace = ParticleSystemSimulationSpace.World;
-            gunParticles.gravityModifier = -0.1f;
+            ////定义开炮特效
+            //gunParticles.playOnAwake = false;
+            //gunParticles.Stop();
+            //gunParticles.loop = false;
+            //gunParticles.startSize = 5;
+            //gunParticles.startSpeed = 4;
+            //gunParticles.maxParticles = 500;
+            //gunParticles.startLifetime = 3f;          
+            //gunParticles.startColor = new Color32(250, 135, 0, 150);
+            //gunParticles.simulationSpace = ParticleSystemSimulationSpace.World;
+            //gunParticles.gravityModifier = -0.1f;
 
-            ParticleSystem.EmissionModule em = gunParticles.emission;
-            em.rate = new ParticleSystem.MinMaxCurve { mode = ParticleSystemCurveMode.TwoConstants, constantMin = 10, constantMax = 20 };
-            em.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0.2f, 30, 50) });
-            em.enabled = true;
+            ////ParticleSystem.EmissionModule em = gunParticles.emission;
+            ////em.rate = new ParticleSystem.MinMaxCurve { mode = ParticleSystemCurveMode.TwoConstants, constantMin = 10, constantMax = 20 };
+            ////em.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0.2f, 30, 50) });
+            ////em.enabled = true;
 
-            ParticleSystem.ShapeModule sm = gunParticles.shape;
-            sm.shapeType = ParticleSystemShapeType.Cone;
-            sm.radius = 1f;
-            sm.angle = 60f;
-            //sm.randomDirection = false;
-            sm.enabled = true;
+            //ParticleSystem.ShapeModule sm = gunParticles.shape;
+            //sm.shapeType = ParticleSystemShapeType.Cone;
+            //sm.radius = 1f;
+            //sm.angle = 60f;
+            ////sm.randomDirection = false;
+            //sm.enabled = true;
 
-            ParticleSystem.VelocityOverLifetimeModule volm = gunParticles.velocityOverLifetime;
-            volm.z = 0.5f;
-            volm.space = ParticleSystemSimulationSpace.Local;
-            volm.enabled = true;
+            //ParticleSystem.VelocityOverLifetimeModule volm = gunParticles.velocityOverLifetime;
+            //volm.z = 0.5f;
+            //volm.space = ParticleSystemSimulationSpace.Local;
+            //volm.enabled = true;
 
-            ParticleSystem.ColorOverLifetimeModule colm = gunParticles.colorOverLifetime;
-            colm.color = new Gradient()
-            {
-                alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(255, gunParticles.startLifetime * 0.65f), new GradientAlphaKey(10, gunParticles.startLifetime) },
+            //ParticleSystem.ColorOverLifetimeModule colm = gunParticles.colorOverLifetime;
+            //colm.color = new Gradient()
+            //{
+            //    alphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(255, gunParticles.startLifetime * 0.65f), new GradientAlphaKey(10, gunParticles.startLifetime) },
 
-                colorKeys = new GradientColorKey[] { new GradientColorKey(new Color32(250, 135, 0, 150), gunParticles.startLifetime * 0.35f), new GradientColorKey(Color.gray, gunParticles.startLifetime * 0.65f), new GradientColorKey(Color.white, gunParticles.startLifetime) }
-            };
-            colm.enabled = true;
+            //    colorKeys = new GradientColorKey[] { new GradientColorKey(new Color32(250, 135, 0, 150), gunParticles.startLifetime * 0.35f), new GradientColorKey(Color.gray, gunParticles.startLifetime * 0.65f), new GradientColorKey(Color.white, gunParticles.startLifetime) }
+            //};
+            //colm.enabled = true;
 
-            ParticleSystem.SizeOverLifetimeModule solm = gunParticles.sizeOverLifetime;
-            solm.separateAxes = false;
-            solm.size = new ParticleSystem.MinMaxCurve(1, new AnimationCurve(new Keyframe[] { new Keyframe(0, 0.15f), new Keyframe(0.17f, 0.9f), new Keyframe(0.25f, 0.65f), new Keyframe(1, 0f) }));
-            solm.enabled = true;
+            //ParticleSystem.SizeOverLifetimeModule solm = gunParticles.sizeOverLifetime;
+            //solm.separateAxes = false;
+            //solm.size = new ParticleSystem.MinMaxCurve(1, new AnimationCurve(new Keyframe[] { new Keyframe(0, 0.15f), new Keyframe(0.17f, 0.9f), new Keyframe(0.25f, 0.65f), new Keyframe(1, 0f) }));
+            //solm.enabled = true;
 
-            ParticleSystem.RotationBySpeedModule rblm = gunParticles.rotationBySpeed;
-            rblm.enabled = true;
-            rblm.range = new Vector2(90, 135);
-            rblm.separateAxes = true;
+            //ParticleSystem.RotationBySpeedModule rblm = gunParticles.rotationBySpeed;
+            //rblm.enabled = true;
+            //rblm.range = new Vector2(0, 360);
+            //rblm.separateAxes = true;
 
             
 
-            ParticleSystemRenderer psr = gunParticles.GetComponent<ParticleSystemRenderer>();
-            psr.renderMode = ParticleSystemRenderMode.Billboard;
-            psr.normalDirection = 1;
-            psr.material = new Material(Shader.Find("Particles/Additive"));
-            psr.material.mainTexture = gunParticleTexture;
-            psr.sortMode = ParticleSystemSortMode.None;
-            psr.sortingFudge = 5;
-            psr.minParticleSize = 0;
-            psr.maxParticleSize = 1;
-            psr.alignment = ParticleSystemRenderSpace.View;
-            psr.pivot = Vector3.zero;
-            psr.motionVectors = true;
-            psr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
-            psr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
+            //ParticleSystemRenderer psr = gunParticles.GetComponent<ParticleSystemRenderer>();
+            //psr.renderMode = ParticleSystemRenderMode.Billboard;
+            //psr.normalDirection = 1;
+            //psr.material = new Material(Shader.Find("Transparent/Diffuse"));
+            //psr.material.mainTexture = gunParticleTexture;
+            //psr.sortMode = ParticleSystemSortMode.None;
+            //psr.sortingFudge = 5;
+            //psr.minParticleSize = 0;
+            //psr.maxParticleSize = 1;
+            //psr.alignment = ParticleSystemRenderSpace.View;
+            //psr.pivot = Vector3.zero;
+            //psr.motionVectors = true;
+            //psr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            //psr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes;
         }
 
         public override void Update()
