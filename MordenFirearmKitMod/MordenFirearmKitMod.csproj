@@ -71,6 +71,7 @@
     <Compile Include="Blocks\BulletBlock.cs" />
     <Compile Include="GenericScript\BulletScript.cs" />
     <Compile Include="GenericScript\LauncherScript.cs" />
+    <Compile Include="GenericScript\MuzzleFlashScript.cs" />
     <Compile Include="GenericScript\TimedSelfDestruct.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
