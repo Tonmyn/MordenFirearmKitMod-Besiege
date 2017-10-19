@@ -294,7 +294,7 @@ namespace MordenFirearmKitMod
             BulletScript bs = Bullet.AddComponent<BulletScript>();
             bs.Strength = StrengthSlider.Value;
             bs.bulletKind = (BulletScript.BulletKind)Enum.ToObject(typeof(BulletScript.BulletKind), BulletMenu.Value);
-            Debug.Log(bs.bulletKind.ToString());
+            //Debug.Log(bs.bulletKind.ToString());
             bs.TrailLength = TrailLengthSlider.Value;
 
             //Bullet.AddComponent<SphereCollider>().transform.localScale = Bullet.transform.localScale * 0.25f;
