@@ -225,7 +225,7 @@ namespace MordenFirearmKitMod
         public float TrailLength = 1;
 
         /// <summary>拖尾颜色</summary>
-        public Color TrailColor = new Color(255f, 255f, 0f, 1f);
+        public Color TrailColor = new Color(255f, 255f, 0f);
 
         /// <summary>碰撞开启时间(0.1s)</summary>
         public float CollisionEnableTime = 2;
@@ -255,9 +255,9 @@ namespace MordenFirearmKitMod
                 BulletTrail.endWidth = 0.1f;
                 BulletTrail.startWidth = 0.5f;
                 BulletTrail.time = TrailLength * 0.1f;
-                BulletTrail.material.shader = Shader.Find("Transparent/Diffuse");
-                BulletTrail.material.color = TrailColor;
-                BulletTrail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                BulletTrail.material.shader = Shader.Find("Particles/Additive");
+                BulletTrail.material.SetColor("_TintColor", TrailColor);
+                //BulletTrail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             }
         }
 
