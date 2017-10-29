@@ -205,13 +205,17 @@ namespace MordenFirearmKitMod
         /// <summary>子弹种类</summary>
         public enum BulletKind
         {
-            破坏弹 = 0,
-            高爆弹 = 1,
-            云爆弹 = 2,
-            发烟弹 = 3
+            破坏弹 = 1,
+            曳光弹 = 2,
+            高爆弹 = 3,
+            云爆弹 = 4,
+            发烟弹 = 5,
+            曳光高爆弹 = 6,
+            曳光云爆弹 = 7,
+            曳光发烟弹 = 8
         }
 
-        public BulletKind bulletKind = 0;
+        public BulletKind bulletKind = BulletKind.破坏弹;
 
 
         /// <summary>子弹拖尾</summary>
@@ -220,6 +224,11 @@ namespace MordenFirearmKitMod
         /// <summary>拖尾长度</summary>
         public float TrailLength = 1;
 
+        /// <summary>拖尾颜色</summary>
+        public Color TrailColor = new Color(255f, 255f, 0f, 1f);
+
+        /// <summary>碰撞开启时间(0.1s)</summary>
+        public float CollisionEnableTime = 2;
 
         void Awake()
         {
@@ -229,21 +238,27 @@ namespace MordenFirearmKitMod
 
             rigidbody = gameObject.AddComponent<Rigidbody>();
             rigidbody.drag = 0.2f;
+            rigidbody.detectCollisions = false;
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-
-            BulletTrail = gameObject.AddComponent<TrailRenderer>();
-            BulletTrail.endWidth = 0.1f;
-            BulletTrail.startWidth = 0.5f;
-            BulletTrail.time = TrailLength * 0.1f;
-            BulletTrail.material.shader = Shader.Find("Transparent/Diffuse");
-            BulletTrail.material.color = new Color(255f, 255f, 0f, 1f);
-            BulletTrail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            
+         
         }
 
         void Start()
         {
             rigidbody.velocity = transform.forward * 350 * Strength;
+
+            StartCoroutine(Timer(CollisionEnableTime));
+
+            if (bulletKind == BulletKind.曳光弹 || bulletKind == BulletKind.曳光高爆弹 || bulletKind == BulletKind.曳光云爆弹 || bulletKind == BulletKind.曳光发烟弹 )
+            {
+                BulletTrail = gameObject.AddComponent<TrailRenderer>();
+                BulletTrail.endWidth = 0.1f;
+                BulletTrail.startWidth = 0.5f;
+                BulletTrail.time = TrailLength * 0.1f;
+                BulletTrail.material.shader = Shader.Find("Transparent/Diffuse");
+                BulletTrail.material.color = TrailColor;
+                BulletTrail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
         }
 
         void FixedUpdate()
@@ -257,7 +272,11 @@ namespace MordenFirearmKitMod
         void OnCollisionEnter(Collision collision)
         {
             StartCoroutine(Explodey());
-            BulletTrail.enabled = false;
+
+            if (bulletKind == BulletKind.曳光弹)
+                BulletTrail.enabled = false;
+
+            
             if (GetComponent<TimedSelfDestruct>() != null)
                 gameObject.GetComponent<TimedSelfDestruct>().TimedDestroySelf(10f);
 
@@ -282,7 +301,7 @@ namespace MordenFirearmKitMod
             Vector3 position_hit = transform.TransformDirection(new Vector3(-1f, rigidbody.centerOfMass.y, rigidbody.centerOfMass.z)) + transform.position;
 
             //爆炸类型 炸弹
-            if (bulletKind == BulletKind.云爆弹)
+            if (bulletKind == BulletKind.云爆弹 || bulletKind == BulletKind.曳光云爆弹)
             {
                 GameObject explo = (GameObject)Instantiate(PrefabMaster.BlockPrefabs[23].gameObject, position_hit, transform.rotation);
                 explo.transform.localScale = Vector3.one * 0.01f;
@@ -294,7 +313,7 @@ namespace MordenFirearmKitMod
                 ac.Explodey();
                 explo.AddComponent<TimedSelfDestruct>();
             }
-            else if (bulletKind == BulletKind.高爆弹)
+            else if (bulletKind == BulletKind.高爆弹 || bulletKind == BulletKind.曳光高爆弹)
             {
                 GameObject explo = (GameObject)GameObject.Instantiate(PrefabMaster.BlockPrefabs[54].gameObject, position_hit, transform.rotation);
                 explo.transform.localScale = Vector3.one * 0.01f;
@@ -306,7 +325,7 @@ namespace MordenFirearmKitMod
                 ac.StartCoroutine_Auto(ac.Explode());
                 explo.AddComponent<TimedSelfDestruct>();
             }
-            else if (bulletKind == BulletKind.发烟弹)
+            else if (bulletKind == BulletKind.发烟弹 || bulletKind == BulletKind.曳光发烟弹)
             {
                 GameObject explo = (GameObject)GameObject.Instantiate(PrefabMaster.BlockPrefabs[59].gameObject, position_hit, transform.rotation);
                 explo.transform.localScale = Vector3.one * 0.01f;
@@ -319,7 +338,7 @@ namespace MordenFirearmKitMod
                 ac.StartCoroutine(ac.Explode(0.01f));
                 explo.AddComponent<TimedSelfDestruct>();
             }
-            else if (bulletKind == BulletKind.破坏弹)
+            else if (bulletKind == BulletKind.破坏弹 || bulletKind == BulletKind.曳光弹)
             {
                 yield break;
             }
@@ -332,6 +351,8 @@ namespace MordenFirearmKitMod
 
                 }
             }
+            if(GetComponent<TrailRenderer>())
+            BulletTrail.enabled = false;
 
             //transform.localScale = Vector3.zero;
             //rigidbody.isKinematic = true;
@@ -345,5 +366,78 @@ namespace MordenFirearmKitMod
             //gameObject.AddComponent<TimedSelfDestruct>().lifeTime = psp_smoke.lifetime * 120;
         }
 
+        public IEnumerator Timer(float delay)
+        {
+            //碰撞开启
+            while (delay-- > 0 && !rigidbody.detectCollisions)
+            {
+                yield return new WaitForSeconds(0.1f * Time.timeScale);
+                //time--;
+            }
+            if (delay <= 0)
+            {
+                rigidbody.detectCollisions = true;
+            }
+
+        }
+
+        /// <summary>
+        /// 获取子弹类型
+        /// </summary>
+        /// <param name="BulletKindNumber">子弹类型编号</param>
+        /// <returns>返回BulletKind格式的子弹类型</returns>
+        public static BulletKind GetBulletKind(int BulletKindNumber)
+        {
+            return (BulletKind)Enum.ToObject(typeof(BulletKind), BulletKindNumber);
+        }
+
+        /// <summary>
+        /// 获取子弹类型
+        /// </summary>
+        /// <param name="Kind">子弹类型</param>
+        /// <returns>返回int格式的子弹类型</returns>
+        public static int GetBulletKind(BulletKind Kind)
+        {
+            return (int)Enum.Parse(typeof(BulletKind), Kind.ToString());
+        }
+
+        /// <summary>
+        /// 获取子弹种类总数
+        /// </summary>
+        /// <returns>子弹种类数</returns>
+        public static int GetBulletKindNumber()
+        {
+            return Enum.GetNames(typeof(BulletKind)).GetLength(0);
+        }
+
+        public class BulletBelt
+        {
+            public BulletScript bs;
+
+            public int CurrentBelt = 0;
+
+            public int BeltLength = 1;
+
+            public List<int> KindGroup = new List<int>();
+
+
+            public BulletBelt(GameObject bullet, float belt)
+            {
+                bs = bullet.GetComponent<BulletScript>();
+
+                BeltLength = Mathf.Abs((int)belt).ToString().Length;
+
+                for (int i = 0; i < BeltLength; i++)
+                {
+                    KindGroup.Add(Mathf.Clamp(int.Parse(belt.ToString().Substring(i, 1)), 1, GetBulletKindNumber()));
+                }
+            }
+
+            public void ChangedBulletKind()
+            {
+                bs.bulletKind = GetBulletKind(KindGroup[CurrentBelt++]);                
+                CurrentBelt = CurrentBelt >= BeltLength ? 0 : CurrentBelt;
+            }
+        }
     }
 }

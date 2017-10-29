@@ -120,6 +120,9 @@ namespace MordenFirearmKitMod
 
         //威力
         MSlider StrengthSlider;
+
+        //后座
+        MSlider KnockBackSlider;
             
         //射速滑条
         MSlider FireRateSlider;
@@ -137,10 +140,14 @@ namespace MordenFirearmKitMod
         //子弹种类
         MMenu BulletMenu;
 
+        //子弹弹链
+        MSlider BulletBeltSlider;
+
         //拖尾长度
         MSlider TrailLengthSlider;
 
-
+        //拖尾颜色
+        MColourSlider TrailColorSlider;
 
 
         #endregion
@@ -177,6 +184,8 @@ namespace MordenFirearmKitMod
 
             StrengthSlider = AddSlider("威力", "Strength", 1f, 0.5f, 2f);
 
+            KnockBackSlider = AddSlider("后座", "KnockBack", 1f, 0f, 2f);
+
             FireRateSlider = AddSlider("射速", "FireRate", 0.05f, 0f, 0.5f);
 
             BulletLimitSlider = AddSlider("载弹量", "BulletLimit", 50f, 0f, 500f);
@@ -185,8 +194,17 @@ namespace MordenFirearmKitMod
 
             #region 子弹功能组件
 
-            BulletMenu = AddMenu("BulletKind", 0, new List<string>() { BulletScript.BulletKind.破坏弹.ToString(), BulletScript.BulletKind.高爆弹.ToString(), BulletScript.BulletKind.云爆弹.ToString(), BulletScript.BulletKind.发烟弹.ToString() });
+            //BulletMenu = AddMenu("BulletKind", 0, new List<string>()
+            //{
+            //    BulletScript.BulletKind.破坏弹.ToString(),
+            //    BulletScript.BulletKind.曳光弹.ToString(),
+            //    BulletScript.BulletKind.高爆弹.ToString(),
+            //    BulletScript.BulletKind.云爆弹.ToString(),
+            //    BulletScript.BulletKind.发烟弹.ToString()
+            //});
+            BulletBeltSlider = AddSlider("弹链", "BulletBelt", 1, 1, BulletScript.GetBulletKindNumber());
             TrailLengthSlider = AddSlider("尾迹长度", "TrailLength", 1f, 0f, 3f);
+            TrailColorSlider = AddColourSlider("拖尾颜色", "TrailColoer", new Color(255f, 255f, 0f, 1f));
 
             #endregion
 
@@ -213,10 +231,13 @@ namespace MordenFirearmKitMod
             CaliberMenu.DisplayInMapper = gunBase;
             StrengthSlider.DisplayInMapper = gunBase;
             FireRateSlider.DisplayInMapper = gunBase;
+            KnockBackSlider.DisplayInMapper = gunBase;
             BulletLimitSlider.DisplayInMapper = gunBase;
 
-            BulletMenu.DisplayInMapper = bullet;
+            //BulletMenu.DisplayInMapper = bullet;
+            BulletBeltSlider.DisplayInMapper = bullet;
             TrailLengthSlider.DisplayInMapper = bullet;
+            TrailColorSlider.DisplayInMapper = bullet;
 
         }
 
@@ -293,9 +314,10 @@ namespace MordenFirearmKitMod
             //Bullet.AddComponent<DestroyIfEditMode>();
             BulletScript bs = Bullet.AddComponent<BulletScript>();
             bs.Strength = StrengthSlider.Value;
-            bs.bulletKind = (BulletScript.BulletKind)Enum.ToObject(typeof(BulletScript.BulletKind), BulletMenu.Value);
+            //bs.bulletKind = (BulletScript.BulletKind)Enum.ToObject(typeof(BulletScript.BulletKind), BulletMenu.Value);
             //Debug.Log(bs.bulletKind.ToString());
             bs.TrailLength = TrailLengthSlider.Value;
+            bs.TrailColor = TrailColorSlider.Value;
 
             //Bullet.AddComponent<SphereCollider>().transform.localScale = Bullet.transform.localScale * 0.25f;
             MeshCollider mc = Bullet.GetComponent<MeshCollider>();
@@ -316,10 +338,11 @@ namespace MordenFirearmKitMod
             MGL.gunMuzzle.gunHeat = resources["/MordenFirearmKitMod/MuzzleHeat.png"].texture;
             MGL.Trigger = Fire;         
             MGL.FireRate = FireRateSlider.Value;
-            MGL.KnockBack = StrengthSlider.Value;
+            MGL.KnockBack = StrengthSlider.Value * KnockBackSlider.Value;
             MGL.bulletLimit = (int)BulletLimitSlider.Value;
             MGL.CJ.breakForce = 15000;
             MGL.Bullet = Bullet;
+            MGL.Belt = BulletBeltSlider.Value;
 
 
         }
@@ -338,12 +361,13 @@ namespace MordenFirearmKitMod
             QCL.gunMuzzle.Size = QCL.gunMuzzle.Time = 4;
             QCL.Trigger = Fire;
             QCL.FireRate = FireRateSlider.Value*0;
-            QCL.KnockBack = StrengthSlider.Value * 2;
+            QCL.KnockBack = StrengthSlider.Value * 2 * KnockBackSlider.Value;
             QCL.bulletLimit = (int)BulletLimitSlider.Value;
             QCL.CJ.breakForce = QCL.CJ.breakTorque = 15000;
 
             QCL.Bullet = Bullet;
             QCL.Bullet.GetComponent<BulletScript>().Strength = StrengthSlider.Value * 2;
+            QCL.Belt = BulletBeltSlider.Value;
             QCL.gunAudio.volume = 0.35f;
 
         }
@@ -361,10 +385,11 @@ namespace MordenFirearmKitMod
             ACL.gunMuzzle.gunHeat = resources["/MordenFirearmKitMod/MuzzleHeat.png"].texture;
             ACL.Trigger = Fire;
             ACL.FireRate = FireRateSlider.Value * 5;
-            ACL.KnockBack = StrengthSlider.Value *1.2f;
+            ACL.KnockBack = StrengthSlider.Value * 1.2f * KnockBackSlider.Value;
             ACL.bulletLimit = (int)BulletLimitSlider.Value;
             ACL.CJ.breakForce = 15000;
             ACL.Bullet = Bullet;
+            ACL.Belt = BulletBeltSlider.Value;
         }
 
         void GetGunMeshs()
@@ -594,9 +619,7 @@ namespace MordenFirearmKitMod
                 {
                     GunVis = mf.gameObject; break;
                 }
-            }
-
-            
+            }          
 
         }
 
@@ -699,7 +722,6 @@ namespace MordenFirearmKitMod
                 {
                     Interval = 0;
                     shootable = true;
-
                     return;
                 }
                 else
@@ -718,6 +740,8 @@ namespace MordenFirearmKitMod
 
             base.Update();
         }
+
+
 
     }
 

@@ -29,7 +29,8 @@ namespace MordenFirearmKitMod
         ///<summary>后座力</summary>
         public float KnockBack = 1;
 
-
+        /// <summary>弹链</summary>
+        public float Belt = 0;
 
         //发射时间间隔
         internal float Interval;
@@ -45,6 +46,9 @@ namespace MordenFirearmKitMod
 
         ///<summary>子弹组件</summary>
         public GameObject Bullet;
+
+        ///<summary>子弹弹链组件</summary>
+        public BulletScript.BulletBelt BulletBelt;
 
         ///<summary>枪的刚体组件</summary>
         public Rigidbody rigidbody;
@@ -66,7 +70,7 @@ namespace MordenFirearmKitMod
 
         public virtual void Awake()
         {
-            GenericObject = new GameObject();
+            GenericObject = new GameObject("GenericObject");
             GenericObject.transform.parent = transform;
             GenericObject.transform.localPosition = GunPoint;          
 
@@ -103,7 +107,9 @@ namespace MordenFirearmKitMod
             gunAudio.playOnAwake = false;
             gunAudio.loop = false;
             gunAudio.volume = 0.1f;
-            gunAudio.enabled = true;   
+            gunAudio.enabled = true;
+
+            BulletBelt = new BulletScript.BulletBelt(Bullet, Belt);
         }
 
        
@@ -144,6 +150,8 @@ namespace MordenFirearmKitMod
         {
 
             bulletNumber--;
+
+            BulletBelt.ChangedBulletKind();
 
             rigidbody.AddForce(-transform.forward * KnockBack * 4000f);
 

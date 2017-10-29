@@ -29,8 +29,11 @@ namespace MordenFirearmKitMod
         {
 
             yield return new WaitForSeconds(t / 10f);
+            if (gameObject)
+            {
+                Destroy(gameObject);
+            }
 
-            Destroy(gameObject);
             if (GetComponent<TimedRocket>())
             {
                 Destroy(GetComponent<TimedRocket>());

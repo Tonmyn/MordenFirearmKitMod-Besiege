@@ -245,7 +245,7 @@ public class MuzzleFlash : MonoBehaviour
         gunParticles[4].startSpeed = 0.1f;
         gunParticles[4].maxParticles = 100;
         gunParticles[4].startLifetime = 1f + gunParticles[4].GetComponent<AnimationUV>().DelayTime;
-        gunParticles[4].startColor = Color.white;
+        gunParticles[4].startColor = new Color(0.7f,0.7f,0.7f,0.8f);
         gunParticles[4].scalingMode = ParticleSystemScalingMode.Shape;
 
         em = gunParticles[4].emission;

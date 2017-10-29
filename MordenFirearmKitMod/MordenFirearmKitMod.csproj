@@ -85,7 +85,6 @@
     <None Include="Resources\obj\MordenFirearmKitMod\Rocket.obj" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\other\MordenFirearmKitMod\MachineGun.wav" />
     <Content Include="Resources\other\MordenFirearmKitMod\RocketFire.png" />
     <Content Include="Resources\other\MordenFirearmKitMod\RocketSmoke.png" />
     <Content Include="Resources\tex\MordenFirearmKitMod\Rocket.png" />
