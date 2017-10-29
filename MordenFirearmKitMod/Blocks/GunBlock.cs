@@ -204,7 +204,7 @@ namespace MordenFirearmKitMod
             //});
             BulletBeltSlider = AddSlider("弹链", "BulletBelt", 1, 1, BulletScript.GetBulletKindNumber());
             TrailLengthSlider = AddSlider("尾迹长度", "TrailLength", 1f, 0f, 3f);
-            TrailColorSlider = AddColourSlider("拖尾颜色", "TrailColoer", new Color(1f, 1f, 0f));
+            TrailColorSlider = AddColourSlider("拖尾颜色", "TrailColoer", new Color(255f, 255f, 0f));
 
             #endregion
 
