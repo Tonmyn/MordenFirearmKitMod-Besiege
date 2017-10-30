@@ -83,8 +83,23 @@
     <None Include="Resources\obj\MordenFirearmKitMod\barrel.obj" />
     <None Include="Resources\obj\MordenFirearmKitMod\butt.obj" />
     <None Include="Resources\obj\MordenFirearmKitMod\Rocket.obj" />
+    <None Include="Resources\other\MordenFirearmKitMod\AutoCannon.obj" />
+    <None Include="Resources\other\MordenFirearmKitMod\FPSDistortionParticles.shader" />
+    <None Include="Resources\other\MordenFirearmKitMod\GunAudio.ogg" />
+    <None Include="Resources\other\MordenFirearmKitMod\MachineGun.obj" />
+    <None Include="Resources\other\MordenFirearmKitMod\MachineGun.ogg" />
+    <None Include="Resources\other\MordenFirearmKitMod\MuzzleFlashCone.obj" />
+    <None Include="Resources\other\MordenFirearmKitMod\QuickCannon.obj" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\other\MordenFirearmKitMod\AutoCannon.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\MachineGun.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\MuzzleFlame.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\MuzzleFlash.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\MuzzleFlash2.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\MuzzleHeat.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\MuzzleSmoke.png" />
+    <Content Include="Resources\other\MordenFirearmKitMod\QuickCannon.png" />
     <Content Include="Resources\other\MordenFirearmKitMod\RocketFire.png" />
     <Content Include="Resources\other\MordenFirearmKitMod\RocketSmoke.png" />
     <Content Include="Resources\tex\MordenFirearmKitMod\Rocket.png" />

@@ -236,7 +236,7 @@ namespace MordenFirearmKitMod
             gameObject.AddComponent<DestroyIfEditMode>();
             gameObject.AddComponent<TimedSelfDestruct>().lifeTime = 100f;
 
-            rigidbody = gameObject.AddComponent<Rigidbody>();
+            rigidbody = GetComponent<Rigidbody>();
             rigidbody.drag = 0.2f;
             rigidbody.detectCollisions = false;
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;

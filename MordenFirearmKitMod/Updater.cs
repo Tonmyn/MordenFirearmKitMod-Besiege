@@ -13,10 +13,10 @@ namespace MordenFirearmKitMod
     {
         
         //Mod名字
-        public string ModName = Assembly.GetExecutingAssembly().GetName().Name;
+        public static string ModName = Assembly.GetExecutingAssembly().GetName().Name;
 
         //Mod作者
-        public string Author = "XultimateX";
+        public static string Author = "XultimateX";
 
         //最新Mod版本号
         public Version LatestVersion { get; private set; }
@@ -28,16 +28,16 @@ namespace MordenFirearmKitMod
         public string LatestReleaseBody { get; private set; }
 
         //Josn格式的版本地址
-        private string JosnUrl;
+        public static string JosnUrl { get; set; }
 
         //最新Mod发布地址
-        public string url { get; set; }
+        public static string Url { get; set; }
 
         //更新Mod可用
         public bool UpdaterEnable { get; private set; } = false;
 
         //当前Mod版本号
-        private Version CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        private static  Version CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
 
         //提示窗口大小
         private Rect windowDialog = new Rect(300, 300, 320, 150);
@@ -53,12 +53,12 @@ namespace MordenFirearmKitMod
 
         public Updater(string address)
         {
-            Url(address);
+            SetUrl(address);
         }
 
         public Updater(string owner, string path)
         {
-            Url(owner, path);
+            SetUrl(owner, path);
         }
 
         //组件更新检查函数
@@ -103,21 +103,26 @@ namespace MordenFirearmKitMod
         }
 
         //设置更新地址
-        public void Url(string str)
+        public void SetUrl(string str)
         {
-            url = str;
+            Url = str;
         }
 
-        public void Url(string owner, string path)
+        /// <summary>
+        /// 设置更新地址并格式化
+        /// </summary>
+        /// <param name="owner">作者</param>
+        /// <param name="path">git仓库名</param>
+        public void SetUrl(string owner, string path)
         {
-            url = "https://git.oschina.net/" + owner + "/" + path + "/releases";
+            //url = "https://git.oschina.net/" + owner + "/" + path + "/releases";
             UrlToJosn(owner, path);
         }
 
-        public void UrlToJosn(string owner,string path)
+        private void UrlToJosn(string owner,string path)
         {
             JosnUrl = "https://git.oschina.net/api/v5/repos/" + owner + "/" + path + "/releases/latest";
-            url = "https://git.oschina.net/" + owner + "/" + path + "/releases";
+            Url = "https://git.oschina.net/" + owner + "/" + path + "/releases";
         }
 
         //画提示更新窗口
@@ -145,7 +150,7 @@ namespace MordenFirearmKitMod
             //画更新按钮
             if (GUILayout.Button("去更新页面下载新版", Elements.Buttons.ComponentField))
             {
-                Application.OpenURL(url);
+                Application.OpenURL(Url);
             }
 
             //画关闭按钮

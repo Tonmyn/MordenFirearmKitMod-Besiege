@@ -143,6 +143,12 @@ namespace MordenFirearmKitMod
         //子弹弹链
         MSlider BulletBeltSlider;
 
+        //子弹质量
+        MSlider BulletMassSlider;
+
+        //子弹碰撞
+        MSlider BulletCollisionSlider;
+
         //拖尾长度
         MSlider TrailLengthSlider;
 
@@ -203,6 +209,8 @@ namespace MordenFirearmKitMod
             //    BulletScript.BulletKind.发烟弹.ToString()
             //});
             BulletBeltSlider = AddSlider("弹链", "BulletBelt", 1, 1, BulletScript.GetBulletKindNumber());
+            BulletMassSlider = AddSlider("质量", "Mass", 0.5f, 0.1f, 2f);
+            BulletCollisionSlider = AddSlider("碰撞(0.1s)", "Collision", 0.2f, 0f, 0.5f);
             TrailLengthSlider = AddSlider("尾迹长度", "TrailLength", 1f, 0f, 3f);
             TrailColorSlider = AddColourSlider("拖尾颜色", "TrailColoer", new Color(255f, 255f, 0f));
 
@@ -236,6 +244,8 @@ namespace MordenFirearmKitMod
 
             //BulletMenu.DisplayInMapper = bullet;
             BulletBeltSlider.DisplayInMapper = bullet;
+            BulletMassSlider.DisplayInMapper = bullet;
+            BulletCollisionSlider.DisplayInMapper = bullet;
             TrailLengthSlider.DisplayInMapper = bullet;
             TrailColorSlider.DisplayInMapper = bullet;
 
@@ -310,12 +320,13 @@ namespace MordenFirearmKitMod
             Bullet.transform.localScale = Vector3.one * 0.15f * Mathf.Min(transform.localScale.x, transform.localScale.y, transform.localScale.z);
             Bullet.AddComponent<MeshCollider>().sharedMesh = Bullet.AddComponent<MeshFilter>().mesh = resources["/MordenFirearmKitMod/Bullet.obj"].mesh;
             Bullet.AddComponent<MeshRenderer>().material.color = Color.gray;
-            //Bullet.AddComponent<Rigidbody>();
+            Bullet.AddComponent<Rigidbody>().mass = BulletMassSlider.Value;
             //Bullet.AddComponent<DestroyIfEditMode>();
             BulletScript bs = Bullet.AddComponent<BulletScript>();
             bs.Strength = StrengthSlider.Value;
             //bs.bulletKind = (BulletScript.BulletKind)Enum.ToObject(typeof(BulletScript.BulletKind), BulletMenu.Value);
             //Debug.Log(bs.bulletKind.ToString());
+            bs.CollisionEnableTime = BulletCollisionSlider.Value;
             bs.TrailLength = TrailLengthSlider.Value;
             bs.TrailColor = TrailColorSlider.Value;
 
@@ -578,6 +589,9 @@ namespace MordenFirearmKitMod
         //加特林转动声音
         public AudioSource RotationAudioSource;
 
+        //加特林转动音量
+        public static float Volume = 1;
+
         ////音频剪辑数据
         //internal AudioClip gunAudioClip;
 
@@ -706,7 +720,7 @@ namespace MordenFirearmKitMod
 
             if (RotationRate != 0)
             {
-                RotationAudioSource.volume = RotationRate / (Vector3.Distance(transform.position, Camera.main.transform.position) * RotationRateLimit);
+                RotationAudioSource.volume = RotationRate / (Vector3.Distance(transform.position, Camera.main.transform.position) * RotationRateLimit) * Volume;
                 RotationAudioSource.pitch = RotationRate / RotationRateLimit;
                 RotationAudioSource.Play();
             }
