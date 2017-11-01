@@ -64,14 +64,14 @@ namespace MordenFirearmKitMod
         //组件更新检查函数
         public IEnumerator Start()
         {
-            Debug.Log("开始检查更新...");
+            Debug.Log(ModName + " 开始检查更新...");
 
             var www = new WWW(JosnUrl);
             yield return www;
 
             if (!www.isDone || !string.IsNullOrEmpty(www.error))
             {
-                Debug.Log("更新信息好像出问题了... " + ModName);
+                Debug.Log(ModName + " 更新信息好像出问题了... ");
                 Destroy(this);
                 yield break;
             }
@@ -88,7 +88,7 @@ namespace MordenFirearmKitMod
             if (LatestVersion > CurrentVersion)
             {
 #if DEBUG
-                Debug.Log(Assembly.GetExecutingAssembly().GetName().Name + "有新版可以更新");
+                Debug.Log(ModName + " 有新版可以更新");
 #endif
                 //更新可用为真
                 UpdaterEnable = true;
@@ -96,7 +96,7 @@ namespace MordenFirearmKitMod
             else
             {
 #if DEBUG
-                Debug.Log(Assembly.GetExecutingAssembly().GetName().Name + "无需更新");
+                Debug.Log(ModName + " 无需更新");
 #endif
             }
 
@@ -133,7 +133,7 @@ namespace MordenFirearmKitMod
             GUI.skin = ModGUI.Skin;
             GUI.backgroundColor = new Color(0.7f, 0.7f, 0.7f, 0.7f);
 
-            windowDialog = GUI.Window(windowID, windowDialog, doWindow, Assembly.GetExecutingAssembly().GetName().Name + " 更新提示");
+            windowDialog = GUI.Window(windowID, windowDialog, doWindow, ModName + " 更新提示");
 
         }
 
