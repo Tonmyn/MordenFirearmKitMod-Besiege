@@ -6,12 +6,18 @@ using spaar.ModLoader;
 using spaar.ModLoader.UI;
 
 namespace MordenFirearmKitMod
-{
+{ 
     
     //Mod更新检查组件
     public class Updater : MonoBehaviour
     {
         
+        //Mod名字
+        public static string ModName = Assembly.GetExecutingAssembly().GetName().Name;
+
+        //Mod作者
+        public static string Author = "XultimateX";
+
         //最新Mod版本号
         public Version LatestVersion { get; private set; }
 
@@ -21,14 +27,17 @@ namespace MordenFirearmKitMod
         //最新Mod发布介绍
         public string LatestReleaseBody { get; private set; }
 
+        //Josn格式的版本地址
+        public static string JosnUrl { get; set; }
+
         //最新Mod发布地址
-        public string url { get; set; }
+        public static string Url { get; set; }
 
         //更新Mod可用
-        public bool UpdaterEnable { get; private set; }
+        public bool UpdaterEnable { get; private set; } = false;
 
         //当前Mod版本号
-        private Version CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        private static  Version CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version;
 
         //提示窗口大小
         private Rect windowDialog = new Rect(300, 300, 320, 150);
@@ -39,30 +48,30 @@ namespace MordenFirearmKitMod
         //组件构造函数
         public Updater()
         {
-            UpdaterEnable = false;
+            UrlToJosn(Author, ModName);
         }
 
         public Updater(string address)
         {
-            UpdaterEnable = false;
-            Url(address);
+            SetUrl(address);
         }
 
         public Updater(string owner, string path)
         {
-            UpdaterEnable = false;
-            Url(owner, path);
+            SetUrl(owner, path);
         }
 
         //组件更新检查函数
         public IEnumerator Start()
         {
-            var www = new WWW(url);
+            Debug.Log(ModName + " 开始检查更新...");
+
+            var www = new WWW(JosnUrl);
             yield return www;
 
             if (!www.isDone || !string.IsNullOrEmpty(www.error))
             {
-                //if (verbose) Debug.Log("=> Unable to connect.");
+                Debug.Log(ModName + " 更新信息好像出问题了... ");
                 Destroy(this);
                 yield break;
             }
@@ -79,7 +88,7 @@ namespace MordenFirearmKitMod
             if (LatestVersion > CurrentVersion)
             {
 #if DEBUG
-                Debug.Log(Assembly.GetExecutingAssembly().GetName().Name + "有新版可以更新");
+                Debug.Log(ModName + " 有新版可以更新");
 #endif
                 //更新可用为真
                 UpdaterEnable = true;
@@ -87,21 +96,33 @@ namespace MordenFirearmKitMod
             else
             {
 #if DEBUG
-                Debug.Log(Assembly.GetExecutingAssembly().GetName().Name + "无需更新");
+                Debug.Log(ModName + " 无需更新");
 #endif
             }
 
         }
 
         //设置更新地址
-        public void Url(string str)
+        public void SetUrl(string str)
         {
-            url = str;
+            Url = str;
         }
 
-        public void Url(string owner, string path)
+        /// <summary>
+        /// 设置更新地址并格式化
+        /// </summary>
+        /// <param name="owner">作者</param>
+        /// <param name="path">git仓库名</param>
+        public void SetUrl(string owner, string path)
         {
-            url = "https://git.oschina.net/api/v5/repos/" + owner + "/" + path + "/releases/latest";
+            //url = "https://git.oschina.net/" + owner + "/" + path + "/releases";
+            UrlToJosn(owner, path);
+        }
+
+        private void UrlToJosn(string owner,string path)
+        {
+            JosnUrl = "https://git.oschina.net/api/v5/repos/" + owner + "/" + path + "/releases/latest";
+            Url = "https://git.oschina.net/" + owner + "/" + path + "/releases";
         }
 
         //画提示更新窗口
@@ -112,7 +133,7 @@ namespace MordenFirearmKitMod
             GUI.skin = ModGUI.Skin;
             GUI.backgroundColor = new Color(0.7f, 0.7f, 0.7f, 0.7f);
 
-            windowDialog = GUI.Window(windowID, windowDialog, doWindow, Assembly.GetExecutingAssembly().GetName().Name + " 更新提示");
+            windowDialog = GUI.Window(windowID, windowDialog, doWindow, ModName + " 更新提示");
 
         }
 
@@ -129,7 +150,7 @@ namespace MordenFirearmKitMod
             //画更新按钮
             if (GUILayout.Button("去更新页面下载新版", Elements.Buttons.ComponentField))
             {
-                Application.OpenURL(url);
+                Application.OpenURL(Url);
             }
 
             //画关闭按钮

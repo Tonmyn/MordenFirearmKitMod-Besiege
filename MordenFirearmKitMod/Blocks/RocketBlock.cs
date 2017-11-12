@@ -9,7 +9,7 @@ using System.ComponentModel;
 namespace MordenFirearmKitMod
 {
 
-    partial class MordenFirearmKitMod
+    partial class MordenFirearmKitBlockMod
     {
 
         //声明火箭弹模块
@@ -270,7 +270,7 @@ namespace MordenFirearmKitMod
         #region 尾焰变量 声明
 
         //声明 尾焰粒子组件
-        protected GameObject particle_fire = new GameObject();
+        protected GameObject particle_fire = new GameObject("尾焰粒子组件");
 
         //声明 尾焰粒子系统
         protected ParticleSystem ps_fire;
@@ -312,7 +312,7 @@ namespace MordenFirearmKitMod
         #region 尾烟变量 声明
 
         //声明 尾烟粒子组件
-        protected GameObject particle_smoke = new GameObject();
+        protected GameObject particle_smoke = new GameObject("尾烟粒子组件");
 
         //声明 粒子系统
         protected ParticleSystem ps_smoke;
@@ -394,12 +394,12 @@ namespace MordenFirearmKitMod
                 psp.color_start = Color.blue;
                 psp.color_end = Color.yellow;
                 psp.color_startTime = 0;
-                psp.color_endTime = lifetime;
+                psp.color_endTime = psp.lifetime/2;
 
                 psp.alpha_start = 1;
                 psp.alpha_end = 0;
                 psp.alpha_startTime = 0;
-                psp.alpha_endTime = lifetime;
+                psp.alpha_endTime = psp.alpha_startTime;
 
                 return psp;
             }
@@ -474,11 +474,11 @@ namespace MordenFirearmKitMod
 
             #region 尾焰组件初始化
 
-            lifetime_fire = AddSlider("时间", "LifeTimeFire", psp_fire.lifetime, 0, 1);
+            lifetime_fire = AddSlider("时间", "LifeTimeFire", psp_fire.lifetime * transform.localScale.x, 0, 1);
 
             radius_fire = AddSlider("半径", "RadiusFire", psp_fire.radius, 0, 2);
 
-            angle_fire = AddSlider("角度", "AngleFire", psp_fire.angle, 0, 5);
+            angle_fire = AddSlider("角度", "AngleFire", psp_fire.angle, 0, 60);
 
             size_fire = AddSlider("尺寸", "SizeFire", psp_fire.size, 0, 5);
 
@@ -548,6 +548,7 @@ namespace MordenFirearmKitMod
 
             page_valuechanged(0);
 
+            
         }
         
         //改变 功能开关 事件
@@ -1190,31 +1191,32 @@ namespace MordenFirearmKitMod
             ps_smoke.Stop();
             
 
-            gameObject.AddComponent<TimedSelfDestruct>().lifetime = psp_smoke.lifetime * 120;
+            gameObject.AddComponent<TimedSelfDestruct>().lifeTime = psp_smoke.lifetime * 120;
 
         }
 
+        //尾焰粒子组件初始化
         protected void fire_ps_init(ParticleSystemProperties psp)
         {
             ps_fire = particle_fire.AddComponent<ParticleSystem>();
             ps_fire.Stop();
-            ps_fire.startLifetime = psp.lifetime;
+            ps_fire.startLifetime = psp.lifetime * Mathf.Sqrt( transform.localScale.x);
             particle_fire.transform.parent = transform;
             particle_fire.transform.localPosition = new Vector3(1.25f, 0, 0.3f);
             particle_fire.transform.localRotation = new Quaternion(90, 0, 90, 0);
-            
+            ps_fire.scalingMode = ParticleSystemScalingMode.Hierarchy;
 
             ParticleSystem.ShapeModule sm = ps_fire.shape;
             sm.shapeType = ParticleSystemShapeType.Cone;
-            sm.radius = 0f;
-            sm.angle = 2;
-            //sm.randomDirection = true;
+            sm.radius = psp_fire.radius;
+            sm.angle = psp_fire.angle;
+            sm.randomDirection = false;
             sm.enabled = true;
             
 
             ParticleSystem.SizeOverLifetimeModule sl = ps_fire.sizeOverLifetime;
             //float size = (transform.localScale.y + transform.localScale.z) / 2;
-            sl.size = new ParticleSystem.MinMaxCurve(psp.size, AnimationCurve.Linear(0f, psp.size_start, psp.lifetime, psp.size_end));
+            sl.size = new ParticleSystem.MinMaxCurve((transform.localScale.y + transform.localScale.z) / 2 * psp_fire.size, AnimationCurve.Linear(0f, psp.size_start, ps_fire.startLifetime, psp.size_end));
             sl.enabled = true;
 
             ParticleSystem.ColorOverLifetimeModule colm = ps_fire.colorOverLifetime;
@@ -1233,6 +1235,7 @@ namespace MordenFirearmKitMod
             psr_fire.sharedMaterial.mainTexture = (resources["/MordenFirearmKitMod/RocketFire.png"].texture);
         }
 
+        //尾烟粒子组件初始化
         protected void smoke_ps_init(ParticleSystemProperties psp)
         {
             ps_smoke = particle_smoke.AddComponent<ParticleSystem>();
@@ -1262,7 +1265,7 @@ namespace MordenFirearmKitMod
 
             ParticleSystem.SizeOverLifetimeModule sl = ps_smoke.sizeOverLifetime;
             //float size = (transform.localScale.y + transform.localScale.z) / 2;
-            sl.size = new ParticleSystem.MinMaxCurve(psp.size, AnimationCurve.Linear(0f, psp.size_start, psp.lifetime, psp.size_end));
+            sl.size = new ParticleSystem.MinMaxCurve(psp.size * (transform.localScale.y + transform.localScale.z) / 3, AnimationCurve.Linear(0f, psp.size_start, ps_fire.startLifetime, psp.size_end));
             sl.enabled = true;
 
             ParticleSystem.RotationOverLifetimeModule rolm = ps_smoke.rotationOverLifetime;
@@ -1488,6 +1491,7 @@ namespace MordenFirearmKitMod
             //火箭弹实例化 设置连接点失效
             rocket[label] = (GameObject)Instantiate(PrefabMaster.BlockPrefabs[650].gameObject, pos, transform.rotation, transform);
             Destroy(rocket[label].GetComponent<ConfigurableJoint>());
+            //rocket[label].transform.localPosition = transform.InverseTransformVector(rigidbody.position) + position_rocket[label];
 
             //火箭弹刚体 不开启碰撞 不受物理影响
             rb[label] = rocket[label].GetComponent<Rigidbody>();
@@ -1623,25 +1627,7 @@ namespace MordenFirearmKitMod
 
     }
 
-    //到时自毁脚本
-    public class TimedSelfDestruct : MonoBehaviour
-    {
-        float timer = 0;
-        public float lifetime = 260;
 
-        void FixedUpdate()
-        {
-            ++timer;
-            if (timer > lifetime)
-            {
-                Destroy(gameObject);
-                if (this.GetComponent<TimedRocket>())
-                {
-                    Destroy(this.GetComponent<TimedRocket>());
-                }
-            }
-        }
-    }
 
     public class ParticleSystemComponent : MonoBehaviour
     {
@@ -1667,4 +1653,5 @@ namespace MordenFirearmKitMod
 
         }
     }
+
 }
