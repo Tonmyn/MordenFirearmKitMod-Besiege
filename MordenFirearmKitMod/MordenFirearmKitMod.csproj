@@ -65,10 +65,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Blocks\DirectionBlock.cs" />
     <Compile Include="Blocks\GunBlock.cs" />
     <Compile Include="Blocks\RocketBlock.cs" />
     <Compile Include="BulletBase.cs" />
-    <Compile Include="Blocks\BulletBlock.cs" />
     <Compile Include="GenericScript\BulletScript.cs" />
     <Compile Include="GenericScript\LauncherScript.cs" />
     <Compile Include="GenericScript\MuzzleFlashScript.cs" />

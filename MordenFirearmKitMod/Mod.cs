@@ -48,6 +48,14 @@ namespace MordenFirearmKitMod
         // a directory called "Release" will be created in your project directory. You just need to put into a .zip file or similiar
         // archive and you're ready to publish your mod. (Put the _contents_ of the folder into a .zip file, not the Release folder itself)
 
+        enum BlockList
+        {
+            火箭弹模块 = 650,
+            火箭巢模块 = 651,
+            机枪模块 = 652,
+            指向模块 = 653
+        }
+
         public override void OnLoad()
         {
             // Your initialization code here
@@ -61,12 +69,12 @@ namespace MordenFirearmKitMod
             LoadBlock(RocketBlock);
             LoadBlock(RocketPodBlock);
             LoadBlock(MachineGun);
+            LoadBlock(direction);
 
             //增加灯关渲染数量
-            QualitySettings.pixelLightCount +=10;
+            QualitySettings.pixelLightCount += 10;
 
         }
-
 
         public override void OnUnload()
         {
@@ -121,6 +129,7 @@ namespace MordenFirearmKitMod
 
             }
         }
+
     }
 
 }

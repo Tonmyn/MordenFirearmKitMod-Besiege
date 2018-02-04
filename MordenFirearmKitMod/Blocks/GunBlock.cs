@@ -15,7 +15,7 @@ namespace MordenFirearmKitMod
         //机枪模块
         public Block MachineGun = new Block()
             ///ID of the Block
-            .ID(652)
+            .ID((int)BlockList.机枪模块)
 
             ///Name of the Block
             .BlockName("MachineGun")
