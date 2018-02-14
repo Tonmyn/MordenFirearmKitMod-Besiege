@@ -16,7 +16,7 @@ namespace MordenFirearmKitMod
 
             .BlockName(BlockList.指向模块.ToString())
 
-            .Obj(new List<Obj>() { new Obj("/MordenFirearmKitMod/Direction.obj", "/MordenFirearmKitMod/Direction.png", new VisualOffset(new Vector3(1f, 1f, 1f), new Vector3(1.25f, 0f, 0.3f), new Vector3(45f, 0f, 180f))) })
+            .Obj(new List<Obj>() { new Obj("/MordenFirearmKitMod/Direction.obj", "/MordenFirearmKitMod/Direction.png", new VisualOffset(Vector3.one, Vector3.zero, Vector3.zero)) })
 
             .IconOffset(new Icon(1.3f, new Vector3(-0.25f, -0.25f, 0f), new Vector3(15f, -15f, 45f)))
 
@@ -28,13 +28,15 @@ namespace MordenFirearmKitMod
 #if DEBUG
             .ShowCollider(true)
 #endif
-            .CompoundCollider(new List<ColliderComposite>() { ColliderComposite.Capsule(0.25f, 2.65f, Direction.X, new Vector3(-0.125f, 0f, 0.3f), Vector3.zero) })
+            .CompoundCollider(new List<ColliderComposite>() { /*ColliderComposite.Capsule(0.25f, 2.65f, Direction.Z, new Vector3(-0.125f, 0f, 0.3f), Vector3.zero)*/
+                ColliderComposite.Box(Vector3.one,new Vector3(0,0,0.5f),Vector3.zero) })
 
             .NeededResources(new List<NeededResource>() { })
 
             .AddingPoints(new List<AddingPoint>()
             {
                 new BasePoint(false,true)//.Motionable(true,true,true)
+                ,new AddingPoint(new Vector3(0,0,0.5f),new Vector3(0,0,90),true)
             }
             );
 
@@ -53,12 +55,85 @@ namespace MordenFirearmKitMod
 
         Vector3 LastVector = Vector3.zero;
 
-        float force = 0.1f,i = 0;
-
         Vector3 offset = new Vector3(0,1,0);
 
-        LineRenderer lr1,lr2,lr3;
+        //偏差 间隔
+        float Error = 0,Interval = 1,i=0;
 
+        float Hardness = 1;
+        //PID
+        float P = 1, I = 1, D = 1;
+
+        PID pid = new PID();
+
+        MKey Lock, Release;
+
+        MSlider Pslider, Islider, Dslider;
+
+        //LineRenderer lr1,lr2,lr3;
+
+
+        class PID
+        {
+            //比例,积分,微分
+            float P,I,D;
+            //偏差,上次偏差,上上次偏差
+            float Error, LastError,BeforeLastError;
+            //时间间隔
+            //float T = Time.deltaTime;
+            //计算结果
+            float Result;
+
+            public PID()
+            {
+                Result = Error = LastError = BeforeLastError = 0;
+
+                P = I = D = 1;
+            }
+
+            public PID(float p,float i,float d)
+            {
+                Result = Error = LastError = BeforeLastError = 0;
+
+                P = p;
+                I = i;
+                D = d;
+
+            }
+
+            public float result(float error)
+            {
+                Error = error;
+                Result = P * Error + I * (Error - LastError) + D * (Error - 2 * LastError + BeforeLastError);
+
+                BeforeLastError = LastError;
+                LastError = Error;
+                
+                return Result;
+            }
+
+            public float result(float error, float p, float i, float d)
+            {
+                Error = error;
+                P = p;
+                I = i;
+                D = d;
+                Result = P * Error + I * (Error - LastError) + D * (Error - 2 * LastError + BeforeLastError);
+
+                BeforeLastError = LastError;
+                LastError = Error;
+
+                return Result;
+            }
+
+            public void SetPID(float p, float i, float d)
+            {
+                P = p;
+                I = i;
+                D = d;
+            }
+
+        }
         
 
         protected virtual System.Collections.IEnumerator UpdateMapper()
@@ -84,91 +159,46 @@ namespace MordenFirearmKitMod
             LoadMapperValues(stream);
         }
 
+        public override void SafeAwake()
+        {
+            base.SafeAwake();
+            Lock = AddKey("锁定", "Lock", KeyCode.T);
+            Release = AddKey("释放", "Release", KeyCode.R);
+
+            AddSlider("比例", "p", 1, 0.1f, 2f).ValueChanged += (float value) => { P = value; };
+            AddSlider("积分", "i", 1, 0.1f, 3f).ValueChanged += (float value) => { I = value; };
+            AddSlider("微分", "d", 1, 0.1f, 3f).ValueChanged += (float value) => { D = value; };
+            AddSlider("间隔", "Interval", 1, 1, 10).ValueChanged += (float value) => { Interval = value; };
+            AddSlider("硬度", "Hardness", 1, 0, 5).ValueChanged += (float value) => { Hardness = value; };
+
+            BoxCollider BC = GetComponentsInChildren<BoxCollider>().ToList().Find(match => match.name == "Adding Point");
+            BC.center = Vector3.zero;
+            BC.size = Vector3.one * 1.1f;
+        }
 
         protected override void OnSimulateStart()
         {
-            lr1 = gameObject.AddComponent<LineRenderer>();
-            lr1.enabled = false;
-            lr1.useWorldSpace = true;
-            lr1.SetVertexCount(2);
-            lr1.material = new Material(Shader.Find("Particles/Additive"));
-            lr1.SetColors(Color.red, Color.yellow);
-            lr1.SetWidth(0.5f, 0.5f);
 
-            //lr2 = gameObject.AddComponent<LineRenderer>();
-            //lr2.useWorldSpace = true;
-            //lr2.SetVertexCount(2);
-            //lr2.material = new Material(Shader.Find("Particles/Additive"));
-            //lr2.SetColors(Color.blue, Color.magenta);
-            //lr2.SetWidth(2f, 2f);
+            GetComponent<ConfigurableJoint>().projectionMode = JointProjectionMode.PositionAndRotation;
+            GetComponent<ConfigurableJoint>().projectionAngle = Mathf.Clamp(Hardness, 0, 5);
 
-            //GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //go.transform.parent = transform;
-            //go.transform.position = -transform.right + transform.position;
-            //Destroy(go.GetComponent<Rigidbody>());
-            //lr2 = go.AddComponent<LineRenderer>();
-            lr2 = new GameObject().AddComponent<LineRenderer>();
-            lr2.enabled = false;
-            lr2.useWorldSpace = true;
-            lr2.SetVertexCount(2);
-            lr2.material = new Material(Shader.Find("Particles/Additive"));
-            lr2.SetColors(Color.blue, Color.magenta);
-            lr2.SetWidth(2f, 2f);
-            lr2.gameObject.AddComponent<DestroyIfEditMode>();
 
-            lr3 = new GameObject().AddComponent<LineRenderer>();
-            lr3.enabled = false;
-            lr3.useWorldSpace = true;
-            lr3.SetVertexCount(2);
-            lr3.material = new Material(Shader.Find("Particles/Additive"));
-            lr3.SetColors(Color.grey, Color.green);
-            lr3.SetWidth(2f, 2f);
-            lr3.gameObject.AddComponent<DestroyIfEditMode>();
         }
-
 
         protected override void OnSimulateUpdate()
         {
-            if (Input.GetKeyDown(KeyCode.B))
+            //获取目标
+            if (Lock.IsDown)
             {
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RHit, Camera.main.farClipPlane))
                 {
                     if ((RHit.transform.position == transform.position ? false : !RHit.transform.tag.Contains("Cloaked")))
                     {
-                        //this.currentTarget = this.hitt.transform.gameObject;
                         TargetObject = RHit.transform.gameObject;
-                        //TargetPoint = RHit.point;
-                        //Debug.Log(RHit.transform.gameObject.name);
                     }
                 }
             }
 
-
-            if (TargetObject)
-            {
-                //Debug.Log(TargetObject.transform.position);
-                //transform.rotation = Quaternion.LookRotation(Target.transform.position );
-                //Rigidbody.MoveRotation(Quaternion.LookRotation(Target.transform.position));
-
-                lr1.enabled = true;
-                lr1.SetPosition(0, transform.position);
-                lr1.SetPosition(1, TargetObject.transform.position);
-
-                lr2.enabled = true;
-                lr2.SetPosition(0, transform.position);
-                lr2.SetPosition(1, -transform.right*5 + transform.position);
-
-                lr3.enabled = true;
-                lr3.SetPosition(0, transform.position);
-                lr3.SetPosition(1, CrossVector);
-            }
-            else
-            {
-                //transform.rotation = Camera.main.transform.rotation;
-            }
-
-            //lr2.SetPosition(0, transform.position + offset);
-            //lr2.SetPosition(1, transform.right + offset);
 
         }
 
@@ -177,39 +207,28 @@ namespace MordenFirearmKitMod
 
             if (TargetObject)
             {
+                if (Release.IsPressed)
+                {
+                    TargetObject = null;
+                    return;
+                }
 
+                while (i++ < Interval) ;
+                i = 0;
                 TargetVector = TargetObject.transform.position - transform.position;
-                //TargetVector = transform.InverseTransformVector(TargetVector);
-                CrossVector = Vector3.Cross(TargetVector, -transform.right) + transform.position;
+                CrossVector = Vector3.Cross(TargetVector, transform.forward) + transform.position;
+                Error = Vector3.Angle(transform.forward, TargetVector);
 
-                Debug.Log(Vector3.Angle(-transform.right, TargetVector) + " " +TargetVector);
-                //Rigidbody.MoveRotation(Quaternion.LookRotation(Target.transform.right * Time.deltaTime * force));
-                //Debug.Log(Vector2.Angle(new Vector2(TargetVector.x, TargetVector.z), -new Vector2(transform.right.x, transform.right.z))+" - "+ Vector2.Angle(new Vector2(TargetVector.y, TargetVector.x), new Vector2(transform.right.y, transform.right.x)));
-                //rigidbody.AddTorque ( Vector3.Scale(TargetVector+transform.right, new Vector3(100, 100, 100) * Time.deltaTime));
-                //Debug.Log(Vector2.Angle(new Vector2(TargetVector.x,TargetVector.y),Vector2.right)+"|"+ Vector2.Angle(new Vector2(TargetVector.x, TargetVector.z), Vector2.right));
-                //Debug.Log(TargetVector);
-                //transform.rotation = Quaternion.Slerp(transform.rotation,Quaternion.LookRotation(TargetObject.transform.position,transform.position),Time.deltaTime);
-                //transform.rotation = Quaternion.AngleAxis(1 * Time.deltaTime, CrossVector);
-                //Rigidbody.AddTorque(-CrossVector * 1000f);
-                //Rigidbody.AddRelativeTorque(Vector3.Scale(transform.InverseTransformVector(-CrossVector), new Vector3(1, 1, 0))*1000f);
-                //Rigidbody.AddTorque(Vector3.Scale( TargetVector,new Vector3(1,1,0)) * 1000f);
-                //transform.RotateAround(transform.position + offset, TargetVector, Vector3.Angle(-transform.right, TargetVector) * Time.deltaTime * 50);
+                Error = pid.result(Error, P, I, D);
 
-                //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(-transform.right, -CrossVector), i=i+0.01f);
-                //Quaternion .t
-            }
-
-
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                //transform.rotation = Quaternion.AngleAxis((i++) * Time.deltaTime, Vector3.right);
-                //transform.RotateAround( transform.position,transform.right, 20 * Time.deltaTime);
-                //Rigidbody.AddTorque(Vector3.right * 100f);
-
-                //transform.rotation = Quaternion.LookRotation(-transform.right, -CrossVector);
+                rigidbody.angularVelocity = rigidbody.transform.InverseTransformVector(Vector3.Scale(rigidbody.angularVelocity, new Vector3(0, 1, 1)));
+                rigidbody.MoveRotation(rigidbody.rotation * Quaternion.AngleAxis(-Error * Time.deltaTime * 20f, transform.InverseTransformDirection(CrossVector - transform.position)));
+                //rigidbody.AddTorque((CrossVector-transform.position)*50);
             }
 
         }
+
+
 
     }
 
