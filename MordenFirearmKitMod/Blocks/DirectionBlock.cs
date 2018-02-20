@@ -223,7 +223,7 @@ namespace MordenFirearmKitMod
 
                 rigidbody.angularVelocity = rigidbody.transform.InverseTransformVector(Vector3.Scale(rigidbody.angularVelocity, new Vector3(0, 1, 1)));
                 rigidbody.MoveRotation(rigidbody.rotation * Quaternion.AngleAxis(-Error * Time.deltaTime * 20f, transform.InverseTransformDirection(CrossVector - transform.position)));
-                //rigidbody.AddTorque((CrossVector-transform.position)*50);
+                //rigidbody.AddTorque(-(CrossVector-transform.position)*500);
             }
 
         }
