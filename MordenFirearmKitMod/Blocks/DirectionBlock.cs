@@ -486,174 +486,174 @@ namespace MordenFirearmKitMod
         }
 
 
-        public Vector3 calculateNoneLinearTrajectory(float gunVelocity, float AirDrag, Vector3 gunPosition, float TargetVelocity, Vector3 TargetPosition, Vector3 TargetDirection, Vector3 hitPoint, float G, float accuracy, float diff)
-        {
-            iterativeCount++;
-            if (iterativeCount > 512) { iterativeCount = 0; return hitPoint; }
-            if (hitPoint == Vector3.zero || gunVelocity < 1)
-            {
-                return currentTarget.transform.position;
-            }
-            Vector3 gunDirection = new Vector3(hitPoint.x, gunPosition.y, hitPoint.z) - gunPosition;
-            Quaternion gunRotation = Quaternion.FromToRotation(gunDirection, Vector3.forward);
-            Vector3 localHitPoint = gunRotation * (hitPoint - gunPosition);
-            float currentCalculatedDistance = (hitPoint - gunPosition).magnitude;
+        //public Vector3 calculateNoneLinearTrajectory(float gunVelocity, float AirDrag, Vector3 gunPosition, float TargetVelocity, Vector3 TargetPosition, Vector3 TargetDirection, Vector3 hitPoint, float G, float accuracy, float diff)
+        //{
+        //    iterativeCount++;
+        //    if (iterativeCount > 512) { iterativeCount = 0; return hitPoint; }
+        //    if (hitPoint == Vector3.zero || gunVelocity < 1)
+        //    {
+        //        return currentTarget.transform.position;
+        //    }
+        //    Vector3 gunDirection = new Vector3(hitPoint.x, gunPosition.y, hitPoint.z) - gunPosition;
+        //    Quaternion gunRotation = Quaternion.FromToRotation(gunDirection, Vector3.forward);
+        //    Vector3 localHitPoint = gunRotation * (hitPoint - gunPosition);
+        //    float currentCalculatedDistance = (hitPoint - gunPosition).magnitude;
 
-            float b2M4ac = gunVelocity * gunVelocity - 4 * AirDrag * currentCalculatedDistance;
-            if (b2M4ac < 0) { /*Debug.Log("Nan!!!" + (gunVelocity * gunVelocity - 2 * AirDrag * currentCalculatedDistance));*/ return currentTarget.transform.position; }
-            float V = (float)Math.Sqrt(b2M4ac);
-            float X = localHitPoint.z;//z为前方
-            float Y = localHitPoint.y;
-            Vector2 TT = formulaProjectile(X, Y, V, G);
-            if (TT == Vector2.zero)
-            {
-                iterativeCount = 0;
-                return currentTarget.transform.position;
-            }
-            float VT = TargetVelocity;
-            Vector3 PT = TargetPosition;
-            Vector3 DT = TargetDirection;
-            float T = TT.y;
-            Vector3 newHitPoint = formulaTarget(VT, PT, DT, T);
-            float diff1 = (newHitPoint - hitPoint).magnitude;
-            if (diff1 > diff)
-            {
-                iterativeCount = 0;
-                return currentTarget.transform.position;
-            }
-            if (diff1 < accuracy)
-            {
-                gunRotation = Quaternion.Inverse(gunRotation);
-                Y = Mathf.Tan(TT.x) * X;
-                newHitPoint = gunRotation * new Vector3(0, Y, X) + gunPosition;
-                iterativeCount = 0;
-                return newHitPoint;
-            }
-            return calculateNoneLinearTrajectory(gunVelocity, AirDrag, gunPosition, TargetVelocity, TargetPosition, TargetDirection, newHitPoint, G, accuracy, diff1);
-        }
-        public Vector3 calculateNoneLinearTrajectoryWithAccelerationPrediction(float gunVelocity, float AirDrag, Vector3 gunPosition, float TargetVelocity, float targetAcceleration, Vector3 TargetPosition, Vector3 TargetDirection, Vector3 hitPoint, float G, float accuracy, float diff)
-        {
-            iterativeCount++;
-            if (iterativeCount > 512) { iterativeCount = 0; return TargetPosition; }
-            if (hitPoint == Vector3.zero || gunVelocity < 1)
-            {
-                return currentTarget.transform.position;
-            }
-            Vector3 gunDirection = new Vector3(hitPoint.x, gunPosition.y, hitPoint.z) - gunPosition;
-            Quaternion gunRotation = Quaternion.FromToRotation(gunDirection, Vector3.forward);
-            Vector3 localHitPoint = gunRotation * (hitPoint - gunPosition);
-            float currentCalculatedDistance = (hitPoint - gunPosition).magnitude;
+        //    float b2M4ac = gunVelocity * gunVelocity - 4 * AirDrag * currentCalculatedDistance;
+        //    if (b2M4ac < 0) { /*Debug.Log("Nan!!!" + (gunVelocity * gunVelocity - 2 * AirDrag * currentCalculatedDistance));*/ return currentTarget.transform.position; }
+        //    float V = (float)Math.Sqrt(b2M4ac);
+        //    float X = localHitPoint.z;//z为前方
+        //    float Y = localHitPoint.y;
+        //    Vector2 TT = formulaProjectile(X, Y, V, G);
+        //    if (TT == Vector2.zero)
+        //    {
+        //        iterativeCount = 0;
+        //        return currentTarget.transform.position;
+        //    }
+        //    float VT = TargetVelocity;
+        //    Vector3 PT = TargetPosition;
+        //    Vector3 DT = TargetDirection;
+        //    float T = TT.y;
+        //    Vector3 newHitPoint = formulaTarget(VT, PT, DT, T);
+        //    float diff1 = (newHitPoint - hitPoint).magnitude;
+        //    if (diff1 > diff)
+        //    {
+        //        iterativeCount = 0;
+        //        return currentTarget.transform.position;
+        //    }
+        //    if (diff1 < accuracy)
+        //    {
+        //        gunRotation = Quaternion.Inverse(gunRotation);
+        //        Y = Mathf.Tan(TT.x) * X;
+        //        newHitPoint = gunRotation * new Vector3(0, Y, X) + gunPosition;
+        //        iterativeCount = 0;
+        //        return newHitPoint;
+        //    }
+        //    return calculateNoneLinearTrajectory(gunVelocity, AirDrag, gunPosition, TargetVelocity, TargetPosition, TargetDirection, newHitPoint, G, accuracy, diff1);
+        //}
+        //public Vector3 calculateNoneLinearTrajectoryWithAccelerationPrediction(float gunVelocity, float AirDrag, Vector3 gunPosition, float TargetVelocity, float targetAcceleration, Vector3 TargetPosition, Vector3 TargetDirection, Vector3 hitPoint, float G, float accuracy, float diff)
+        //{
+        //    iterativeCount++;
+        //    if (iterativeCount > 512) { iterativeCount = 0; return TargetPosition; }
+        //    if (hitPoint == Vector3.zero || gunVelocity < 1)
+        //    {
+        //        return currentTarget.transform.position;
+        //    }
+        //    Vector3 gunDirection = new Vector3(hitPoint.x, gunPosition.y, hitPoint.z) - gunPosition;
+        //    Quaternion gunRotation = Quaternion.FromToRotation(gunDirection, Vector3.forward);
+        //    Vector3 localHitPoint = gunRotation * (hitPoint - gunPosition);
+        //    float currentCalculatedDistance = (hitPoint - gunPosition).magnitude;
 
-            float b2M4ac = gunVelocity * gunVelocity - 4 * AirDrag * currentCalculatedDistance;
-            if (b2M4ac < 0) { /*Debug.Log("Nan!!!" + (gunVelocity * gunVelocity - 2 * AirDrag * currentCalculatedDistance));*/ return currentTarget.transform.position; }
-            float V = (float)Math.Sqrt(b2M4ac);
-            float X = localHitPoint.z;//z为前方
-            float Y = localHitPoint.y;
-            Vector2 TT = formulaProjectile(X, Y, V, G);
-            if (TT == Vector2.zero)
-            {
-                iterativeCount = 0;
-                return currentTarget.transform.position;
-            }
-            float VT = TargetVelocity + targetAcceleration * currentCalculatedDistance;
-            Vector3 PT = TargetPosition;
-            Vector3 DT = TargetDirection;
-            float T = TT.y;
-            Vector3 newHitPoint = formulaTarget(VT, PT, DT, T);
-            float diff1 = (newHitPoint - hitPoint).magnitude;
-            if (diff1 > diff)
-            {
-                iterativeCount = 0;
-                return currentTarget.transform.position;
-            }
-            if (diff1 < accuracy)
-            {
-                gunRotation = Quaternion.Inverse(gunRotation);
-                Y = Mathf.Tan(TT.x) * X;
-                newHitPoint = gunRotation * new Vector3(0, Y, X) + gunPosition;
-                iterativeCount = 0;
-                return newHitPoint;
-            }
-            return calculateNoneLinearTrajectory(gunVelocity, AirDrag, gunPosition, TargetVelocity, TargetPosition, TargetDirection, newHitPoint, G, accuracy, diff1);
-        }
-        public Vector3 calculateLinearTrajectory(float gunVelocity, Vector3 gunPosition, float TargetVelocity, Vector3 TargetPosition, Vector3 TargetDirection)
-        {
+        //    float b2M4ac = gunVelocity * gunVelocity - 4 * AirDrag * currentCalculatedDistance;
+        //    if (b2M4ac < 0) { /*Debug.Log("Nan!!!" + (gunVelocity * gunVelocity - 2 * AirDrag * currentCalculatedDistance));*/ return currentTarget.transform.position; }
+        //    float V = (float)Math.Sqrt(b2M4ac);
+        //    float X = localHitPoint.z;//z为前方
+        //    float Y = localHitPoint.y;
+        //    Vector2 TT = formulaProjectile(X, Y, V, G);
+        //    if (TT == Vector2.zero)
+        //    {
+        //        iterativeCount = 0;
+        //        return currentTarget.transform.position;
+        //    }
+        //    float VT = TargetVelocity + targetAcceleration * currentCalculatedDistance;
+        //    Vector3 PT = TargetPosition;
+        //    Vector3 DT = TargetDirection;
+        //    float T = TT.y;
+        //    Vector3 newHitPoint = formulaTarget(VT, PT, DT, T);
+        //    float diff1 = (newHitPoint - hitPoint).magnitude;
+        //    if (diff1 > diff)
+        //    {
+        //        iterativeCount = 0;
+        //        return currentTarget.transform.position;
+        //    }
+        //    if (diff1 < accuracy)
+        //    {
+        //        gunRotation = Quaternion.Inverse(gunRotation);
+        //        Y = Mathf.Tan(TT.x) * X;
+        //        newHitPoint = gunRotation * new Vector3(0, Y, X) + gunPosition;
+        //        iterativeCount = 0;
+        //        return newHitPoint;
+        //    }
+        //    return calculateNoneLinearTrajectory(gunVelocity, AirDrag, gunPosition, TargetVelocity, TargetPosition, TargetDirection, newHitPoint, G, accuracy, diff1);
+        //}
+        //public Vector3 calculateLinearTrajectory(float gunVelocity, Vector3 gunPosition, float TargetVelocity, Vector3 TargetPosition, Vector3 TargetDirection)
+        //{
 
-            Vector3 hitPoint = Vector3.zero;
+        //    Vector3 hitPoint = Vector3.zero;
 
-            if (TargetVelocity != 0)
-            {
-                Vector3 D = gunPosition - TargetPosition;
-                float THETA = Vector3.Angle(D, TargetDirection) * Mathf.Deg2Rad;
-                float DD = D.magnitude;
+        //    if (TargetVelocity != 0)
+        //    {
+        //        Vector3 D = gunPosition - TargetPosition;
+        //        float THETA = Vector3.Angle(D, TargetDirection) * Mathf.Deg2Rad;
+        //        float DD = D.magnitude;
 
-                float A = 1 - Mathf.Pow((gunVelocity / TargetVelocity), 2);
-                float B = -(2 * DD * Mathf.Cos(THETA));
-                float C = DD * DD;
-                float DELTA = B * B - 4 * A * C;
+        //        float A = 1 - Mathf.Pow((gunVelocity / TargetVelocity), 2);
+        //        float B = -(2 * DD * Mathf.Cos(THETA));
+        //        float C = DD * DD;
+        //        float DELTA = B * B - 4 * A * C;
 
-                if (DELTA < 0)
-                {
-                    return Vector3.zero;
-                }
+        //        if (DELTA < 0)
+        //        {
+        //            return Vector3.zero;
+        //        }
 
-                float F1 = (-B + Mathf.Sqrt(B * B - 4 * A * C)) / (2 * A);
-                float F2 = (-B - Mathf.Sqrt(B * B - 4 * A * C)) / (2 * A);
+        //        float F1 = (-B + Mathf.Sqrt(B * B - 4 * A * C)) / (2 * A);
+        //        float F2 = (-B - Mathf.Sqrt(B * B - 4 * A * C)) / (2 * A);
 
-                if (F1 < F2)
-                    F1 = F2;
-                hitPoint = TargetPosition + TargetDirection * F1;
-            }
-            else
-            {
-                hitPoint = TargetPosition;
-            }
-            return hitPoint;
-        }
-        public Vector3 calculateLinearTrajectoryWithAccelerationPrediction(float gunVelocity, Vector3 gunPosition, float TargetVelocity, float TargetAcceleration, Vector3 TargetPosition, Vector3 TargetDirection, Vector3 PredictedPoint, float Precision)
-        {
+        //        if (F1 < F2)
+        //            F1 = F2;
+        //        hitPoint = TargetPosition + TargetDirection * F1;
+        //    }
+        //    else
+        //    {
+        //        hitPoint = TargetPosition;
+        //    }
+        //    return hitPoint;
+        //}
+        //public Vector3 calculateLinearTrajectoryWithAccelerationPrediction(float gunVelocity, Vector3 gunPosition, float TargetVelocity, float TargetAcceleration, Vector3 TargetPosition, Vector3 TargetDirection, Vector3 PredictedPoint, float Precision)
+        //{
 
-            Vector3 hitPoint = Vector3.zero;
+        //    Vector3 hitPoint = Vector3.zero;
 
-            iterativeCount++;
-            if (iterativeCount > 512) { iterativeCount = 0; return calculateLinearTrajectory(gunVelocity, gunPosition, TargetVelocity, targetPoint, TargetDirection); }
+        //    iterativeCount++;
+        //    if (iterativeCount > 512) { iterativeCount = 0; return calculateLinearTrajectory(gunVelocity, gunPosition, TargetVelocity, targetPoint, TargetDirection); }
 
-            if (TargetVelocity != 0)
-            {
-                Vector3 D = gunPosition - TargetPosition;
-                float THETA = Vector3.Angle(D, TargetDirection) * Mathf.Deg2Rad;
-                float DD = D.magnitude;
+        //    if (TargetVelocity != 0)
+        //    {
+        //        Vector3 D = gunPosition - TargetPosition;
+        //        float THETA = Vector3.Angle(D, TargetDirection) * Mathf.Deg2Rad;
+        //        float DD = D.magnitude;
 
-                float A = 1 - Mathf.Pow((gunVelocity / TargetVelocity + (TargetAcceleration * (PredictedPoint.magnitude / gunVelocity))), 2);
-                float B = -(2 * DD * Mathf.Cos(THETA));
-                float C = DD * DD;
-                float DELTA = B * B - 4 * A * C;
+        //        float A = 1 - Mathf.Pow((gunVelocity / TargetVelocity + (TargetAcceleration * (PredictedPoint.magnitude / gunVelocity))), 2);
+        //        float B = -(2 * DD * Mathf.Cos(THETA));
+        //        float C = DD * DD;
+        //        float DELTA = B * B - 4 * A * C;
 
-                if (DELTA < 0)
-                {
-                    return Vector3.zero;
-                }
+        //        if (DELTA < 0)
+        //        {
+        //            return Vector3.zero;
+        //        }
 
-                float F1 = (-B + Mathf.Sqrt(B * B - 4 * A * C)) / (2 * A);
-                float F2 = (-B - Mathf.Sqrt(B * B - 4 * A * C)) / (2 * A);
+        //        float F1 = (-B + Mathf.Sqrt(B * B - 4 * A * C)) / (2 * A);
+        //        float F2 = (-B - Mathf.Sqrt(B * B - 4 * A * C)) / (2 * A);
 
-                if (F1 < F2 && F1 >= 0)
-                    F1 = F2;
-                hitPoint = TargetPosition + TargetDirection * F1;
-            }
-            else
-            {
-                hitPoint = TargetPosition;
-            }
-            if ((hitPoint - PredictedPoint).sqrMagnitude < Precision * Precision)
-            {
-                return hitPoint;
-            }
-            else
-            {
-                return calculateLinearTrajectoryWithAccelerationPrediction(gunVelocity, gunPosition, TargetVelocity, TargetAcceleration, TargetPosition, TargetDirection, hitPoint, Precision);
-            }
-        }
+        //        if (F1 < F2 && F1 >= 0)
+        //            F1 = F2;
+        //        hitPoint = TargetPosition + TargetDirection * F1;
+        //    }
+        //    else
+        //    {
+        //        hitPoint = TargetPosition;
+        //    }
+        //    if ((hitPoint - PredictedPoint).sqrMagnitude < Precision * Precision)
+        //    {
+        //        return hitPoint;
+        //    }
+        //    else
+        //    {
+        //        return calculateLinearTrajectoryWithAccelerationPrediction(gunVelocity, gunPosition, TargetVelocity, TargetAcceleration, TargetPosition, TargetDirection, hitPoint, Precision);
+        //    }
+        //}
 
         public Vector3 getCorrTorque(Vector3 from, Vector3 to, Rigidbody rb, float SpeedPerSecond)
         {
@@ -837,6 +837,68 @@ namespace MordenFirearmKitMod
 
 
 
+    }
+
+
+    public class Parabola : MonoBehaviour
+    {
+        //重力  
+        [Range(0, 1)]
+        public float gravity = 0.13f;
+        //最大长度  
+        public float maxLength = 50;
+        //两点之间的距离  
+        const float length = 0.2f;
+        //点集合  
+        List<Vector3> m_List = new List<Vector3>();
+        Material m_LineMat;
+
+        public void OnRenderObject()
+        {
+            CreateLineMaterial();
+            m_LineMat.SetPass(0);
+
+            Vector3 position = transform.position;
+            Vector3 forward = transform.rotation * Vector3.forward * length;
+            Vector3 newPos = position;
+            Vector3 lastPos = newPos;
+            m_List.Add(newPos);
+            int i = 0, iMax = 0;
+            float dis = 0;
+            while (dis < maxLength)
+            {
+                i++;
+                newPos = lastPos + forward + Vector3.up * i * -gravity * 0.1f;
+                dis += Vector3.Distance(lastPos, newPos);
+                m_List.Add(newPos);
+                lastPos = newPos;
+            }
+
+            GL.Begin(GL.LINES);
+            i = 0;
+            iMax = m_List.Count;
+            for (i = 0; i < iMax; i++)
+            {
+                GL.Vertex(m_List[i]);
+            }
+            GL.End();
+
+            m_List.Clear();
+        }
+
+        void CreateLineMaterial()
+        {
+            if (!m_LineMat)
+            {
+                var shader = Shader.Find("Hidden/Internal-Colored");
+                m_LineMat = new Material(shader);
+                m_LineMat.hideFlags = HideFlags.HideAndDontSave;
+                m_LineMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                m_LineMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                m_LineMat.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
+                m_LineMat.SetInt("_ZWrite", 0);
+            }
+        }
     }
 
 }
