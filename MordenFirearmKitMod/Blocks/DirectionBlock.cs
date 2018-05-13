@@ -59,7 +59,7 @@ namespace MordenFirearmKitMod
 
             .IconOffset(new Icon(1.3f, new Vector3(-0.25f, -0.25f, 0f), new Vector3(15f, -15f, 45f)))
 
-            .Components(new Type[] { typeof(DirectionBlockScript2) })
+            .Components(new Type[] { typeof(GenericDirectionBlockScript) })
 
             .Properties(new BlockProperties().SearchKeywords(new string[] { "指向", "direction" }).Burnable(0.1f).CanBeDamaged(0.1f))
 
@@ -78,6 +78,119 @@ namespace MordenFirearmKitMod
                 ,new AddingPoint(new Vector3(0,0,0.5f),new Vector3(0,0,90),true)
             }
             );
+
+    }
+
+
+    //通用指向模块脚本
+    //基本的锁定释放目标功能
+    public class GenericDirectionBlockScript : BlockScript
+    {
+        RaycastHit RHit;
+
+        GameObject TargetObject;
+
+        DirectionScript ds;
+
+        MKey key_Lock, key_Release;
+
+        MMenu menu_DirectionKind;
+
+
+        public override void SafeAwake()
+        {
+
+            key_Lock = AddKey("锁定", "Lock", KeyCode.T);
+            key_Release = AddKey("释放", "Release", KeyCode.R);
+
+            menu_DirectionKind = AddMenu("导弹类型", 0, new List<string> { "直线", "曲线" });
+            //menu_DirectionKind.ValueChanged += (int value) => { };
+
+
+            BoxCollider BC = GetComponentsInChildren<BoxCollider>().ToList().Find(match => match.name == "Adding Point");
+            BC.center = Vector3.zero;
+            BC.size = Vector3.one * 1.1f;
+
+            
+
+        }
+
+        protected override void OnSimulateStart()
+        {
+            initScript(menu_DirectionKind.Value);
+        }
+
+        protected override void OnSimulateUpdate()
+        {
+            //获取目标
+            if (key_Lock.IsDown)
+            {
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RHit, Camera.main.farClipPlane))
+                {
+                    if ((RHit.transform.position == transform.position ? false : !RHit.transform.tag.Contains("Cloaked")))
+                    {
+                        TargetObject = RHit.transform.gameObject;
+                        ds.Target = TargetObject;
+                    }
+                }
+            }
+
+
+        }
+
+        protected override void OnSimulateFixedUpdate()
+        {
+
+            if (TargetObject)
+            {
+                if (key_Release.IsPressed)
+                {
+                    TargetObject = null;
+                    ds.Target = null;
+                    return;
+                }
+
+            }
+
+        }
+
+        void initScript(int value)
+        {
+            if (value == 0)
+            {
+                ds = gameObject.AddComponent<Straight>();            
+            }
+            else if (value == 1)
+            {
+                ds = gameObject.AddComponent<Curve>();
+            }
+
+            ds.init();
+        }
+
+        protected virtual System.Collections.IEnumerator UpdateMapper()
+        {
+            if (BlockMapper.CurrentInstance == null)
+                yield break;
+            while (Input.GetMouseButton(0))
+                yield return null;
+            BlockMapper.CurrentInstance.Copy();
+            BlockMapper.CurrentInstance.Paste();
+            yield break;
+        }
+
+        public override void OnSave(XDataHolder stream)
+        {
+            base.OnSave(stream);
+            SaveMapperValues(stream);
+        }
+
+        public override void OnLoad(XDataHolder stream)
+        {
+            base.OnLoad(stream);
+            LoadMapperValues(stream);
+        }
+
 
     }
 
@@ -901,4 +1014,206 @@ namespace MordenFirearmKitMod
         }
     }
 
+ 
+
+
+    public class Straight : DirectionScript
+    {
+
+        LineRenderer lineRenderer;
+
+        PID pid;
+
+        int i;
+
+        float lastangle,error;
+
+        Rigidbody myRigidbody;
+
+        private void Start()
+        {
+            lineRenderer = gameObject.AddComponent<LineRenderer>();
+            lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+            lineRenderer.SetColors(Color.yellow, Color.red);
+            lineRenderer.SetWidth(0.2F, 0.2F);
+            lineRenderer.SetVertexCount(2);
+
+            pid = gameObject.AddComponent<PID>();
+
+            myRigidbody = GetComponent<Rigidbody>();
+
+            i = 0;
+            lastangle = 0;
+        }
+
+        public override void init()
+        {
+            Debug.Log("Straight script-init");
+        }
+
+        private void Update()
+        {
+            if (Target)
+            {
+                //Debug.Log("straight calculate");
+                lineRenderer.enabled = true;
+                lineRenderer.SetPosition(0, transform.position);
+                lineRenderer.SetPosition(1, Target.transform.position);
+
+                Destroy(GetComponent<ConfigurableJoint>());
+
+                //if (i++ < 10)
+                //{
+                //    i = 0;
+                //    Vector3 TargetVector = Target.transform.position - transform.position;
+                //    Vector3 CrossVector = Vector3.Cross(TargetVector, transform.right) + transform.position;
+                //    error = Vector3.Angle(transform.right, TargetVector);
+
+                //    error = pid.result(error, 1, 1, 1);
+
+                //    myRigidbody.angularVelocity = myRigidbody.transform.InverseTransformVector(Vector3.Scale(myRigidbody.angularVelocity, new Vector3(0, 1, 1)));
+                //    myRigidbody.MoveRotation(myRigidbody.rotation * Quaternion.AngleAxis(-error * Time.deltaTime * 20f, transform.InverseTransformDirection(CrossVector - transform.position)));
+                //    //rigidbody.AddTorque(-(CrossVector-transform.position)*500);
+                //}
+
+                
+            }
+            else
+            {
+                lineRenderer.enabled = false;
+                //Debug.Log("straight target null");
+            }
+            
+        }
+
+        private void FixedUpdate()
+        {
+            if (Target)
+            {
+
+                if (i++ < 10)
+                {
+                    i = 0;
+                    Vector3 TargetVector = Target.transform.position - transform.position;
+                    Vector3 CrossVector = Vector3.Cross(TargetVector, transform.right) + transform.position;
+                    error = Vector3.Angle(transform.right, TargetVector);
+
+                    error = pid.result(error, 1, 1, 1);
+
+                    //myRigidbody.angularVelocity = myRigidbody.transform.InverseTransformVector(Vector3.Scale(myRigidbody.angularVelocity, new Vector3(0, 1, 1)));
+                    //myRigidbody.MoveRotation(myRigidbody.rotation * Quaternion.AngleAxis(-error * Time.deltaTime * 20f, transform.InverseTransformDirection(CrossVector - transform.position)));
+                    //rigidbody.AddTorque(-(CrossVector-transform.position)*500);
+
+                    
+                }
+
+
+                myRigidbody.inertiaTensorRotation = Quaternion.identity;
+                //myRigidbody.AddRelativeForce(Vector3.right * 10f);
+
+
+            }
+
+        }
+    }
+
+    public class Curve : DirectionScript
+    {
+        public override void init()
+        {
+            Debug.Log("Curve script-init");
+        }
+
+        private void Update()
+        {
+            if (Target)
+            {
+                Debug.Log("curve calculate");
+            }
+            else
+            {
+                Debug.Log("curve target null");
+            }
+
+        }
+    }
+
+
+    /// <summary>
+    /// 指向模块脚本抽象类
+    /// </summary>
+    public abstract class DirectionScript : MonoBehaviour
+    {
+
+        public GameObject Target;
+
+        public abstract void init();
+
+    }
+
+
+
+    public class PID : MonoBehaviour
+    {
+
+        //比例,积分,微分
+        float P, I, D;
+        //偏差,上次偏差,上上次偏差
+        float Error, LastError, BeforeLastError;
+        //时间间隔
+        //float T = Time.deltaTime;
+        //计算结果
+        float Result;
+
+        public PID()
+        {
+            Result = Error = LastError = BeforeLastError = 0;
+
+            P = I = D = 1;
+        }
+
+        public PID(float p, float i, float d)
+        {
+            Result = Error = LastError = BeforeLastError = 0;
+
+            P = p;
+            I = i;
+            D = d;
+
+        }
+
+        public float result(float error)
+        {
+            Error = error;
+            Result = P * Error + I * (Error - LastError) + D * (Error - 2 * LastError + BeforeLastError);
+
+            BeforeLastError = LastError;
+            LastError = Error;
+
+            return Result;
+        }
+
+        public float result(float error, float p, float i, float d)
+        {
+            Error = error;
+            P = p;
+            I = i;
+            D = d;
+            Result = P * Error + I * (Error - LastError) + D * (Error - 2 * LastError + BeforeLastError);
+
+            BeforeLastError = LastError;
+            LastError = Error;
+
+            return Result;
+        }
+
+        public void SetPID(float p, float i, float d)
+        {
+            P = p;
+            I = i;
+            D = d;
+        }
+
+
+    }
 }
