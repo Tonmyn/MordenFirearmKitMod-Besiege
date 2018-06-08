@@ -45,7 +45,7 @@ namespace MordenFirearmKitMod
                        )
 
            //模块 组件
-           .Components(new Type[] { typeof(RocketBlockScript),typeof(ParticleSystemComponent), })
+           .Components(new Type[] { typeof(RocketBlockScript), })
 
            //模块 设置模块属性
            .Properties(
