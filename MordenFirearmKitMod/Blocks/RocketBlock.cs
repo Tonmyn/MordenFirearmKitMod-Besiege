@@ -1628,30 +1628,4 @@ namespace MordenFirearmKitMod
     }
 
 
-
-    public class ParticleSystemComponent : MonoBehaviour
-    {
-        public MSlider test;
-
-        void Start()
-        {
-
-            //test = AddSlider("test", "TEST", 0, 0, 1);
-            test = new MSlider("test","test",0,0,1);
-            test.DisplayInMapper = true;
-            Debug.Log("!!|" );
-            test.ValueChanged += new ValueChangeHandler(valueChanged);
-        }
-
-        public bool HasSliders(BlockBehaviour block)
-        {
-            return block.MapperTypes.Exists(match => match.Key == "TEST");
-        }
-
-        public void valueChanged(float value)
-        {
-
-        }
-    }
-
 }
