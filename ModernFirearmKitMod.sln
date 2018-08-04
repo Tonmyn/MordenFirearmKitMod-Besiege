@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MordenFirearmKitMod", "MordenFirearmKitMod\MordenFirearmKitMod.csproj", "{BB84A70C-12FF-4C52-833A-86C2AB9AF05C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModernFirearmKitMod", "MordenFirearmKitMod\ModernFirearmKitMod.csproj", "{BB84A70C-12FF-4C52-833A-86C2AB9AF05C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {95EAFF97-F229-4DA6-A742-A722D9631DB6}
 	EndGlobalSection
 EndGlobal
