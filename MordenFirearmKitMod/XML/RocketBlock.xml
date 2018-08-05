@@ -38,7 +38,7 @@
 		 specifying its id here will make the game load this block when loading machines that contain the old block. -->
 	<!-- <Replaces>410</Replaces> -->
 	
-	<Script>ModernFirearmKitMod.testscript</Script>
+	<Script>ModernFirearmKitMod.RocketBlockScript</Script>
 	
 	<!-- Blocks can have certain predefined behaviour added without any custom code.
 		 These behaviours are called modules.
@@ -51,6 +51,7 @@
 	
 	<!-- Include to make block take damage. -->
 	<!-- <Health>20</Health> -->
+  <Health>0.1</Health>
 	
 	<!-- Optional.
 		 The game generates "stripped" versions of the prefab,
@@ -79,8 +80,8 @@
 	<!-- <DamageType>Blunt</DamageType> -->
 	
 	<Mesh name="Rocket Mesh">
-		<Position x="0.0" y="0.0" z="0.0" />
-		<Rotation x="-270" y="0.0" z="0.0" />
+		<Position x="0.0" y="0.0" z="0.5" />
+		<Rotation x="0.0" y="0.0" z="0.0" />
 		<Scale x="1.0" y="1.0" z="1.0" />
   </Mesh>
 	
@@ -131,11 +132,11 @@
 	<Colliders>
 		<!-- Insert Collider definitions here.
 			 Example: -->
-		<BoxCollider>
-			<Position x="0.0" y="0.0" z="0.0" />
+		<CapsuleCollider>
+			<Position x="0.0" y="0.0" z="0.5" />
 			<Rotation x="0.0" y="0.0" z="0.0" />
-			<Scale x="1.0" y="1.0" z="0.5" />
-		</BoxCollider>
+			<Capsule direction="X" radius="0.25" height="2.5" />
+		</CapsuleCollider>
 	</Colliders>
 	
 	<BasePoint hasAddingPoint="false">

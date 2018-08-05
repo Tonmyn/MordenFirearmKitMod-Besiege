@@ -42,8 +42,6 @@ namespace MordenFirearmKitMod
             //增加灯关渲染数量
             QualitySettings.pixelLightCount += 10;
 
-          
- 
         }
     
 
