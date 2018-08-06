@@ -22,13 +22,13 @@ namespace ModernFirearmKitMod
         /// <summary>
         /// 倒计时完成要做的事
         /// </summary>
-        public Action CountDownComplete;
+        public Action CountDownCompleteEvent;
 
         private bool isClick = false;
 
         void Awake()
         {
-            CountDownComplete += () => { BesiegeConsoleController.ShowMessage("Count Down Complete..."); };
+            CountDownCompleteEvent += () => { BesiegeConsoleController.ShowMessage("Count Down Complete..."); };
         }
 
 
@@ -52,7 +52,7 @@ namespace ModernFirearmKitMod
             if (time <= 0)
             {
                 TimeSwitch = false;
-                CountDownComplete();
+                CountDownCompleteEvent();
             }
         }
 

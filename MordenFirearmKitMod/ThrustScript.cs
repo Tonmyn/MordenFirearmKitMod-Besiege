@@ -10,9 +10,13 @@ namespace ModernFirearmKitMod
     public class ThrustScript : MonoBehaviour
     {
 
-        public Vector3 ThrustPoint;
+        public Vector3 ThrustPoint { set; get; }
 
-        public Vector3 ThrustDirection;
+        private Vector3 thrustPoint;
+
+        public Vector3 ThrustDirection { set; get; }
+
+        private Vector3 thrustDirection;
 
         public float ThrustForce;
    
@@ -25,6 +29,8 @@ namespace ModernFirearmKitMod
         public bool isThrusted;
 
         public Rigidbody rigidbody;
+
+        public Action OnThrustEvent;
 
         private CountDownScript thrustDelayCountDown;
 
@@ -39,19 +45,21 @@ namespace ModernFirearmKitMod
             GameObject thrustCD = new GameObject("Trust Time Count Down Object");
             thrustCD.transform.SetParent(transform);
             thrustCountDown = thrustCD.AddComponent<CountDownScript>();
+
             rigidbody = GetComponent<Rigidbody>();
-            ThrustPoint = Vector3.zero;
+
             ThrustSwitch = false;
             isThrusted = false;
+
         }
 
         void Start()
         {
             thrustDelayCountDown.Time = ThrustDelayTime;
-            thrustDelayCountDown.CountDownComplete += () => { thrustCountDown.TimeSwitch = true; BesiegeConsoleController.ShowMessage("delay"); };
+            thrustDelayCountDown.CountDownCompleteEvent += () => { thrustCountDown.TimeSwitch = true; };
 
             thrustCountDown.Time = ThrustTime;
-            thrustCountDown.CountDownComplete += () => {  BesiegeConsoleController.ShowMessage("finish"); };
+            thrustCountDown.CountDownCompleteEvent += () => { };
 
 
         }
@@ -66,13 +74,18 @@ namespace ModernFirearmKitMod
                 if (isThrusted == false)
                 {
                     isThrusted = true;
+                    OnThrustEvent();
                 }
                
             }
 
             if (thrustCountDown.TimeSwitch )
             {
-                rigidbody.AddForceAtPosition(ThrustDirection.normalized * ThrustForce, ThrustPoint, ForceMode.VelocityChange);       
+                thrustDirection = transform.TransformDirection(ThrustDirection);
+                thrustPoint = transform.TransformPoint(ThrustPoint);
+
+                rigidbody.AddForceAtPosition(thrustDirection.normalized * ThrustForce, thrustPoint, ForceMode.VelocityChange);
+
             }
 
         }

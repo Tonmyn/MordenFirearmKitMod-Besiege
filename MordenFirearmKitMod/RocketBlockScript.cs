@@ -10,7 +10,7 @@ namespace ModernFirearmKitMod
 {
     class RocketBlockScript :BlockScript
     {
-
+        
         MKey launch_key;
 
         MSlider thrustForce_slider;
@@ -18,6 +18,8 @@ namespace ModernFirearmKitMod
         MSlider thrustTime_slider;
 
         MSlider thrustDelay_slider;
+
+        MSlider colliderDelay_slider;
 
         RocketScript rocketScript;
 
@@ -30,6 +32,8 @@ namespace ModernFirearmKitMod
             thrustTime_slider.ValueChanged += (value) => { changedPropertise(); };
             thrustDelay_slider = AddSlider("延迟发射 0.1s", "Thrust Delay", 0, 0f, 10f);
             thrustDelay_slider.ValueChanged += (value) => { changedPropertise(); };
+            colliderDelay_slider = AddSlider("碰撞开启 0.05s", "Collider Enable", 1f, 1f, 5f);
+            colliderDelay_slider.ValueChanged += (value) => { changedPropertise(); };
 
             initRocketScript();
 
@@ -48,6 +52,8 @@ namespace ModernFirearmKitMod
             thruster.ThrustForce = thrustForce_slider.Value;
             thruster.ThrustTime = thrustTime_slider.Value * 1000;
             thruster.ThrustDelayTime = thrustDelay_slider.Value * 500;
+
+            //rocketScript.delayDetectCollisionsTime = colliderDelay_slider.Value*100;
         }
 
 
@@ -55,8 +61,10 @@ namespace ModernFirearmKitMod
         {
             if (launch_key.IsPressed)
             {
-                rocketScript.thruster.ThrustSwitch = true;
+                rocketScript.launched = true;
             }
+            
+            
         }
 
     }
