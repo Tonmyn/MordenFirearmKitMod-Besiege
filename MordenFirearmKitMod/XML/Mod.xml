@@ -117,6 +117,8 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
 		<!-- <Texture name="some-texture-name" path="some_texture_file.png" /> -->
     <Mesh name="Rocket Mesh" path="Obj\Rocket.obj"/>
     <Texture name="Rocket Texture" path="Texture\Rocket.png"/>
+    <Texture name="Rocket Fire Texture" path="Other\RocketFire.png"/>
+    <Texture name="Rocket Smoke Texture" path="Other\RocketSmoke.png"/>
 	</Resources>
 
 

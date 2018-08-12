@@ -22,8 +22,6 @@ namespace ModernFirearmKitMod
    
         public float ThrustTime;
 
-        public float ThrustDelayTime;
-
         public bool ThrustSwitch;
 
         public bool isThrusted;
@@ -31,36 +29,29 @@ namespace ModernFirearmKitMod
         public Rigidbody rigidbody;
 
         public Action OnThrustEvent;
+        public Action OnThrustingEvent;
+        public Action OnThrustedEvent;
 
-        private CountDownScript thrustDelayCountDown;
-
-        private CountDownScript thrustCountDown;
+        private CountDownScript thrust_CountDown;
 
         void Awake()
         {
-            GameObject delayCD = new GameObject("Thrust Delay Count Down Object");
-            delayCD.transform.SetParent(transform);
-            thrustDelayCountDown = delayCD.AddComponent<CountDownScript>();
-
-            GameObject thrustCD = new GameObject("Trust Time Count Down Object");
-            thrustCD.transform.SetParent(transform);
-            thrustCountDown = thrustCD.AddComponent<CountDownScript>();
+            thrust_CountDown = gameObject.AddComponent<CountDownScript>();
 
             rigidbody = GetComponent<Rigidbody>();
 
             ThrustSwitch = false;
             isThrusted = false;
-
         }
 
         void Start()
         {
-            thrustDelayCountDown.Time = ThrustDelayTime;
-            thrustDelayCountDown.CountDownCompleteEvent += () => { thrustCountDown.TimeSwitch = true; };
 
-            thrustCountDown.Time = ThrustTime;
-            thrustCountDown.CountDownCompleteEvent += () => { };
-
+            thrust_CountDown.Time = ThrustTime;
+            thrust_CountDown.CountDownCompleteEvent +=  OnThrustedEvent;
+            OnThrustEvent += () => { };
+            OnThrustingEvent += () => { };
+            OnThrustedEvent += () => { };
 
         }
 
@@ -69,7 +60,7 @@ namespace ModernFirearmKitMod
             if (ThrustSwitch && !isThrusted)
             {
 
-                thrustDelayCountDown.TimeSwitch = true;
+                thrust_CountDown.TimeSwitch = true;
 
                 if (isThrusted == false)
                 {
@@ -79,8 +70,10 @@ namespace ModernFirearmKitMod
                
             }
 
-            if (thrustCountDown.TimeSwitch )
+            if (thrust_CountDown.TimeSwitch )
             {
+                OnThrustingEvent();
+
                 thrustDirection = transform.TransformDirection(ThrustDirection);
                 thrustPoint = transform.TransformPoint(ThrustPoint);
 

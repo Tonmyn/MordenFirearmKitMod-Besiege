@@ -30,7 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -66,15 +66,20 @@
     <Compile Include="Blocks\RocketBlock.cs" />
     <Compile Include="BulletBase.cs" />
     <Compile Include="CountDownScript.cs" />
+    <Compile Include="DragScript.cs" />
+    <Compile Include="ExplodeScript.cs" />
     <Compile Include="GenericScript\BulletScript.cs" />
     <Compile Include="GenericScript\LauncherScript.cs" />
     <Compile Include="GenericScript\MuzzleFlashScript.cs" />
     <Compile Include="GenericScript\TimedSelfDestruct.cs" />
     <Compile Include="Mod.cs" />
+    <Compile Include="RocketSmokeScript.cs" />
+    <Compile Include="RocketFireScript.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RocketBlockScript.cs" />
     <Compile Include="RocketScript.cs" />
     <Compile Include="ThrustScript.cs" />
+    <Compile Include="TimedSelfDestruct.cs" />
     <Compile Include="Updater.cs" />
   </ItemGroup>
   <ItemGroup>
