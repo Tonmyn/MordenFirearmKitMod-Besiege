@@ -44,9 +44,8 @@ namespace ModernFirearmKitMod
             allowCollision = false;
             rigidbody = GetComponent<Rigidbody>();
             rigidbody.drag = rigidbody.angularDrag = 0;
-
+            rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
     
-
             initPhysical();
 
             initParticle();
@@ -58,7 +57,7 @@ namespace ModernFirearmKitMod
             thruster = gameObject.AddComponent<ThrustScript>();
             thruster.ThrustDirection = Vector3.right;
             thruster.ThrustPoint = rigidbody.centerOfMass;
-            thruster.OnThrustedEvent += () => { fireScripter.EmitSwitch = false; };
+            thruster.OnThrustedEvent += () => { fireScripter.EmitSwitch = false; smokeScripter.EmitSwitch = false; };
 
             GameObject delayCD = new GameObject("Delay Thrust Count Down Object");
             delayCD.transform.SetParent(transform);
@@ -67,6 +66,7 @@ namespace ModernFirearmKitMod
             {
                 thruster.ThrustSwitch = drager.enabled = true;
                 fireScripter.EmitSwitch = true;
+                smokeScripter.EmitSwitch = true;
                 if (GetComponent<ConfigurableJoint>() != null)
                 {
                     configurableJoint = GetComponent<ConfigurableJoint>();

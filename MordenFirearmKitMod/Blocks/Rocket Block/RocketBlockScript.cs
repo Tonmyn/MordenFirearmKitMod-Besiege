@@ -34,18 +34,6 @@ namespace ModernFirearmKitMod
 
         #region 尾焰变量 声明
 
-        //声明 尾焰粒子组件
-        //protected GameObject particle_fire = new GameObject("尾焰粒子组件");
-
-        //声明 尾焰粒子系统
-        //protected ParticleSystem ps_fire;
-
-        //声明 尾焰粒子渲染器
-        //protected ParticleSystemRenderer psr_fire;
-
-        //声明 尾焰粒子属性
-        //public ParticleSystemProperties psp_fire = new ParticleSystemProperties().init_fire();
-
         //声明 滑条 粒子存活时间
         MSlider lifetime_fire;
 
@@ -71,6 +59,30 @@ namespace ModernFirearmKitMod
         MSlider colorStartTime_fire;
 
         MSlider colorEndTime_fire;
+
+        #endregion
+
+        #region 尾烟变量 声明
+
+        //声明 菜单 尾烟颜色
+        protected MMenu colorsmoke_menu;
+
+        //声明 滑条 粒子存活时间
+        protected MSlider lifetime_smoke;
+
+        //声明 滑条 角度
+        protected MSlider angle_smoke;
+
+        //声明 滑条 尺寸
+        protected MSlider size_smoke;
+
+        //声明 滑条 初始尺寸
+        protected MSlider sizeStart_smoke;
+
+        //声明 滑条 结束尺寸
+        protected MSlider sizeEnd_smoke;
+
+        public int color_smoke = 0;
 
         #endregion
 
@@ -138,6 +150,23 @@ namespace ModernFirearmKitMod
 
             #endregion
 
+            #region 尾烟组件初始化
+
+            colorsmoke_menu = AddMenu("尾烟颜色", color_smoke, new List<string> { "灰色", "白色", "黑色" });
+            colorsmoke_menu.ValueChanged += (value) => { changedPropertise(); };
+            lifetime_smoke = AddSlider("时间", "LifeTimeSmoke", 3f, 0, 5);
+            lifetime_smoke.ValueChanged += (value) => { changedPropertise(); };
+            angle_smoke = AddSlider("角度", "AngleSmoke", 15f, 0, 60);
+            angle_smoke.ValueChanged += (value) => { changedPropertise(); };
+            size_smoke = AddSlider("尺寸", "SizeSmoke", 1f, 0, 3);
+            size_smoke.ValueChanged += (value) => { changedPropertise(); };
+            sizeStart_smoke = AddSlider("初始尺寸", "SizeStartSmoke", 1f, 0, 1);
+            sizeStart_smoke.ValueChanged += (value) => { changedPropertise(); };
+            sizeEnd_smoke = AddSlider("结束尺寸", "SizeEndSmoke", 3f, 0, 10);
+            sizeEnd_smoke.ValueChanged += (value) => { changedPropertise(); };
+
+            #endregion
+
             #endregion
 
             initRocketScript();
@@ -169,7 +198,6 @@ namespace ModernFirearmKitMod
             DragScript drager = rocketScript.drager;
             drager.DragClamp = DragForce_slider.Value;
 
-
             RocketFireScript fireScripter = rocketScript.fireScripter;
             fireScripter.LifeTime = lifetime_fire.Value;
             fireScripter.Radius = radius_fire.Value;
@@ -182,8 +210,28 @@ namespace ModernFirearmKitMod
             fireScripter.ColorStartTime = colorStartTime_fire.Value;
             fireScripter.ColorEndTime = colorEndTime_fire.Value * transform.localScale.x;
 
+            RocketSmokeScript smokeScript = rocketScript.smokeScripter;
+            smokeScript.StartColor = smokeScript.EndColor = getColor(colorsmoke_menu.Value);
+            smokeScript.LifeTime = lifetime_smoke.Value;
+            smokeScript.Angle = angle_smoke.Value;
+            smokeScript.Size = size_smoke.Value * (transform.localScale.y + transform.localScale.z) / 3;
+            smokeScript.StartSize = sizeStart_smoke.Value;
+            smokeScript.EndSize = sizeEnd_smoke.Value;
 
+            Color getColor(int index)
+            {
+                List<string> colorList = new List<string> { "灰色", "白色", "黑色" };
 
+                Color color;
+                switch (index)
+                {
+                    case 0:color = Color.gray;break;
+                    case 1: color = Color.white; break;
+                    default: color = Color.black; break;
+                }
+
+                return color;
+            }
         }
 
         void DisplayInMapper(int value)
@@ -253,6 +301,42 @@ namespace ModernFirearmKitMod
             //alphaStartTime_fire.DisplayInMapper = show_1;
 
             //alphaEndTime_fire.DisplayInMapper = show_1;
+
+            #endregion
+
+            #region 页码2控件   
+
+            colorsmoke_menu.DisplayInMapper = show_2;
+
+            //toggle_smoke.DisplayInMapper = show_2;
+
+            lifetime_smoke.DisplayInMapper = show_2;
+
+            //radius_smoke.DisplayInMapper = show_2;
+
+            angle_smoke.DisplayInMapper = show_2;
+
+            size_smoke.DisplayInMapper = show_2;
+
+            sizeStart_smoke.DisplayInMapper = show_2;
+
+            sizeEnd_smoke.DisplayInMapper = show_2;
+
+            //colorStart_smoke.DisplayInMapper = show_2;
+
+            //colorEnd_smoke.DisplayInMapper = show_2;
+
+            //colorStartTime_smoke.DisplayInMapper = show_2;
+
+            //colorEndTime_smoke.DisplayInMapper = show_2;
+
+            //alphaStart_smoke.DisplayInMapper = show_2;
+
+            //alphaEnd_smoke.DisplayInMapper = show_2;
+
+            //alphaStartTime_smoke.DisplayInMapper = show_2;
+
+            //alphaEndTime_smoke.DisplayInMapper = show_2;
 
             #endregion
         }

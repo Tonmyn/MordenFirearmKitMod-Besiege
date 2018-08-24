@@ -36,10 +36,9 @@ namespace ModernFirearmKitMod
 
         void Start()
         {
-            if (GetComponent<ParticleSystem>() == null)
-            {
-                particleSystem = gameObject.AddComponent<ParticleSystem>();
-            }
+
+            particleSystem = GetComponent<ParticleSystem>() ?? gameObject.AddComponent<ParticleSystem>();
+
             particleSystem.playOnAwake = false;
             particleSystem.Stop();
             particleSystem.startLifetime = LifeTime;

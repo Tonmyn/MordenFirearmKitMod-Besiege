@@ -73,14 +73,13 @@
     <Compile Include="GenericScript\MuzzleFlashScript.cs" />
     <Compile Include="GenericScript\TimedSelfDestruct.cs" />
     <Compile Include="Mod.cs" />
-    <Compile Include="RocketSmokeScript.cs" />
-    <Compile Include="RocketFireScript.cs" />
+    <Compile Include="Blocks\Rocket Block\RocketSmokeScript.cs" />
+    <Compile Include="Blocks\Rocket Block\RocketFireScript.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RocketBlockScript.cs" />
-    <Compile Include="RocketScript.cs" />
+    <Compile Include="Blocks\Rocket Block\RocketBlockScript.cs" />
+    <Compile Include="Blocks\Rocket Block\RocketScript.cs" />
     <Compile Include="ThrustScript.cs" />
     <Compile Include="TimedSelfDestruct.cs" />
-    <Compile Include="Updater.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\obj\AutoCannon.obj" />
