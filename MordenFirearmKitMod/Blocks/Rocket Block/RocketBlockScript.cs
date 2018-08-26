@@ -4,27 +4,27 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Modding;
-
+using System.ComponentModel;
 
 namespace ModernFirearmKitMod
 {
     class RocketBlockScript :BlockScript
     {
-        MMenu functionPage_menu;
+        public MMenu functionPage_menu;
 
-        Rigidbody rigidbody;
+        public Rigidbody rigidbody;
 
-        RocketScript rocketScript;
+        public RocketScript rocketScript;
 
         #region 基本功能变量声明
 
-        MKey launch_key;
+        public MKey launch_key;
 
         MSlider thrustForce_slider;
 
         MSlider thrustTime_slider;
 
-        MSlider thrustDelay_slider;
+        public MSlider thrustDelay_slider;
 
         MSlider DragForce_slider;
 
@@ -88,16 +88,16 @@ namespace ModernFirearmKitMod
 
         public override void SafeAwake()
         {
-            
 
             #region 控件初始化
 
-            functionPage_menu = AddMenu("Function Page Menu", 0, new List<string> { "火箭参数", "尾焰参数", "尾烟参数" });
+            functionPage_menu = AddMenu("Function Page Menu", 0, new List<string> { "火箭参数","尾烟参数","尾烟参数"});
             functionPage_menu.ValueChanged += (value) => { DisplayInMapper(value); };
 
             #region 基本功能参数初始化
 
             launch_key = AddKey("发射", "Launch", KeyCode.L);
+            launch_key.KeysChanged += () => { changedPropertise(); };
 
             thrustForce_slider = AddSlider("推力大小", "Thrust Force", 1, 0f, 10f);
             thrustForce_slider.ValueChanged += (value) => { changedPropertise(); };
@@ -174,20 +174,25 @@ namespace ModernFirearmKitMod
             changedPropertise();
 
             DisplayInMapper(0);
+
+        }
+
+        public override void OnBlockPlaced()
+        {
+
         }
 
         void initRocketScript()
         {
-
             rigidbody = GetComponent<Rigidbody>();
             rigidbody.centerOfMass += Vector3.forward * 0.5f;
 
-            rocketScript = gameObject.AddComponent<RocketScript>();
-          
+            rocketScript = GetComponent<RocketScript>() ?? gameObject.AddComponent<RocketScript>();
         }
 
         void changedPropertise()
         {
+            rocketScript.launchKey = launch_key;
             rocketScript.thrustDelay_CountDown.Time = thrustDelay_slider.Value * 500;
             rocketScript.allowCollisionsDelay_CountDown.Time = colliderDelay_slider.Value * 500;
 
@@ -234,28 +239,28 @@ namespace ModernFirearmKitMod
             }
         }
 
-        void DisplayInMapper(int value)
+        virtual public void DisplayInMapper(int value)
         {
             bool show_0, show_1, show_2;
 
-            if (value == 0)
-            {
-                show_0 = true;
-                show_1 = false;
-                show_2 = false;
-            }
-            else if (value == 1)
-            {
-                show_0 = false;
-                show_1 = true;
-                show_2 = false;
-            }
-            else
-            {
-                show_0 = false;
-                show_1 = false;
-                show_2 = true;
-            }
+            //if ()
+            //{
+                show_0 = "火箭参数" == functionPage_menu.Items[value];
+                show_1 = "尾焰参数" == functionPage_menu.Items[value];
+                show_2 = "尾烟参数" == functionPage_menu.Items[value];
+            //}
+            //else if ()
+            //{
+            //    show_0 = false;
+            //    show_1 = true;
+            //    show_2 = false;
+            //}
+            //else if()
+            //{
+            //    show_0 = false;
+            //    show_1 = false;
+            //    show_2 = true;
+            //}
 
             #region 页码0控件
 
@@ -339,14 +344,6 @@ namespace ModernFirearmKitMod
             //alphaEndTime_smoke.DisplayInMapper = show_2;
 
             #endregion
-        }
-
-        public override void SimulateFixedUpdateHost()
-        {
-            if (launch_key.IsPressed)
-            {
-                rocketScript.launched = true;
-            }                     
         }
 
     }

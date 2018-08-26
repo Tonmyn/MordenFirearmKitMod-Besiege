@@ -11,6 +11,8 @@ namespace ModernFirearmKitMod
     {
         //public GameObject thrustObject;
 
+        public MKey launchKey;
+
         public ThrustScript thruster;
 
         public DragScript drager;
@@ -39,13 +41,13 @@ namespace ModernFirearmKitMod
 
         void Awake()
         {
-
+            launchKey = new MKey("", "", KeyCode.None);
             launched = false;
             allowCollision = false;
             rigidbody = GetComponent<Rigidbody>();
             rigidbody.drag = rigidbody.angularDrag = 0;
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-    
+
             initPhysical();
 
             initParticle();
@@ -54,7 +56,7 @@ namespace ModernFirearmKitMod
 
         void initPhysical()
         {
-            thruster = gameObject.AddComponent<ThrustScript>();
+            thruster = gameObject.GetComponent<ThrustScript>()?? gameObject.AddComponent<ThrustScript>();
             thruster.ThrustDirection = Vector3.right;
             thruster.ThrustPoint = rigidbody.centerOfMass;
             thruster.OnThrustedEvent += () => { fireScripter.EmitSwitch = false; smokeScripter.EmitSwitch = false; };
@@ -109,6 +111,11 @@ namespace ModernFirearmKitMod
 
         void Update()
         {
+            if (launchKey.IsPressed)
+            {
+                launched = true;
+            }
+
             if (launched && !thruster.isThrusted)
             {
                 thrustDelay_CountDown.TimeSwitch = true;
