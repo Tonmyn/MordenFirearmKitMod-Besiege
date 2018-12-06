@@ -102,7 +102,7 @@ namespace ModernFirearmKitMod
             thrustForce_slider = AddSlider("推力大小", "Thrust Force", 1, 0f, 10f);
             thrustForce_slider.ValueChanged += (value) => { changedPropertise(); };
 
-            thrustTime_slider = AddSlider("推力时间 1s", "Thrust Time", 1, 0f, 10f);
+            thrustTime_slider = AddSlider("推力时间 10s", "Thrust Time", 1, 0f, 10f);
             thrustTime_slider.ValueChanged += (value) => { changedPropertise(); };
 
             DragForce_slider = AddSlider("阻力大小", "DRAG", 0.5f, 0.2f, 3f);

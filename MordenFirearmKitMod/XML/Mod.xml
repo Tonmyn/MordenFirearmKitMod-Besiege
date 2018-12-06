@@ -83,6 +83,7 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
 		<!-- <Block path="SomeBlock.xml" /> -->
     <Block path="RocketBlock.xml"/>
     <Block path="RocketPodBlock.xml"/>
+    <Block path="MissileBlock.xml"/>
 	</Blocks>
 	
 	<!-- Any entities (level objects) your mod adds to the game.

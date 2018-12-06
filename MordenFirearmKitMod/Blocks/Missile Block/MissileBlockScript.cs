@@ -5,11 +5,10 @@ using System.Text;
 using UnityEngine;
 using Modding;
 
-namespace ModernFirearmKitMod
+namespace ModernFirearmKitMod.Blocks.Missile_Block
 {
-    class LauncherScript :MonoBehaviour
+    class MissileBlockScript:BlockScript
     {
-        public GameObject Bullet;
 
 
 

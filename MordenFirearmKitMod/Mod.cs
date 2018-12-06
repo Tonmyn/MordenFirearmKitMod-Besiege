@@ -11,18 +11,17 @@ namespace MordenFirearmKitMod
     // If you need documentation about any of these values or the mod loader
     // in general, take a look at http://wiki.spiderlinggames.co.uk/besiege/modding-documentation/articles/introduction.html.
 
+    public enum BlockList
+    {
+        火箭弹模块 = 650,
+        火箭巢模块 = 651,
+        机枪模块 = 652,
+        指向模块 = 653
+    }
 
     public partial class MordenFirearmKitBlockMod : ModEntryPoint
     {
-     
-
-        enum BlockList
-        {
-            火箭弹模块 = 650,
-            火箭巢模块 = 651,
-            机枪模块 = 652,
-            指向模块 = 653
-        }
+      
 
         public override void OnLoad()
         {
@@ -38,6 +37,12 @@ namespace MordenFirearmKitMod
             //LoadBlock(RocketPodBlock);
             //LoadBlock(MachineGun);
             //LoadBlock(direction);
+
+
+            if (ModernFirearmKitMod.RocketPodBlockScript.RocketTemp == null)
+            {
+                ModernFirearmKitMod.RocketPodBlockScript.CreateRocketBlockTemp();
+            }
 
             //增加灯关渲染数量
             QualitySettings.pixelLightCount += 10;

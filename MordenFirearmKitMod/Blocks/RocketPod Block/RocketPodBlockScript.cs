@@ -11,6 +11,8 @@ namespace ModernFirearmKitMod
     class RocketPodBlockScript : RocketBlockScript
     {
 
+        public static GameObject RocketTemp;
+
         #region 功能变量声明
 
         //MKey launch_key;
@@ -24,7 +26,7 @@ namespace ModernFirearmKitMod
         //声明 滑条 连发间隔
         protected MSlider interval_slider;
 
-        //声明 连发间隔
+        //声明 连发间隔(单位：秒)
         public float interval = 2;
 
         #endregion
@@ -41,10 +43,12 @@ namespace ModernFirearmKitMod
         private Vector3[] position_rocket = new Vector3[18];
 
         //声明 火箭弹刚体
-        private Rigidbody[] rb = new Rigidbody[18];
+        //private Rigidbody[] rb = new Rigidbody[18];
 
         //声明 连发开启
         private bool continued = false;
+
+        private CountDownScript continuedCD;
 
         #endregion
 
@@ -63,6 +67,10 @@ namespace ModernFirearmKitMod
             base.SafeAwake();
             functionPage_menu.Items.Insert(0,"火箭巢参数");
             rocketScript.enabled = false;
+
+            continuedCD = gameObject.AddComponent<CountDownScript>();
+            continuedCD.Time = interval * 10f;
+            continuedCD.CountDownCompleteEvent += () => { continued = true; };     
 
         }
 
@@ -99,16 +107,37 @@ namespace ModernFirearmKitMod
 
         }
 
-        public override void SimulateFixedUpdateHost()
+        public override void SimulateUpdateHost()
         {
+            Rocket_Reload();
+
             if (launch_key.IsPressed)
             {
+                Rocket_Launch();
+                continuedCD.TimeSwitch = true;
+               
+            }
 
+            if (continued && launch_key.IsDown)
+            {
+                continued = false;
+                Rocket_Launch();
+                continuedCD.TimeSwitch = true;
+            }
+
+            if (launch_key.IsReleased)
+            {
+                continued = continuedCD.TimeSwitch = false;
             }
         }
 
+        public override void SimulateFixedUpdateHost()
+        {
+   
+        }
+
         //火箭弹实例化位置计算
-        public void Rocket_Position()
+        private void Rocket_Position()
         {
             int i;
 
@@ -143,32 +172,36 @@ namespace ModernFirearmKitMod
         }
 
         //火箭弹实例化
-        public void Rocket_Instantiate(int label)
+        private void Rocket_Instantiate(int label)
         {
 
             //火箭弹安装位置 本地坐标转世界坐标
-            Vector3 pos = transform.TransformVector(transform.InverseTransformVector(rigidbody.position) + position_rocket[label]);
+            Vector3 offset = new Vector3(-1.375f, 0f, 0.15f);
+            Vector3 pos = transform.TransformVector(transform.InverseTransformVector(rigidbody.position) + offset + position_rocket[label]);
 
             //火箭弹实例化 设置连接点失效
-            GameObject rocket = new GameObject("Rocket");
-            rocket.transform.SetParent(transform);
-            rocket.AddComponent<Rigidbody>();
-            rocket.AddComponent<RocketScript>();
+            GameObject Rocket = /*new GameObject("Rocket")*/(GameObject)Instantiate(RocketTemp, pos, transform.rotation,transform);
+            Rocket.SetActive(true);
+            //Rockets.transform.SetParent(transform);
+            //Rockets.AddComponent<Rigidbody>();
+            //Rockets.AddComponent<RocketScript>();
             
-            //Destroy(rocket.GetComponent<ConfigurableJoint>());
+            //Destroy(Rockets.GetComponent<ConfigurableJoint>());
 
             //火箭弹刚体 不开启碰撞 不受物理影响
-            rb[label] = rocket.GetComponent<Rigidbody>();
-            rb[label].detectCollisions = false;
-            rb[label].isKinematic = true;
+            Rigidbody rb = Rocket.GetComponent<Rigidbody>();
+            rb.detectCollisions = false;
+            rb.isKinematic = true;
 
             //设置火箭弹大小
-            rocket.transform.localScale = new Vector3(1f, 0.5f, 0.5f);
+            Rocket.transform.localScale = new Vector3(1f, 0.5f, 0.5f);
 
             //火箭弹脚本 初始化
-            RocketScript rs = rocket.GetComponent<RocketScript>();
-            rs.thruster = rocketScript.thruster;
+            RocketScript rs = Rocket.GetComponent<RocketScript>();
+            rs = rocketScript;
+            //rs.thruster = rocketScript.thruster;
 
+            Rockets[label] = Rocket;
 
             //rs.enabled = true;
             ////rs.explosiontype = explosiontype;
@@ -199,6 +232,87 @@ namespace ModernFirearmKitMod
             //rbs.psp_smoke.size_end = sizeEnd_smoke.Value;
 
             //Rockets[label] = Instantiate(PrefabMaster.BlockPrefabs[1000].gameObject);
+        }    
+
+        //火箭弹发射
+        public void Rocket_Launch()
+        {
+
+            Rocket_LaunchPlan(Label);
+
+            //火箭弹标签回零
+            if (++Label > number - 1)
+            {
+                Label = 0;
+            }
+
+            //火箭弹发射准备
+            void Rocket_LaunchPlan(int label)
+            {
+                GameObject Rocket = Rockets[label];
+
+                //火箭弹不存在即返回
+                if (Rocket == null || Rocket.GetComponent<RocketScript>().launched) return;
+
+                //火箭弹发射位置
+                Vector3 pos = transform.TransformVector(transform.InverseTransformVector(rigidbody.position) + position_rocket[label] + new Vector3(3f, 0, 0));
+
+                //火箭弹移动到发射位置
+                Rocket.transform.position = pos;
+
+                //火箭巢本地速度
+                Vector3 local_velocity = transform.InverseTransformDirection(rigidbody.velocity);
+                Rigidbody rb = Rocket.GetComponent<Rigidbody>();
+
+                //火箭弹继承火箭巢速度
+                rb.velocity = transform.TransformDirection(Vector3.Scale(local_velocity, new Vector3(1.2f * -Mathf.Sign(local_velocity.x), 0.15f, 0.15f)));
+
+                //火箭弹受物理影响
+                rb.isKinematic = false;
+
+                //火箭弹开启碰撞
+                rb.detectCollisions = true;
+
+                RocketScript rocketScript = Rocket.GetComponent<RocketScript>();
+                rocketScript.enabled = true;
+                rocketScript = this.rocketScript;
+                rocketScript.launched = true;
+                //Debug.Log(rocketScript.thruster.ThrustTime);
+
+            }
+        }
+
+        //火箭弹重装
+        private void Rocket_Reload()
+        {
+            //火箭弹在无限弹药模式下 有空位的情况下实例化新火箭弹
+            if (StatMaster.GodTools.InfiniteAmmoMode)
+            {
+                for (int i = 0; i < number; i++)
+                {
+                    if (!Rockets[i] || Rockets[i].GetComponent<RocketBlockScript>().rocketScript.launched)
+                    {
+                        Rocket_Instantiate(i);
+                    }
+                }
+            }
+        }
+
+
+        internal static void CreateRocketBlockTemp()
+        {
+            RocketTemp = new GameObject("Rocket Temp");
+            RocketTemp.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
+            RocketTemp.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("Rocket Texture");
+            RocketTemp.AddComponent<Rigidbody>();
+            CapsuleCollider capsuleCollider = RocketTemp.AddComponent<CapsuleCollider>();
+            capsuleCollider.radius = 0.15f;
+            capsuleCollider.height = 2.5f;
+            capsuleCollider.direction = 0;
+            RocketTemp.AddComponent<RocketScript>();
+            RocketTemp.SetActive(false);
+
+            Debug.Log("create");
         }
 
     }
