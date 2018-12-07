@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Blocks\DirectionBlock.cs" />
     <Compile Include="Blocks\GunBlock.cs" />
+    <Compile Include="Blocks\MachineGunBlock\MachineGunBlockScript.cs" />
     <Compile Include="Blocks\Missile Block\MissileBlockScript.cs" />
     <Compile Include="Blocks\RocketBlock.cs" />
     <Compile Include="Blocks\RocketPod Block\RocketPodBlockScript.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="GenericScript\DragScript.cs" />
     <Compile Include="GenericScript\ExplodeScript.cs" />
     <Compile Include="GenericScript\BulletScript.cs" />
+    <Compile Include="GenericScript\LauncherBlockScript.cs" />
     <Compile Include="GenericScript\LauncherScript.cs" />
     <Compile Include="GenericScript\MuzzleFlashScript.cs" />
     <Compile Include="Mod.cs" />
@@ -118,6 +120,7 @@
     <Content Include="Resources\tex\QuickCannon.png" />
     <Content Include="Resources\tex\Rocket.png" />
     <Content Include="Resources\tex\RocketPod.png" />
+    <Content Include="XML\MachineGunBlock.xml" />
     <Content Include="XML\MissileBlock.xml" />
     <Content Include="XML\Mod.xml" />
     <Content Include="XML\RocketBlock.xml">

@@ -84,6 +84,7 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
     <Block path="RocketBlock.xml"/>
     <Block path="RocketPodBlock.xml"/>
     <Block path="MissileBlock.xml"/>
+    <Block path="MachineGunBlock.xml"/>
 	</Blocks>
 	
 	<!-- Any entities (level objects) your mod adds to the game.
@@ -124,6 +125,10 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
 
     <Mesh name="RocketPod Mesh" path="Obj\RocketPod.obj"/>
     <Texture name="RocketPod Texture" path="Texture\RocketPod.png"/>
+    
+    <Mesh name ="MachineGun Mesh" path="Obj\MachineGun.obj"/>
+    <Texture name="MachineGun Texture" path="Texture\MachineGun.png"/>
+    <AudioClip name="MachineGun AudioClip" path ="Other\MachineGun.ogg"/>
 	</Resources>
 
 

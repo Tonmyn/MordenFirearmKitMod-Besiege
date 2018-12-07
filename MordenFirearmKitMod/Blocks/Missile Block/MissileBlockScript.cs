@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using Modding;
 
-namespace ModernFirearmKitMod.Blocks.Missile_Block
+namespace ModernFirearmKitMod
 {
     class MissileBlockScript:BlockScript
     {
