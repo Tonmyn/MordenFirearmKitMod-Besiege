@@ -12,9 +12,9 @@ namespace ModernFirearmKitMod
         public override float KnockBack { get; set; }
         public override int BulletCurrentNumber { get; set; }
         public override int BulletMaxNumber { get; set; }
-        public override GameObject Bullet { get; set; }
+        public override GameObject BulletObject { get; set; }
         public override Vector3 SpawnPoint { get; set; }
-        public override bool ShootEnable { get; set; }
+        public override bool LaunchEnable { get; set; }
 
         //加特林转速
         float RotationRate;
@@ -38,10 +38,15 @@ namespace ModernFirearmKitMod
 
             KnockBack = 1f;
             SpawnPoint = new Vector3(0, 0, 3.5f);
-            Bullet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            BulletObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            BulletObject.AddComponent<Rigidbody>();
+            BulletScript bulletScript = BulletObject.AddComponent<BulletScript>();
+            bulletScript.Strength = 50f;
+            bulletScript.Direction = transform.InverseTransformDirection(transform.forward);
+            bulletScript.CollisionEnableTime = 1f;
             BulletCurrentNumber = BulletMaxNumber = 500;
             Rate = 0.2f;
-            ShootEnable = false;
+            LaunchEnable = false;
 
 
             RotationRate = 0f;
@@ -59,23 +64,24 @@ namespace ModernFirearmKitMod
 
         public override void SimulateUpdateHost()
         {
+            
             if (CJ == null)
             {
                 return;
             }
-
-            if (LaunchKey.IsDown)
+            Reload();
+            if (LaunchKey.IsDown && BulletCurrentNumber > 0)
             {
                 RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 20 * Time.timeScale * Time.deltaTime);
-                if (RotationRate >= RotationRateLimit && !ShootEnable && Time.timeScale !=0)
+                if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
                 {
-                    ShootEnable = true;
+                    LaunchEnable = true;
                     StartCoroutine(Launch());
                 }           
             }
             else
             {
-                ShootEnable = false;
+                LaunchEnable = false;
                 RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 10);
             }
 
@@ -93,8 +99,11 @@ namespace ModernFirearmKitMod
             }
         }
 
+        public override void Reload(bool constraint = false)
+        {
+            if (StatMaster.GodTools.InfiniteAmmoMode) BulletCurrentNumber = BulletMaxNumber;
+        }
 
-     
 
 
     }

@@ -8,6 +8,8 @@ using UnityEngine;
 
 namespace ModernFirearmKitMod
 {
+
+
     public abstract class LauncherBlockScript : BlockScript
     {
 
@@ -15,7 +17,7 @@ namespace ModernFirearmKitMod
         public MKey LaunchKey;
 
         /// <summary>子弹物体</summary>
-        public abstract GameObject Bullet { get; set; }
+        public abstract GameObject BulletObject { get; set; }
         /// <summary>枪口位置</summary>
         public abstract Vector3 SpawnPoint { get; set; }
         /// <summary>最大弹药数</summary>
@@ -27,27 +29,46 @@ namespace ModernFirearmKitMod
         /// <summary>后座</summary>
         public abstract float KnockBack { get; set; }
 
-        public abstract bool ShootEnable { get; set; }
+        public abstract bool LaunchEnable { get; set; }
 
-        public Action LaunchEvent;
+        public event Action<GameObject> LaunchEvent;
+
+
+        public abstract void Reload(bool constraint = false);
+
 
         public IEnumerator Launch()
         {
-            if (BulletCurrentNumber <= 0||!ShootEnable) yield break;
+            if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber--; }
 
-            LaunchEvent?.Invoke();
-
-            BulletCurrentNumber--;
+            if (BulletCurrentNumber < 0||!LaunchEnable) yield break;        
 
             Rigidbody.AddForce(-transform.forward * KnockBack /** 4000f*/, ForceMode.Impulse);
 
-            GameObject bullet = (GameObject)Instantiate(Bullet, transform.TransformPoint(SpawnPoint), transform.rotation);
+            GameObject bullet = (GameObject)Instantiate(BulletObject, transform.TransformPoint(SpawnPoint), transform.rotation, transform.parent);
 
             bullet.SetActive(true);
+            bullet.GetComponent<BulletScript>().FireEnabled = true;
+
+            LaunchEvent?.Invoke(bullet);
+           
+            yield return new WaitForSeconds(Rate);
+            LaunchEnable = false;   
+        }
+
+        public IEnumerator Launch(GameObject bullet)
+        {
+            if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber--; }
+
+            if (BulletCurrentNumber < 0 || !LaunchEnable) yield break;
+
+            Rigidbody.AddForce(-transform.forward * KnockBack, ForceMode.Impulse);
+
+            LaunchEvent?.Invoke(bullet);
 
             yield return new WaitForSeconds(Rate);
-
-            ShootEnable = false;
+            LaunchEnable = false;
+            yield break;
         }
 
     }

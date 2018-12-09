@@ -4,32 +4,96 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Modding;
-
+using System.Collections;
 
 namespace ModernFirearmKitMod
 {
-    class RocketPodBlockScript : RocketBlockScript
+    class RocketPodBlockScript : LauncherBlockScript
     {
+        public MMenu functionPage_menu;
 
         public static GameObject RocketTemp;
 
         #region 功能变量声明
 
-        //MKey launch_key;
-
-        //声明 滑条 载弹数量
-        protected MSlider number_slider;
-
-        //声明 载弹数量
-        public int number = 18;
-
-        //声明 滑条 连发间隔
-        protected MSlider interval_slider;
-
-        //声明 连发间隔(单位：秒)
-        public float interval = 2;
+        public override float Rate { get; set; }
+        public override float KnockBack { get; set; }
+        public override int BulletCurrentNumber { get; set; }
+        public override int BulletMaxNumber { get; set; }
+        public override GameObject BulletObject { get; set; }
+        public override Vector3 SpawnPoint { get; set; }
+        public override bool LaunchEnable { get; set; }
 
         #endregion
+
+        //声明 滑条 载弹数量
+        private MSlider number_slider;
+        //声明 滑条 连发间隔
+        private MSlider rate_slider;
+
+        MSlider thrustForce_slider;
+
+        MSlider thrustTime_slider;
+
+        //MSlider thrustDelay_slider;
+
+        MSlider DragForce_slider;
+
+        #region 尾焰变量 声明
+
+        //声明 滑条 粒子存活时间
+        MSlider lifetime_fire;
+
+        //声明 滑条 半径
+        MSlider radius_fire;
+
+        //声明 滑条 角度
+        MSlider angle_fire;
+
+        //声明 滑条 尺寸
+        MSlider size_fire;
+
+        //声明 滑条 初始尺寸
+        MSlider sizeStart_fire;
+
+        //声明 滑条 结束尺寸
+        MSlider sizeEnd_fire;
+
+        MColourSlider colorStart_fire;
+
+        MColourSlider colorEnd_fire;
+
+        MSlider colorStartTime_fire;
+
+        MSlider colorEndTime_fire;
+
+        #endregion
+
+        #region 尾烟变量 声明
+
+        //声明 菜单 尾烟颜色
+        protected MMenu colorsmoke_menu;
+
+        //声明 滑条 粒子存活时间
+        protected MSlider lifetime_smoke;
+
+        //声明 滑条 角度
+        protected MSlider angle_smoke;
+
+        //声明 滑条 尺寸
+        protected MSlider size_smoke;
+
+        //声明 滑条 初始尺寸
+        protected MSlider sizeStart_smoke;
+
+        //声明 滑条 结束尺寸
+        protected MSlider sizeEnd_smoke;
+
+        public int color_smoke = 0;
+
+        #endregion
+
+       
 
         #region 内部变量声明
 
@@ -40,106 +104,254 @@ namespace ModernFirearmKitMod
         private int Label = 0;
 
         //声明 火箭弹实例化位置
-        private Vector3[] position_rocket = new Vector3[18];
-
-        //声明 火箭弹刚体
-        //private Rigidbody[] rb = new Rigidbody[18];
-
-        //声明 连发开启
-        private bool continued = false;
-
-        private CountDownScript continuedCD;
+        private Vector3[] relativePositions;
 
         #endregion
 
         public override void SafeAwake()
         {
-            
 
-            //launch_key = AddKey("发射", "Launch", KeyCode.L);
+            functionPage_menu = AddMenu("Function Page Menu", 0, new List<string> { "火箭巢参数", "尾烟参数", "尾烟参数" });
+            functionPage_menu.ValueChanged += (value) => { DisplayInMapper(value); };
+
+            LaunchKey = AddKey("发射", "Launch", KeyCode.L);
+
+            KnockBack = 0f;
+            SpawnPoint = new Vector3(0, 0, 3.5f);
+            BulletObject = RocketTemp;
+            
+            BulletCurrentNumber = BulletMaxNumber = 18;
+            Rate = 2f;
+            LaunchEnable = false;
+
+            LaunchEvent += delayLaunch;
+
+            relativePositions = GetRelativePositions();
+
+            #region 基本功能参数初始化
 
             //添加 滑条 参数
-            number_slider = AddSlider("载弹数量", "NUMBER", number, 1, 18);
-            number_slider.ValueChanged += (value) => { number = (int)value; };
-            interval_slider = AddSlider("连发间隔 0.1s", "INTERVAL", interval, 1f, 5f);
-            interval_slider.ValueChanged += (value)=> { interval = value; };
+            number_slider = AddSlider("载弹数量", "Number", BulletMaxNumber, 1, 18);
+            number_slider.ValueChanged += (value) => { BulletMaxNumber = (int)value; };
+            rate_slider = AddSlider("射速 0.1s", "Rate", Rate, 1f, 5f);
+            rate_slider.ValueChanged += (value)=> { Rate = value * 0.1f; };
 
-            base.SafeAwake();
-            functionPage_menu.Items.Insert(0,"火箭巢参数");
-            rocketScript.enabled = false;
+            thrustForce_slider = AddSlider("推力大小", "Thrust Force", 1, 0f, 10f);
+            thrustForce_slider.ValueChanged += (value) => { changedPropertise(); };
 
-            continuedCD = gameObject.AddComponent<CountDownScript>();
-            continuedCD.Time = interval * 10f;
-            continuedCD.CountDownCompleteEvent += () => { continued = true; };     
+            thrustTime_slider = AddSlider("推力时间 10s", "Thrust Time", 1, 0f, 10f);
+            thrustTime_slider.ValueChanged += (value) => { changedPropertise(); };
+
+            DragForce_slider = AddSlider("阻力大小", "DRAG", 0.5f, 0.2f, 3f);
+            DragForce_slider.ValueChanged += (value) => { changedPropertise(); };
+
+            #endregion
+
+            #region 尾焰组件初始化
+
+            lifetime_fire = AddSlider("时间", "LifeTimeFire", 0.5f /** transform.localScale.x*/, 0, 10);
+            lifetime_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            radius_fire = AddSlider("半径", "RadiusFire", 0f, 0, 2);
+            radius_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            angle_fire = AddSlider("角度", "AngleFire", 2f, 0, 60);
+            angle_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            size_fire = AddSlider("尺寸", "SizeFire", 0.5f, 0, 5);
+            size_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            sizeStart_fire = AddSlider("初始尺寸", "SizeStartFire", 1f, 0, 5);
+            sizeStart_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            sizeEnd_fire = AddSlider("结束尺寸", "SizeEndFire", 0f, 0, 5);
+            sizeEnd_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            colorStart_fire = AddColourSlider("渐变初始颜色", "ColorStartFire", Color.blue, false);
+            colorStart_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEndFire", Color.yellow, false);
+            colorEnd_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTimeFire", 0f, 0, 0.5f * transform.localScale.x);
+            colorStartTime_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTimeFire", 0.25f, 0, 0.5f * transform.localScale.x);
+            colorEndTime_fire.ValueChanged += (value) => { changedPropertise(); };
+
+            #endregion
+
+            #region 尾烟组件初始化
+
+            colorsmoke_menu = AddMenu("尾烟颜色", color_smoke, new List<string> { "灰色", "白色", "黑色" });
+            colorsmoke_menu.ValueChanged += (value) => { changedPropertise(); };
+            lifetime_smoke = AddSlider("时间", "LifeTimeSmoke", 3f, 0, 5);
+            lifetime_smoke.ValueChanged += (value) => { changedPropertise(); };
+            angle_smoke = AddSlider("角度", "AngleSmoke", 15f, 0, 60);
+            angle_smoke.ValueChanged += (value) => { changedPropertise(); };
+            size_smoke = AddSlider("尺寸", "SizeSmoke", 1f, 0, 3);
+            size_smoke.ValueChanged += (value) => { changedPropertise(); };
+            sizeStart_smoke = AddSlider("初始尺寸", "SizeStartSmoke", 1f, 0, 1);
+            sizeStart_smoke.ValueChanged += (value) => { changedPropertise(); };
+            sizeEnd_smoke = AddSlider("结束尺寸", "SizeEndSmoke", 3f, 0, 10);
+            sizeEnd_smoke.ValueChanged += (value) => { changedPropertise(); };
+
+            #endregion
+
+            changedPropertise();
 
         }
 
-         void changedPropertise()
+        void changedPropertise()
         {
-           
 
 
         }
 
-        public override void DisplayInMapper(int value)
+        public void DisplayInMapper(int value)
         {
-            base.DisplayInMapper(value);
+            bool show_0, show_1, show_2;
 
-            bool show = ("火箭巢参数" == functionPage_menu.Items[value]);
+            //if ()
+            //{
+            show_0 = "火箭巢参数" == functionPage_menu.Items[value];
+            show_1 = "尾焰参数" == functionPage_menu.Items[value];
+            show_2 = "尾烟参数" == functionPage_menu.Items[value];
+            //}
+            //else if ()
+            //{
+            //    show_0 = false;
+            //    show_1 = true;
+            //    show_2 = false;
+            //}
+            //else if()
+            //{
+            //    show_0 = false;
+            //    show_1 = false;
+            //    show_2 = true;
+            //}
 
-            launch_key.DisplayInMapper = show;
-            number_slider.DisplayInMapper = show;
-            interval_slider.DisplayInMapper = show;
-            
-            thrustDelay_slider.DisplayInMapper = false;
-            
+            #region 页码0控件
+
+            LaunchKey.DisplayInMapper = show_0;
+            //explosiontype_menu.DisplayInMapper = show_0;
+            //power_slider.DisplayInMapper = show_0;
+            //colliderDelay_slider.DisplayInMapper = show_0;
+            //thrustDelay_slider.DisplayInMapper = show_0;
+            number_slider.DisplayInMapper = show_0;
+            rate_slider.DisplayInMapper = show_0;
+            thrustForce_slider.DisplayInMapper = show_0;
+            thrustTime_slider.DisplayInMapper = show_0;
+            DragForce_slider.DisplayInMapper = show_0;
+
+            #endregion
+
+            #region 页码1控件   
+
+            //toggle_fire.DisplayInMapper = show_1;
+
+            lifetime_fire.DisplayInMapper = show_1;
+
+            radius_fire.DisplayInMapper = show_1;
+
+            angle_fire.DisplayInMapper = show_1;
+
+            size_fire.DisplayInMapper = show_1;
+
+            sizeStart_fire.DisplayInMapper = show_1;
+
+            sizeEnd_fire.DisplayInMapper = show_1;
+
+            colorStart_fire.DisplayInMapper = show_1;
+
+            colorEnd_fire.DisplayInMapper = show_1;
+
+            colorStartTime_fire.DisplayInMapper = show_1;
+
+            colorEndTime_fire.DisplayInMapper = show_1;
+
+            //alphaStart_fire.DisplayInMapper = show_1;
+
+            //alphaEnd_fire.DisplayInMapper = show_1;
+
+            //alphaStartTime_fire.DisplayInMapper = show_1;
+
+            //alphaEndTime_fire.DisplayInMapper = show_1;
+
+            #endregion
+
+            #region 页码2控件   
+
+            colorsmoke_menu.DisplayInMapper = show_2;
+
+            //toggle_smoke.DisplayInMapper = show_2;
+
+            lifetime_smoke.DisplayInMapper = show_2;
+
+            //radius_smoke.DisplayInMapper = show_2;
+
+            angle_smoke.DisplayInMapper = show_2;
+
+            size_smoke.DisplayInMapper = show_2;
+
+            sizeStart_smoke.DisplayInMapper = show_2;
+
+            sizeEnd_smoke.DisplayInMapper = show_2;
+
+            //colorStart_smoke.DisplayInMapper = show_2;
+
+            //colorEnd_smoke.DisplayInMapper = show_2;
+
+            //colorStartTime_smoke.DisplayInMapper = show_2;
+
+            //colorEndTime_smoke.DisplayInMapper = show_2;
+
+            //alphaStart_smoke.DisplayInMapper = show_2;
+
+            //alphaEnd_smoke.DisplayInMapper = show_2;
+
+            //alphaStartTime_smoke.DisplayInMapper = show_2;
+
+            //alphaEndTime_smoke.DisplayInMapper = show_2;
+
+            #endregion
         }
 
         public override void OnSimulateStart()
         {
 
-            number = Mathf.Clamp(number, 1, 18);
-            Rocket_Position();
-            for (int i = 0; i < number; i++)
-            {
-                Rocket_Instantiate(i);
-            }
+            BulletMaxNumber = Mathf.Clamp(BulletMaxNumber, 1, 18);
+            GetRelativePositions();
 
+            Reload(true);
         }
 
         public override void SimulateUpdateHost()
         {
-            Rocket_Reload();
+            base.SimulateUpdateHost();
+            Reload();
 
-            if (launch_key.IsPressed)
+            if (LaunchKey.IsDown )
             {
-                Rocket_Launch();
-                continuedCD.TimeSwitch = true;
-               
+                if (!LaunchEnable)
+                {
+                    LaunchEnable = true;
+                    int index = Label++ % BulletMaxNumber;                   
+                    StartCoroutine(Launch(Rockets[index]));
+                }
             }
-
-            if (continued && launch_key.IsDown)
+            else
             {
-                continued = false;
-                Rocket_Launch();
-                continuedCD.TimeSwitch = true;
+                LaunchEnable = false;
             }
-
-            if (launch_key.IsReleased)
-            {
-                continued = continuedCD.TimeSwitch = false;
-            }
-        }
-
-        public override void SimulateFixedUpdateHost()
-        {
-   
         }
 
         //火箭弹实例化位置计算
-        private void Rocket_Position()
+        private static Vector3[] GetRelativePositions()
         {
             int i;
+
+            Vector3[] Positions = new Vector3[18];
 
             //声明 原点
             Vector2 origin = new Vector2(0.4f, 0);
@@ -153,7 +365,7 @@ namespace ModernFirearmKitMod
             //外圈火箭弹位置
             for (i = 0; i < 12; i++)
             {
-                position_rocket[i] = new Vector3(
+                Positions[i] = new Vector3(
                                                     0,
                                                     origin.y + radius_large * Mathf.Sin(angle_large * i * Mathf.Deg2Rad),
                                                     origin.x - radius_large * Mathf.Cos(angle_large * i * Mathf.Deg2Rad)
@@ -163,12 +375,19 @@ namespace ModernFirearmKitMod
             //内圈火箭弹位置
             for (i = 0; i < 6; i++)
             {
-                position_rocket[i + 12] = new Vector3(
+                Positions[i + 12] = new Vector3(
                                                         0,
                                                         origin.y + radius_little * Mathf.Sin((angle_little * i + 30) * Mathf.Deg2Rad),
                                                         origin.x - radius_little * Mathf.Cos((angle_little * i + 30) * Mathf.Deg2Rad)
                                                       );
             }
+
+            return Positions;
+        }
+        //火箭弹发射世界位置
+        private Vector3 getRealPosition(int label,Vector3 offset)
+        {
+            return transform.TransformVector(transform.InverseTransformVector(Rigidbody.position) + relativePositions[label] + offset);
         }
 
         //火箭弹实例化
@@ -177,120 +396,88 @@ namespace ModernFirearmKitMod
 
             //火箭弹安装位置 本地坐标转世界坐标
             Vector3 offset = new Vector3(-1.375f, 0f, 0.15f);
-            Vector3 pos = transform.TransformVector(transform.InverseTransformVector(rigidbody.position) + offset + position_rocket[label]);
+            Vector3 pos = getRealPosition(label, offset);
 
-            //火箭弹实例化 设置连接点失效
-            GameObject Rocket = /*new GameObject("Rocket")*/(GameObject)Instantiate(RocketTemp, pos, transform.rotation,transform);
+            //火箭弹实例化
+            GameObject Rocket = (GameObject)Instantiate(RocketTemp, pos, transform.rotation, transform);
             Rocket.SetActive(true);
-            //Rockets.transform.SetParent(transform);
-            //Rockets.AddComponent<Rigidbody>();
-            //Rockets.AddComponent<RocketScript>();
-            
-            //Destroy(Rockets.GetComponent<ConfigurableJoint>());
-
-            //火箭弹刚体 不开启碰撞 不受物理影响
-            Rigidbody rb = Rocket.GetComponent<Rigidbody>();
-            rb.detectCollisions = false;
-            rb.isKinematic = true;
-
-            //设置火箭弹大小
+            Rockets[label] = Rocket;
             Rocket.transform.localScale = new Vector3(1f, 0.5f, 0.5f);
 
+            //火箭弹刚体 不开启碰撞 不受物理影响
+            Rigidbody rigidbody = Rocket.GetComponent<Rigidbody>();
+            rigidbody.detectCollisions = false;
+            rigidbody.isKinematic = true;
             //火箭弹脚本 初始化
-            RocketScript rs = Rocket.GetComponent<RocketScript>();
-            rs = rocketScript;
-            //rs.thruster = rocketScript.thruster;
+            RocketScript rocketScript = RocketTemp.GetComponent<RocketScript>();
+            rocketScript.ThrustDirection = Rocket.transform.right;
+            rocketScript.ThrustPoint = rigidbody.centerOfMass;
+            rocketScript.ThrustForce = thrustForce_slider.Value * 30;
+            rocketScript.ThrustTime = thrustTime_slider.Value * 10;
+            rocketScript.DelayLaunchTime = 0f;
+            rocketScript.DelayEnableCollisionTime = 1f;
+            rocketScript.DragClamp = DragForce_slider.Value;
 
-            Rockets[label] = Rocket;
+            RocketFireScript fireScripter = rocketScript.fireScripter;
+            fireScripter.LifeTime = lifetime_fire.Value;
+            fireScripter.Radius = radius_fire.Value;
+            fireScripter.Angle = angle_fire.Value;
+            fireScripter.Size = (transform.localScale.y + transform.localScale.z) / 2 * size_fire.Value;
+            fireScripter.StartSize = sizeStart_fire.Value;
+            fireScripter.EndSize = sizeEnd_fire.Value;
+            fireScripter.StartColor = colorStart_fire.Value;
+            fireScripter.EndColor = colorEnd_fire.Value;
+            fireScripter.ColorStartTime = colorStartTime_fire.Value;
+            fireScripter.ColorEndTime = colorEndTime_fire.Value * transform.localScale.x;
 
-            //rs.enabled = true;
-            ////rs.explosiontype = explosiontype;
-            //rs.thruster.ThrustTime = time;
-            //rs.power = power;
-            //rs.thrust = thrust;
-            //rs.drag = drag;
-            //rs.timeopen = timeopen;
+            RocketSmokeScript smokeScript = rocketScript.smokeScripter;
+            smokeScript.StartColor = smokeScript.EndColor = getColor(colorsmoke_menu.Value);
+            smokeScript.LifeTime = lifetime_smoke.Value;
+            smokeScript.Angle = angle_smoke.Value;
+            smokeScript.Size = size_smoke.Value * (transform.localScale.y + transform.localScale.z) / 3;
+            smokeScript.StartSize = sizeStart_smoke.Value;
+            smokeScript.EndSize = sizeEnd_smoke.Value;
 
-            ////火箭弹尾焰初始化
-            //rbs.psp_fire.lifetime = lifetime_fire.Value;
-            //rbs.psp_fire.radius = radius_fire.Value;
-            //rbs.psp_fire.angle = angle_fire.Value;
-            //rbs.psp_fire.size = size_fire.Value;
-            //rbs.psp_fire.size_start = sizeStart_fire.Value;
-            //rbs.psp_fire.size_end = sizeEnd_fire.Value;
-            //rbs.psp_fire.color_start = colorStart_fire.Value;
-            //rbs.psp_fire.color_end = colorEnd_fire.Value;
-            //rbs.psp_fire.color_startTime = colorStartTime_fire.Value;
-            //rbs.psp_fire.color_endTime = colorEndTime_fire.Value;
-
-            ////火箭弹尾烟初始化
-            //rbs.psp_smoke.color_start = rbs.psp_smoke.color_end = colorSmoke_valueChanged(colorsmoke_menu.Value);
-            //rbs.psp_smoke.lifetime = lifetime_smoke.Value;
-            //rbs.psp_smoke.angle = angle_smoke.Value;
-            //rbs.psp_smoke.size = size_smoke.Value;
-            //rbs.psp_smoke.size_start = sizeStart_smoke.Value;
-            //rbs.psp_smoke.size_end = sizeEnd_smoke.Value;
-
-            //Rockets[label] = Instantiate(PrefabMaster.BlockPrefabs[1000].gameObject);
-        }    
-
-        //火箭弹发射
-        public void Rocket_Launch()
-        {
-
-            Rocket_LaunchPlan(Label);
-
-            //火箭弹标签回零
-            if (++Label > number - 1)
+            Color getColor(int index)
             {
-                Label = 0;
-            }
+                List<string> colorList = new List<string> { "灰色", "白色", "黑色" };
 
-            //火箭弹发射准备
-            void Rocket_LaunchPlan(int label)
-            {
-                GameObject Rocket = Rockets[label];
+                Color color;
+                switch (index)
+                {
+                    case 0: color = Color.gray; break;
+                    case 1: color = Color.white; break;
+                    default: color = Color.black; break;
+                }
 
-                //火箭弹不存在即返回
-                if (Rocket == null || Rocket.GetComponent<RocketScript>().launched) return;
-
-                //火箭弹发射位置
-                Vector3 pos = transform.TransformVector(transform.InverseTransformVector(rigidbody.position) + position_rocket[label] + new Vector3(3f, 0, 0));
-
-                //火箭弹移动到发射位置
-                Rocket.transform.position = pos;
-
-                //火箭巢本地速度
-                Vector3 local_velocity = transform.InverseTransformDirection(rigidbody.velocity);
-                Rigidbody rb = Rocket.GetComponent<Rigidbody>();
-
-                //火箭弹继承火箭巢速度
-                rb.velocity = transform.TransformDirection(Vector3.Scale(local_velocity, new Vector3(1.2f * -Mathf.Sign(local_velocity.x), 0.15f, 0.15f)));
-
-                //火箭弹受物理影响
-                rb.isKinematic = false;
-
-                //火箭弹开启碰撞
-                rb.detectCollisions = true;
-
-                RocketScript rocketScript = Rocket.GetComponent<RocketScript>();
-                rocketScript.enabled = true;
-                rocketScript = this.rocketScript;
-                rocketScript.launched = true;
-                //Debug.Log(rocketScript.thruster.ThrustTime);
-
-            }
+                return color;
+            }         
+            
         }
 
+        private void delayLaunch(GameObject gameObject)
+        {      
+            Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
+            rigidbody.isKinematic = false;
+            RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
+            rigidbody.AddForce(gameObject.transform.right * 30f, ForceMode.Impulse);
+            StartCoroutine(delay());
+            IEnumerator delay()
+            {
+                yield return new WaitForSeconds(rocketScript.DelayEnableCollisionTime * 0.1f);
+                rigidbody.detectCollisions = rocketScript.LaunchEnabled = true;
+                gameObject.transform.SetParent(transform.parent.transform);
+            }
+        }   
         //火箭弹重装
-        private void Rocket_Reload()
+        public override void Reload(bool constraint = false)
         {
             //火箭弹在无限弹药模式下 有空位的情况下实例化新火箭弹
-            if (StatMaster.GodTools.InfiniteAmmoMode)
+            if (StatMaster.GodTools.InfiniteAmmoMode || constraint)
             {
-                for (int i = 0; i < number; i++)
+                for (int i = 0; i < BulletMaxNumber; i++)
                 {
-                    if (!Rockets[i] || Rockets[i].GetComponent<RocketBlockScript>().rocketScript.launched)
+                    if (!Rockets[i] || Rockets[i].GetComponent<RocketScript>().Launched)
                     {
                         Rocket_Instantiate(i);
                     }
@@ -298,21 +485,25 @@ namespace ModernFirearmKitMod
             }
         }
 
+       
+
 
         internal static void CreateRocketBlockTemp()
         {
             RocketTemp = new GameObject("Rocket Temp");
+            RocketTemp.transform.localScale = new Vector3(1f, 0.5f, 0.5f);
             RocketTemp.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
             RocketTemp.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("Rocket Texture");
-            RocketTemp.AddComponent<Rigidbody>();
-            CapsuleCollider capsuleCollider = RocketTemp.AddComponent<CapsuleCollider>();
+            Rigidbody rigidbody = RocketTemp.AddComponent<Rigidbody>();         
+            rigidbody.mass = 0.25f;
+            CapsuleCollider capsuleCollider = RocketTemp.AddComponent<CapsuleCollider>();            
             capsuleCollider.radius = 0.15f;
             capsuleCollider.height = 2.5f;
             capsuleCollider.direction = 0;
-            RocketTemp.AddComponent<RocketScript>();
-            RocketTemp.SetActive(false);
 
-            Debug.Log("create");
+            RocketTemp.AddComponent<RocketScript>();
+            RocketTemp.AddComponent<DestroyIfEditMode>();
+            RocketTemp.SetActive(false); 
         }
 
     }

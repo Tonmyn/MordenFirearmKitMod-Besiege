@@ -12,8 +12,6 @@ namespace ModernFirearmKitMod
     {
         public MMenu functionPage_menu;
 
-        public Rigidbody rigidbody;
-
         public RocketScript rocketScript;
 
         #region 基本功能变量声明
@@ -24,11 +22,11 @@ namespace ModernFirearmKitMod
 
         MSlider thrustTime_slider;
 
-        public MSlider thrustDelay_slider;
+        MSlider thrustDelay_slider;
 
         MSlider DragForce_slider;
 
-        MSlider colliderDelay_slider;
+        //MSlider colliderDelay_slider;
 
         #endregion
 
@@ -111,8 +109,8 @@ namespace ModernFirearmKitMod
             thrustDelay_slider = AddSlider("延迟发射 0.1s", "Thrust Delay", 0, 0f, 10f);
             thrustDelay_slider.ValueChanged += (value) => { changedPropertise(); };
 
-            colliderDelay_slider = AddSlider("碰撞开启 0.05s", "Collider Enable", 0f, 0f, 0.5f);
-            colliderDelay_slider.ValueChanged += (value) => { changedPropertise(); };
+            //colliderDelay_slider = AddSlider("碰撞开启 0.05s", "Collider Enable", 0f, 0f, 0.5f);
+            //colliderDelay_slider.ValueChanged += (value) => { changedPropertise(); };
 
             #endregion
 
@@ -177,31 +175,22 @@ namespace ModernFirearmKitMod
 
         }
 
-        public override void OnBlockPlaced()
-        {
-
-        }
-
         void initRocketScript()
         {
-            rigidbody = GetComponent<Rigidbody>();
+            Rigidbody rigidbody = Rigidbody;
             rigidbody.centerOfMass += Vector3.forward * 0.5f;
-
             rocketScript = GetComponent<RocketScript>() ?? gameObject.AddComponent<RocketScript>();
+            rocketScript.ThrustDirection = transform.right;
+            rocketScript.ThrustPoint = rigidbody.centerOfMass;
+
         }
 
         void changedPropertise()
         {
-            rocketScript.launchKey = launch_key;
-            rocketScript.thrustDelay_CountDown.Time = thrustDelay_slider.Value * 500;
-            rocketScript.allowCollisionsDelay_CountDown.Time = colliderDelay_slider.Value * 500;
-
-            ThrustScript thruster = rocketScript.thruster;
-            thruster.ThrustForce = thrustForce_slider.Value;
-            thruster.ThrustTime = thrustTime_slider.Value * 1000;
-
-            DragScript drager = rocketScript.drager;
-            drager.DragClamp = DragForce_slider.Value;
+            rocketScript.ThrustForce = thrustForce_slider.Value * 30;
+            rocketScript.ThrustTime = thrustTime_slider.Value * 10;
+            rocketScript.DelayLaunchTime = thrustDelay_slider.Value * 0.1f;
+            rocketScript.DragClamp = DragForce_slider.Value;
 
             RocketFireScript fireScripter = rocketScript.fireScripter;
             fireScripter.LifeTime = lifetime_fire.Value;
@@ -267,7 +256,7 @@ namespace ModernFirearmKitMod
             launch_key.DisplayInMapper = show_0;
             //explosiontype_menu.DisplayInMapper = show_0;
             //power_slider.DisplayInMapper = show_0;
-            colliderDelay_slider.DisplayInMapper = show_0;
+            //colliderDelay_slider.DisplayInMapper = show_0;
             thrustDelay_slider.DisplayInMapper = show_0;           
             thrustForce_slider.DisplayInMapper = show_0;   
             thrustTime_slider.DisplayInMapper = show_0;
@@ -344,6 +333,14 @@ namespace ModernFirearmKitMod
             //alphaEndTime_smoke.DisplayInMapper = show_2;
 
             #endregion
+        }
+
+        public override void SimulateUpdateHost()
+        {
+            if (launch_key.IsPressed)
+            {
+                rocketScript.LaunchEnabled = true;
+            }     
         }
 
     }

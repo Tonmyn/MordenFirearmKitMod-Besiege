@@ -68,7 +68,6 @@
     <Compile Include="Blocks\RocketBlock.cs" />
     <Compile Include="Blocks\RocketPod Block\RocketPodBlockScript.cs" />
     <Compile Include="GenericScript\BulletBase.cs" />
-    <Compile Include="GenericScript\CountDownScript.cs" />
     <Compile Include="GenericScript\DragScript.cs" />
     <Compile Include="GenericScript\ExplodeScript.cs" />
     <Compile Include="GenericScript\BulletScript.cs" />
@@ -81,8 +80,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Blocks\Rocket Block\RocketBlockScript.cs" />
     <Compile Include="Blocks\Rocket Block\RocketScript.cs" />
-    <Compile Include="GenericScript\ThrustScript.cs" />
-    <Compile Include="GenericScript\TimedSelfDestruct.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\obj\AutoCannon.obj" />
@@ -120,7 +117,9 @@
     <Content Include="Resources\tex\QuickCannon.png" />
     <Content Include="Resources\tex\Rocket.png" />
     <Content Include="Resources\tex\RocketPod.png" />
-    <Content Include="XML\MachineGunBlock.xml" />
+    <Content Include="XML\MachineGunBlock.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="XML\MissileBlock.xml" />
     <Content Include="XML\Mod.xml" />
     <Content Include="XML\RocketBlock.xml">
@@ -129,6 +128,7 @@
     <Content Include="XML\RocketPodBlock.xml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Blocks\ClusterBombBlock\" />
     <Folder Include="Blocks\Radar Block\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
