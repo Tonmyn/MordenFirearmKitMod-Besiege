@@ -19,7 +19,7 @@ namespace MordenFirearmKitMod
         指向模块 = 653
     }
 
-    public partial class MordenFirearmKitBlockMod : ModEntryPoint
+    public class MordenFirearmKitBlockMod : ModEntryPoint
     {
       
 
@@ -42,8 +42,10 @@ namespace MordenFirearmKitMod
             {
                 ModernFirearmKitMod.RocketPodBlockScript.CreateRocketBlockTemp();
             }
+            ModResource.CreateAssetBundleResource("fo", "Resources" + @"/" + "flashasset");
+            new GameObject("test").AddComponent<test>();
 
-
+         
 
             //增加灯关渲染数量
             QualitySettings.pixelLightCount += 10;
@@ -98,6 +100,18 @@ namespace MordenFirearmKitMod
         //    }
         //}
 
+    }
+
+    public class test : MonoBehaviour
+    {
+        void Update()
+        {
+
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                Debug.Log("input");
+            }
+        }
     }
 
 }

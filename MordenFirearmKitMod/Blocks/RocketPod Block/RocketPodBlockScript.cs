@@ -410,7 +410,7 @@ namespace ModernFirearmKitMod
             rigidbody.isKinematic = true;
             //火箭弹脚本 初始化
             RocketScript rocketScript = RocketTemp.GetComponent<RocketScript>();
-            rocketScript.ThrustDirection = Rocket.transform.right;
+            rocketScript.ThrustDirection = Rocket.transform.InverseTransformDirection(Vector3.right);
             rocketScript.ThrustPoint = rigidbody.centerOfMass;
             rocketScript.ThrustForce = thrustForce_slider.Value * 30;
             rocketScript.ThrustTime = thrustTime_slider.Value * 10;
@@ -460,7 +460,7 @@ namespace ModernFirearmKitMod
             Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
             rigidbody.isKinematic = false;
             RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
-            rigidbody.AddForce(gameObject.transform.right * 30f, ForceMode.Impulse);
+            //rigidbody.AddForce(gameObject.transform.right * 30f, ForceMode.Impulse);
             StartCoroutine(delay());
             IEnumerator delay()
             {

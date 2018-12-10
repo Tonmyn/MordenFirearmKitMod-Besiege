@@ -180,7 +180,7 @@ namespace ModernFirearmKitMod
             Rigidbody rigidbody = Rigidbody;
             rigidbody.centerOfMass += Vector3.forward * 0.5f;
             rocketScript = GetComponent<RocketScript>() ?? gameObject.AddComponent<RocketScript>();
-            rocketScript.ThrustDirection = transform.right;
+            rocketScript.ThrustDirection = transform.InverseTransformDirection(Vector3.right);
             rocketScript.ThrustPoint = rigidbody.centerOfMass;
 
         }

@@ -67,13 +67,13 @@ namespace ModernFirearmKitMod
 
         void initParticle()
         {
-            fire_ParticleObject = new GameObject("Rocket Fire Object");
+            fire_ParticleObject = fire_ParticleObject ?? new GameObject("Rocket Fire Object");
             fire_ParticleObject.transform.SetParent(transform);
             fire_ParticleObject.transform.localPosition = new Vector3(-1.35f, 0, 0.5f);
             fire_ParticleObject.transform.localRotation = Quaternion.AngleAxis(-90f, Vector3.up);
             fireScripter = fire_ParticleObject.GetComponent<RocketFireScript>() ?? fire_ParticleObject.AddComponent<RocketFireScript>();
 
-            smoke_ParticleObject = new GameObject("Rocket Smoke Object");
+            smoke_ParticleObject = smoke_ParticleObject ?? new GameObject("Rocket Smoke Object");
             smoke_ParticleObject.transform.SetParent(transform);
             smoke_ParticleObject.transform.localPosition = new Vector3(-1.35f, 0, 0.5f);
             smoke_ParticleObject.transform.localRotation = Quaternion.AngleAxis(-90f, Vector3.up);
