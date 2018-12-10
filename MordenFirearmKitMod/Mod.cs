@@ -42,7 +42,7 @@ namespace MordenFirearmKitMod
             {
                 ModernFirearmKitMod.RocketPodBlockScript.CreateRocketBlockTemp();
             }
-            ModResource.CreateAssetBundleResource("fo", "Resources" + @"/" + "flashasset");
+            ModResource.CreateAssetBundleResource("fo", "Resources" + @"/" + "explosionasset");
             new GameObject("test").AddComponent<test>();
 
          
@@ -110,6 +110,10 @@ namespace MordenFirearmKitMod
             if (Input.GetKeyDown(KeyCode.I))
             {
                 Debug.Log("input");
+
+                AssetBundle assetBundle = ModResource.GetAssetBundle("fo");
+                GameObject cube = (GameObject)Instantiate<GameObject>(assetBundle.LoadAsset<GameObject>("example"));
+                cube.transform.position = new Vector3(0, 3, 0);
             }
         }
     }
