@@ -32,6 +32,8 @@ namespace ModernFirearmKitMod
 
         GameObject GunVis;
 
+        GameObject VisualEffectsObject;
+
         public override void SafeAwake()
         {
             LaunchKey = AddKey("Fire", "Fire", KeyCode.C);
@@ -60,6 +62,13 @@ namespace ModernFirearmKitMod
             List<MeshFilter> meshFilters = new List<MeshFilter>();
             GetComponentsInChildren(false, meshFilters);
             GunVis = meshFilters.Find(match => match.name == "Vis").gameObject;
+
+           
+        }
+
+        public override void OnSimulateStart()
+        {
+            initVFX();
         }
 
         public override void SimulateUpdateHost()
@@ -75,8 +84,8 @@ namespace ModernFirearmKitMod
                 RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 20 * Time.timeScale * Time.deltaTime);
                 if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
                 {
-                    LaunchEnable = true;
-                    StartCoroutine(Launch());
+                    LaunchEnable = true;                  
+                    StartCoroutine(Launch());                 
                 }           
             }
             else
@@ -86,7 +95,7 @@ namespace ModernFirearmKitMod
             }
 
             GunVis.transform.Rotate(new Vector3(0, RotationRate, 0) * Time.timeScale);
-
+            VisualEffectsObject.SetActive(LaunchEnable);
             if (RotationRate != 0)
             {
                 RotationAudioSource.volume = RotationRate / (Vector3.Distance(transform.position, Camera.main.transform.position) * RotationRateLimit) * Volume;
@@ -104,6 +113,14 @@ namespace ModernFirearmKitMod
             if (StatMaster.GodTools.InfiniteAmmoMode) BulletCurrentNumber = BulletMaxNumber;
         }
 
+        void initVFX()
+        {
+            VisualEffectsObject = VisualEffectsObject ?? (GameObject)Instantiate(TempManager.mgb, transform);
+            VisualEffectsObject.transform.position = transform.TransformPoint(Vector3.forward * 3);
+            VisualEffectsObject.transform.localEulerAngles = new Vector3(0, 180, 0);
+            VisualEffectsObject.GetComponent<FPSDemoReactivator>().TimeDelayToReactivate = Rate;
+            VisualEffectsObject.SetActive(false);
+        }
 
 
     }

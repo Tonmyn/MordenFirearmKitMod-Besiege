@@ -5,7 +5,7 @@ using UnityEngine;
 using Modding.Common;
 using Modding.Blocks;
 
-namespace MordenFirearmKitMod
+namespace ModernFirearmKitMod
 {
 
     // If you need documentation about any of these values or the mod loader
@@ -42,7 +42,7 @@ namespace MordenFirearmKitMod
             {
                 ModernFirearmKitMod.RocketPodBlockScript.CreateRocketBlockTemp();
             }
-            ModResource.CreateAssetBundleResource("fo", "Resources" + @"/" + "explosionasset");
+            ModResource.CreateAssetBundleResource("fo", "Resources" + @"/" + /*"explosionasset"*/"m4a1");
             new GameObject("test").AddComponent<test>();
 
          
@@ -104,6 +104,28 @@ namespace MordenFirearmKitMod
 
     public class test : MonoBehaviour
     {
+        GameObject Cube;
+
+        public float StartDelay = 0;
+        public float TimeDelayToReactivate = 3;
+
+        void Start()
+        {
+            //InvokeRepeating("Reactivate", StartDelay, TimeDelayToReactivate);
+
+            StartCoroutine(TempManager.createVFX());
+        }
+
+        void Reactivate()
+        {
+            if (Cube)
+            {
+                Cube.gameObject.SetActive(false);
+                Cube.gameObject.SetActive(true);
+            }
+   
+        }
+
         void Update()
         {
 
@@ -111,10 +133,16 @@ namespace MordenFirearmKitMod
             {
                 Debug.Log("input");
 
-                AssetBundle assetBundle = ModResource.GetAssetBundle("fo");
-                GameObject cube = (GameObject)Instantiate<GameObject>(assetBundle.LoadAsset<GameObject>("example"));
-                cube.transform.position = new Vector3(0, 3, 0);
+                //AssetBundle assetBundle = ModResource.GetAssetBundle("fo");
+                //Cube = (GameObject)Instantiate<GameObject>(assetBundle.LoadAsset<GameObject>(/*"example"*/"M4A1"));
+                //Cube.transform.position = new Vector3(0, 3, 0);
+
+
+              
             }
+
+            //if(Input.)
+
         }
     }
 
