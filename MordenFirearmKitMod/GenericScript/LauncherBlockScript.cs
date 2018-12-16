@@ -45,7 +45,7 @@ namespace ModernFirearmKitMod
 
             Rigidbody.AddForce(-transform.forward * KnockBack /** 4000f*/, ForceMode.Impulse);
 
-            GameObject bullet = (GameObject)Instantiate(BulletObject, transform.TransformPoint(SpawnPoint), transform.rotation, transform.parent);
+            GameObject bullet = (GameObject)Instantiate(BulletObject, transform.TransformPoint(SpawnPoint), transform.rotation, transform.root);
 
             bullet.SetActive(true);
             bullet.GetComponent<BulletScript>().FireEnabled = true;

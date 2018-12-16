@@ -122,7 +122,11 @@ namespace ModernFirearmKitMod
             VisualEffectsObject.SetActive(false);
         }
 
+        internal static GameObject CreateBulletObject()
+        {
 
+
+        }
     }
 }
 
