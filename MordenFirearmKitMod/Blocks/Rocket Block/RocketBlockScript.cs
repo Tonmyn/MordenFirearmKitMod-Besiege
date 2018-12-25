@@ -86,7 +86,7 @@ namespace ModernFirearmKitMod
 
         public override void SafeAwake()
         {
-
+           
             #region 控件初始化
 
             functionPage_menu = AddMenu("Function Page Menu", 0, new List<string> { "火箭参数","尾烟参数","尾烟参数"});

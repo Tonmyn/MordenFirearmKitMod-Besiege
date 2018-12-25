@@ -78,6 +78,7 @@
     <Compile Include="ObjectPoolManager\ObjectPoolListComponent.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolComponent.cs" />
     <Compile Include="ObjectPoolManager\PoolUnit.cs" />
+    <Compile Include="ObjectPoolManager\PoolUnitBehavior.cs" />
     <Compile Include="ObjectPoolManager\PoolUnitList.cs" />
     <Compile Include="TempManager.cs" />
     <Compile Include="GenericScript\BulletBase.cs" />
