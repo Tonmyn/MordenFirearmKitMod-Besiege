@@ -96,6 +96,8 @@
     <Compile Include="Blocks\Rocket Block\RocketScript.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\bundle" />
+    <None Include="Resources\bundle.manifest" />
     <None Include="Resources\obj\AutoCannon.obj" />
     <None Include="Resources\obj\Barrel.obj" />
     <None Include="Resources\obj\bullet.obj" />
