@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Modding.Common;
 using Modding.Blocks;
+using System.Collections;
 
 namespace ModernFirearmKitMod
 {
@@ -42,13 +43,13 @@ namespace ModernFirearmKitMod
             {
                 ModernFirearmKitMod.RocketPodBlockScript.CreateRocketBlockTemp();
             }
-            ModResource.CreateAssetBundleResource("fo", "Resources" + @"/" + /*"explosionasset"*/"m4a1");
+            ModResource.CreateAssetBundleResource("Effect", @"Resources/bundle");
             new GameObject("test").AddComponent<test>();
 
          
 
             //增加灯关渲染数量
-            QualitySettings.pixelLightCount += 10;
+            //QualitySettings.pixelLightCount += 10;
 
         }
     
@@ -105,6 +106,7 @@ namespace ModernFirearmKitMod
     public class test : MonoBehaviour
     {
         GameObject Cube;
+        GameObject Cube1;
 
         public float StartDelay = 0;
         public float TimeDelayToReactivate = 3;
@@ -113,7 +115,10 @@ namespace ModernFirearmKitMod
         {
             //InvokeRepeating("Reactivate", StartDelay, TimeDelayToReactivate);
 
+          
+
             StartCoroutine(TempManager.createVFX());
+            StartCoroutine(load());
         }
 
         void Reactivate()
@@ -133,15 +138,25 @@ namespace ModernFirearmKitMod
             {
                 Debug.Log("input");
 
-                //AssetBundle assetBundle = ModResource.GetAssetBundle("fo");
-                //Cube = (GameObject)Instantiate<GameObject>(assetBundle.LoadAsset<GameObject>(/*"example"*/"M4A1"));
-                //Cube.transform.position = new Vector3(0, 3, 0);
+                //AssetBundle assetBundle = ModResource.GetAssetBundle("Effect");
+                //Cube = (GameObject)Instantiate<GameObject>(assetBundle.LoadAsset<GameObject>(/*"example"*//*"M4A1"*/"MachineGunEffect"));
+                
+                Cube = (GameObject)Instantiate<GameObject>(TempManager.mgb);
+                Cube.transform.position = new Vector3(0, 3, 0);
 
+                Instantiate(Cube1).transform.position = new Vector3(3, 0, 0);
 
-              
             }
 
             //if(Input.)
+
+        }
+
+        IEnumerator load()
+        {
+            var assetBundle = ModResource.GetAssetBundle("Effect");
+            yield return new WaitUntil(() => assetBundle.Available);
+            Cube1 = assetBundle.LoadAsset<GameObject>(/*"example"*//*"M4A1"*/"BigExplosion");
 
         }
     }

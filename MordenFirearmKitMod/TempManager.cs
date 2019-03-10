@@ -15,9 +15,9 @@ namespace ModernFirearmKitMod
 
         public static IEnumerator createVFX()
         {
-            ModAssetBundle modAssetBundle = ModResource.GetAssetBundle("fo");
+            ModAssetBundle modAssetBundle = ModResource.GetAssetBundle("Effect");
             yield return new WaitUntil(() => modAssetBundle.Available);
-            mgb = modAssetBundle.LoadAsset<GameObject>("MachineGunVFX");
+            mgb = modAssetBundle.LoadAsset<GameObject>("MachineGunEffect");
             FPSDemoReactivator fPSDemo = mgb.AddComponent<FPSDemoReactivator>();
             fPSDemo.StartDelay = 0.2f;
             fPSDemo.TimeDelayToReactivate = 1;
