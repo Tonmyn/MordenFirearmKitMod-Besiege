@@ -114,8 +114,6 @@
     <None Include="Resources\other\MachineGun.ogg" />
     <None Include="Resources\other\MuzzleFlashCone.obj" />
     <None Include="Resources\other\QuickCannon.obj" />
-    <None Include="Resources\tex\Rocket.ps" />
-    <None Include="Resources\tex\RocketPod.ps" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\other\AutoCannon.png" />
