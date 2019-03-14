@@ -144,7 +144,7 @@ namespace ModernFirearmKitMod
                 Cube = (GameObject)Instantiate<GameObject>(TempManager.mgb);
                 Cube.transform.position = new Vector3(0, 3, 0);
 
-                Instantiate(Cube1).transform.position = new Vector3(3, 0, 0);
+                Instantiate(Cube1).transform.position = new Vector3(3, 3, 0);
 
             }
 
@@ -157,6 +157,40 @@ namespace ModernFirearmKitMod
             var assetBundle = ModResource.GetAssetBundle("Effect");
             yield return new WaitUntil(() => assetBundle.Available);
             Cube1 = assetBundle.LoadAsset<GameObject>(/*"example"*//*"M4A1"*/"BigExplosion");
+            Cube1.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
+            Cube1.AddComponent<MeshRenderer>().material.color = Color.red;
+            Cube1.AddComponent<Rigidbody>();
+            Cube1.AddComponent<BoxCollider>();
+            Cube1.AddComponent<explosion>();
+
+        }
+    }
+
+    class explosion : MonoBehaviour
+    {
+        void OnCollisionEnter(Collision col)
+        {
+
+            //定义爆炸半径
+            float radius = 3.0f;
+            //定义爆炸位置为炸弹位置
+            Vector3 explosionPos = transform.position;
+            //这个方法用来反回球型半径之内（包括半径）的所有碰撞体collider[]
+            Collider[] colliders = Physics.OverlapSphere(explosionPos, radius);
+
+            //遍历返回的碰撞体，如果是刚体，则给刚体添加力
+            foreach (Collider hit in colliders)
+            {
+                if (hit.attachedRigidbody != null)
+                {
+                    float force = UnityEngine.Random.Range(10000f, 100000f);
+                    hit.attachedRigidbody.AddExplosionForce(force, explosionPos, radius);
+
+                }
+                //销毁炸弹和小球
+                //Destroy(col.gameObject);
+                Destroy(gameObject);
+            }
 
         }
     }
