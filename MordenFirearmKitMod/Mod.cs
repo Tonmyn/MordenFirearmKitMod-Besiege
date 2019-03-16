@@ -22,7 +22,8 @@ namespace ModernFirearmKitMod
 
     public class MordenFirearmKitBlockMod : ModEntryPoint
     {
-      
+
+        public static GameObject Mod;
 
         public override void OnLoad()
         {
@@ -39,14 +40,19 @@ namespace ModernFirearmKitMod
             //LoadBlock(MachineGun);
             //LoadBlock(direction);
 
-            if (ModernFirearmKitMod.RocketPodBlockScript.RocketTemp == null)
-            {
-                ModernFirearmKitMod.RocketPodBlockScript.CreateRocketBlockTemp();
-            }
-            ModResource.CreateAssetBundleResource("Effect", @"Resources/bundle");
-            new GameObject("test").AddComponent<test>();
+            Mod = new GameObject("Morden Firearm Kit Mod");
+            UnityEngine.Object.DontDestroyOnLoad(Mod);
+            
+            AssetManager.Instance.transform.SetParent(Mod.transform);
 
-         
+            if (RocketPodBlockScript.RocketTemp == null)
+            {
+                RocketPodBlockScript.CreateRocketBlockTemp();
+            }
+
+            //new GameObject("test").AddComponent<test>();
+
+
 
             //增加灯关渲染数量
             //QualitySettings.pixelLightCount += 10;
@@ -117,8 +123,8 @@ namespace ModernFirearmKitMod
 
           
 
-            StartCoroutine(TempManager.createVFX());
-            StartCoroutine(load());
+            //StartCoroutine(AssetManager.createVFX());
+            //StartCoroutine(load());
         }
 
         void Reactivate()
@@ -141,8 +147,8 @@ namespace ModernFirearmKitMod
                 //AssetBundle assetBundle = ModResource.GetAssetBundle("Effect");
                 //Cube = (GameObject)Instantiate<GameObject>(assetBundle.LoadAsset<GameObject>(/*"example"*//*"M4A1"*/"MachineGunEffect"));
                 
-                Cube = (GameObject)Instantiate<GameObject>(TempManager.mgb);
-                Cube.transform.position = new Vector3(0, 3, 0);
+                //Cube = (GameObject)Instantiate<GameObject>(TempManager.mgb);
+                //Cube.transform.position = new Vector3(0, 3, 0);
 
                 Instantiate(Cube1).transform.position = new Vector3(3, 3, 0);
 
@@ -168,29 +174,43 @@ namespace ModernFirearmKitMod
 
     class explosion : MonoBehaviour
     {
-        void OnCollisionEnter(Collision col)
-        {
+        /// <summary>爆炸半径</summary>
+        public float Radius { get; set; } = 3f;
+        /// <summary>爆炸威力</summary>
+        public float Force { get; set; } = 10000f;
 
-            //定义爆炸半径
-            float radius = 3.0f;
+
+        public IEnumerator explode()
+        {
+            int index = 0;
+
+
             //定义爆炸位置为炸弹位置
             Vector3 explosionPos = transform.position;
             //这个方法用来反回球型半径之内（包括半径）的所有碰撞体collider[]
-            Collider[] colliders = Physics.OverlapSphere(explosionPos, radius);
+            Collider[] colliders = Physics.OverlapSphere(explosionPos, Radius);
 
             //遍历返回的碰撞体，如果是刚体，则给刚体添加力
             foreach (Collider hit in colliders)
             {
                 if (hit.attachedRigidbody != null)
                 {
-                    float force = UnityEngine.Random.Range(10000f, 100000f);
-                    hit.attachedRigidbody.AddExplosionForce(force, explosionPos, radius);
-
+                    float force = UnityEngine.Random.Range(10000f, 50000f);
+                    hit.attachedRigidbody.AddExplosionForce(Force, explosionPos, Radius);
+                    if (++index > 30) { yield return 0; }
                 }
-                //销毁炸弹和小球
-                //Destroy(col.gameObject);
-                Destroy(gameObject);
+         
             }
+
+            //销毁炸弹和小球
+            //Destroy(col.gameObject);
+            Destroy(gameObject);
+        }
+
+        void OnCollisionEnter(Collision col)
+        {
+
+            //StartCoroutine(explode());
 
         }
     }

@@ -74,13 +74,14 @@
     <Compile Include="Blocks\Missile Block\MissileBlockScript.cs" />
     <Compile Include="Blocks\RocketBlock.cs" />
     <Compile Include="Blocks\RocketPod Block\RocketPodBlockScript.cs" />
+    <Compile Include="GenericScript\TimedSelfDestruct.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolBase.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolListComponent.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolComponent.cs" />
     <Compile Include="ObjectPoolManager\PoolUnit.cs" />
     <Compile Include="ObjectPoolManager\PoolUnitBehavior.cs" />
     <Compile Include="ObjectPoolManager\PoolUnitList.cs" />
-    <Compile Include="TempManager.cs" />
+    <Compile Include="AssetManager.cs" />
     <Compile Include="GenericScript\BulletBase.cs" />
     <Compile Include="GenericScript\DragScript.cs" />
     <Compile Include="GenericScript\ExplodeScript.cs" />

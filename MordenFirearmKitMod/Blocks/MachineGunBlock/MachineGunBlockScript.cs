@@ -115,11 +115,11 @@ namespace ModernFirearmKitMod
 
         void initVFX()
         {
-            VisualEffectsObject = VisualEffectsObject ?? (GameObject)Instantiate(TempManager.mgb, transform);
-            VisualEffectsObject.transform.position = transform.TransformPoint(Vector3.forward * 3);
-            VisualEffectsObject.transform.localEulerAngles = new Vector3(0, 180, 0);
-            VisualEffectsObject.GetComponent<FPSDemoReactivator>().TimeDelayToReactivate = Rate;
-            VisualEffectsObject.SetActive(false);
+            //VisualEffectsObject = VisualEffectsObject ?? (GameObject)Instantiate(AssetManager.mgb, transform);
+            //VisualEffectsObject.transform.position = transform.TransformPoint(Vector3.forward * 3);
+            //VisualEffectsObject.transform.localEulerAngles = new Vector3(0, 180, 0);
+            //VisualEffectsObject.GetComponent<FPSDemoReactivator>().TimeDelayToReactivate = Rate;
+            //VisualEffectsObject.SetActive(false);
         }
 
         //internal static GameObject CreateBulletObject()

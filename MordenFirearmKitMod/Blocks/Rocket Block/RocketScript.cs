@@ -59,8 +59,8 @@ namespace ModernFirearmKitMod
             drager.enabled = false;
 
             exploder = GetComponent<ExplodeScript>() ?? gameObject.AddComponent<ExplodeScript>();
-            exploder.Power = 1;
-            exploder.Radius = 5;
+            exploder.Power = 1f;
+            exploder.Radius = 10f;         
             exploder.ExplosionType = ExplodeScript.explosionType.炸弹;
 
         }
@@ -97,20 +97,13 @@ namespace ModernFirearmKitMod
         {
             if (rigidbody.detectCollisions)
             {
+                //rigidbody.isKinematic = true;                
+
+                //exploder.Position = transform.position;
                 //exploder.Explodey();
 
-                //var v = gameObject.AddComponent<ExplodeOnCollide>()/*.OnExplode(5000,300,500,transform.position,5,0)*/;
-                //v.power = 5000;
-                //v.torquePower = 1000;
-                //v.upPower = 1000;
-                //v.radius = 10;
-                //v.parentObj = transform;
-                //v.OnExplode(5000, 300, 500, transform.position, 5, 0);
-                
-                ////v.Explodey();
-
-
-                Debug.Log("boom");
+                //gameObject.GetComponentInChildren<CapsuleCollider>().enabled = false;
+                //gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
             }
         }
 
@@ -124,11 +117,11 @@ namespace ModernFirearmKitMod
                 configurableJoint.breakForce = configurableJoint.breakTorque = 0;
                 rigidbody.WakeUp();
             }
-            
-            smokeScripter.EmitSwitch = true;
-            fireScripter.EmitSwitch = true;
-            isLaunched = drager.enabled = true;
-            rigidbody.AddForceAtPosition(transform.TransformDirection(ThrustDirection).normalized * ThrustForce, transform.TransformPoint(ThrustPoint));
+
+            smokeScripter.EmitSwitch = !exploder.isExplodey;
+            fireScripter.EmitSwitch = !exploder.isExplodey;
+            isLaunched = drager.enabled = !exploder.isExplodey;
+            //rigidbody.AddForceAtPosition(transform.TransformDirection(ThrustDirection).normalized * ThrustForce, transform.TransformPoint(ThrustPoint));
             yield return new WaitForSeconds(ThrustTime);
             smokeScripter.EmitSwitch = false;
             fireScripter.EmitSwitch = false;

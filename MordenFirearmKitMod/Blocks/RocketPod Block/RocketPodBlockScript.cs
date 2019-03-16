@@ -111,7 +111,7 @@ namespace ModernFirearmKitMod
         public override void SafeAwake()
         {
 
-            functionPage_menu = AddMenu("Function Page Menu", 0, new List<string> { "火箭巢参数", "尾烟参数", "尾烟参数" });
+            functionPage_menu = AddMenu("Function Page Menu", 0, new List<string> { "火箭巢参数", "尾焰参数", "尾烟参数" });
             functionPage_menu.ValueChanged += (value) => { DisplayInMapper(value); };
 
             LaunchKey = AddKey("发射", "Launch", KeyCode.L);
@@ -173,10 +173,10 @@ namespace ModernFirearmKitMod
             colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEndFire", Color.yellow, false);
             colorEnd_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTimeFire", 0f, 0, 0.5f * transform.localScale.x);
+            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTimeFire", 0f, 0, 0.5f /** transform.localScale.x*/);
             colorStartTime_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTimeFire", 0.25f, 0, 0.5f * transform.localScale.x);
+            colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTimeFire", 0.25f, 0, 0.5f/* * transform.localScale.x*/);
             colorEndTime_fire.ValueChanged += (value) => { changedPropertise(); };
 
             #endregion
@@ -321,7 +321,7 @@ namespace ModernFirearmKitMod
         {
 
             BulletMaxNumber = Mathf.Clamp(BulletMaxNumber, 1, 18);
-            GetRelativePositions();
+            //GetRelativePositions();
 
             Reload(true);
         }
@@ -395,14 +395,14 @@ namespace ModernFirearmKitMod
         {
 
             //火箭弹安装位置 本地坐标转世界坐标
-            Vector3 offset = new Vector3(-1.375f, 0f, 0.15f);
+            Vector3 offset = new Vector3(-0.375f, 0f, 0.15f);
             Vector3 pos = getRealPosition(label, offset);
 
             //火箭弹实例化
             GameObject Rocket = (GameObject)Instantiate(RocketTemp, pos, transform.rotation, transform);
             Rocket.SetActive(true);
             Rockets[label] = Rocket;
-            Rocket.transform.localScale = new Vector3(1f, 0.5f, 0.5f);
+            //Rocket.transform.localScale = new Vector3(1f, 0.5f, 0.5f);
 
             //火箭弹刚体 不开启碰撞 不受物理影响
             Rigidbody rigidbody = Rocket.GetComponent<Rigidbody>();
@@ -456,17 +456,20 @@ namespace ModernFirearmKitMod
         }
 
         private void delayLaunch(GameObject gameObject)
-        {      
+        {          
+            gameObject.transform.localPosition += Vector3.right * 3.25f;
+            gameObject.transform.SetParent(transform.parent.transform);
+            RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
+            rocketScript.LaunchEnabled = true;        
             Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
             rigidbody.isKinematic = false;
-            RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
-            //rigidbody.AddForce(gameObject.transform.right * 30f, ForceMode.Impulse);
+            
             StartCoroutine(delay());
             IEnumerator delay()
             {
-                yield return new WaitForSeconds(rocketScript.DelayEnableCollisionTime * 0.1f);
-                rigidbody.detectCollisions = rocketScript.LaunchEnabled = true;
-                gameObject.transform.SetParent(transform.parent.transform);
+                yield return new WaitForSeconds(rocketScript.DelayEnableCollisionTime * 0.1f);            
+                rigidbody.detectCollisions =  true;
+                gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = false;
             }
         }   
         //火箭弹重装
@@ -491,15 +494,26 @@ namespace ModernFirearmKitMod
         internal static void CreateRocketBlockTemp()
         {
             RocketTemp = new GameObject("Rocket Temp");
-            RocketTemp.transform.localScale = new Vector3(1f, 0.5f, 0.5f);
-            RocketTemp.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
-            RocketTemp.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("Rocket Texture");
-            Rigidbody rigidbody = RocketTemp.AddComponent<Rigidbody>();         
-            rigidbody.mass = 0.25f;
-            CapsuleCollider capsuleCollider = RocketTemp.AddComponent<CapsuleCollider>();            
+            RocketTemp.transform.localScale = new Vector3(1f, 0.75f, 0.75f);
+
+            GameObject vis = new GameObject("Vis");
+            vis.transform.SetParent(RocketTemp.transform);
+            vis.transform.localPosition -= RocketTemp.transform.right;
+            vis.transform.localScale = RocketTemp.transform.localScale;
+            vis.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
+            vis.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("Rocket Texture");
+
+            GameObject collider = new GameObject("Collider");
+            collider.transform.SetParent(RocketTemp.transform);
+            collider.transform.localScale = RocketTemp.transform.localScale;
+            CapsuleCollider capsuleCollider = collider.AddComponent<CapsuleCollider>();            
             capsuleCollider.radius = 0.15f;
             capsuleCollider.height = 2.5f;
             capsuleCollider.direction = 0;
+            capsuleCollider.isTrigger = true;
+
+            Rigidbody rigidbody = RocketTemp.AddComponent<Rigidbody>();
+            rigidbody.mass = 0.25f;
 
             RocketTemp.AddComponent<RocketScript>();
             RocketTemp.AddComponent<DestroyIfEditMode>();
