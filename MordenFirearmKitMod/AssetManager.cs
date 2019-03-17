@@ -44,16 +44,17 @@ namespace ModernFirearmKitMod
     public class Asset_MachineGun
     {
         //开火特效
-        GameObject fireEffect;
+        public GameObject fireEffect;
+        public Material material;
 
         public Asset_MachineGun(ModAssetBundle modAssetBundle)
         {
-            fireEffect = modAssetBundle.LoadAsset<GameObject>("MachineGunEffect");
+            material = modAssetBundle.LoadAsset<Material>("MachineGunMat.mat");
+
+            fireEffect = modAssetBundle.LoadAsset<GameObject>("MachineGunFireEffect");
             fireEffect.AddComponent<DestroyIfEditMode>();
 
-            FPSDemoReactivator fPSDemo = fireEffect.AddComponent<FPSDemoReactivator>();
-            fPSDemo.StartDelay = 0.2f;
-            fPSDemo.TimeDelayToReactivate = 1;
+            Reactivator fPSDemo = fireEffect.AddComponent<Reactivator>();
             for (int i = 0; i < fireEffect.transform.childCount; i++)
             {
                 var go = fireEffect.transform.GetChild(i).gameObject;
@@ -65,16 +66,16 @@ namespace ModernFirearmKitMod
                     Vector3 vector3 = go.transform.localPosition;
                     vector3.z = -0.5f;
                     go.transform.localPosition = vector3;
-                    Debug.Log("add");
                 }
                 else if (go.name == "MuzzleFlash0")
                 {
                     go.AddComponent<FPSRandomRotateAngle>().RotateZ = true;
+                    go.transform.localScale = new Vector3(0.6f, 0.6f, 0f);
                 }
                 else if (go.name == "MuzzleFlash")
                 {
                     go.transform.localPosition = new Vector3(0, 0, -0.2f);
-                    go.transform.localScale = new Vector3(0.1f, 0.1f, 0.07f);
+                    go.transform.localScale = new Vector3(0.1f, 0.1f, 0.065f);
                 }
                 else if (go.name == "Distortion")
                 {

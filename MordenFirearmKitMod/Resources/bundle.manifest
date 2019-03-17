@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 180336861
+CRC: 581023315
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 03fbb4a3be94a5581ebe0d79756bcb9e
+    Hash: 2b636654bc538452053d1d68f4b09dbf
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 85dea68658b37847bbd64f0a417fb218
+    Hash: 51aa6a82c65b068721ecd3705dc924df
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -21,21 +21,19 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
-- Class: 108
+- Class: 82
   Script: {instanceID: 0}
-- Class: 114
-  Script: {fileID: 11500000, guid: 567de163b38f1c84d99ddd11a22df289, type: 3}
-- Class: 114
-  Script: {fileID: 11500000, guid: e418f0006f891994db9e6a574108cb7f, type: 3}
-- Class: 114
-  Script: {fileID: 11500000, guid: 75ef2d583bf570947b7f1bfc1ab782e1, type: 3}
-- Class: 115
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 108
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
 - Class: 199
   Script: {instanceID: 0}
 Assets:
+- Assets/MachineGunSmokeEffect.prefab
+- Assets/MachineGun/Materials/MachineGunMat.mat
 - Assets/BigExplosion.prefab
-- Assets/MachineGunEffect.prefab
+- Assets/MachineGunFireEffect.prefab
 Dependencies: []

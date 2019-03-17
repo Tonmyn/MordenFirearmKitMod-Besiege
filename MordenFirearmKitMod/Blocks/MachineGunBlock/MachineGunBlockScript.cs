@@ -15,24 +15,20 @@ namespace ModernFirearmKitMod
         public override GameObject BulletObject { get; set; }
         public override Vector3 SpawnPoint { get; set; }
         public override bool LaunchEnable { get; set; }
-
+        //加特林热度
+        float heat = 0;
         //加特林转速
         float RotationRate;
-
         //加特林转速限制
         float RotationRateLimit = 60;
 
         //加特林转动声音
-        public AudioSource RotationAudioSource;
-
-        //加特林转动音量
-        public static float Volume = 5;
+        AudioSource RotationAudioSource;
 
         ConfigurableJoint CJ;
-
-        GameObject GunVis;
-
-        GameObject VisualEffectsObject;
+        GameObject EffectsObject;
+        GameObject GunVis;    
+        Material material;
 
         public override void SafeAwake()
         {
@@ -56,19 +52,24 @@ namespace ModernFirearmKitMod
             RotationAudioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
             RotationAudioSource.clip = ModResource.GetAudioClip("MachineGun AudioClip");
             RotationAudioSource.loop = true;
+            RotationAudioSource.volume = 1;
+            RotationAudioSource.spatialBlend = 1;
+            RotationAudioSource.maxDistance = 15;
 
             CJ = GetComponent<ConfigurableJoint>();
 
             List<MeshFilter> meshFilters = new List<MeshFilter>();
             GetComponentsInChildren(false, meshFilters);
             GunVis = meshFilters.Find(match => match.name == "Vis").gameObject;
-
            
         }
 
         public override void OnSimulateStart()
         {
             initVFX();
+            material = GunVis.GetComponent<MeshRenderer>().material = AssetManager.Instance.MachineGun.material;
+            material.SetTexture("_MainTex", ModResource.GetTexture("MachineGun Texture"));
+            material.SetTexture("_EmissionMap", ModResource.GetTexture("MachineGun-e Texture"));
         }
 
         public override void SimulateUpdateHost()
@@ -85,20 +86,25 @@ namespace ModernFirearmKitMod
                 if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
                 {
                     LaunchEnable = true;                  
-                    StartCoroutine(Launch());                 
-                }           
+                    StartCoroutine(Launch());
+                    heat=Mathf.Clamp01(heat + 0.01f);
+                    EffectsObject.SetActive(true);
+                    EffectsObject.GetComponent<Reactivator>().Switch = true;
+                }
             }
             else
             {
                 LaunchEnable = false;
-                RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 10);
+                heat = Mathf.Clamp01(heat - 0.05f * Time.deltaTime);
+                EffectsObject.GetComponent<Reactivator>().Switch = false;       
+                RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 10);         
             }
 
             GunVis.transform.Rotate(new Vector3(0, RotationRate, 0) * Time.timeScale);
-            VisualEffectsObject.SetActive(LaunchEnable);
+            material.SetColor("_EmissionColor",new Color(heat,0f,0f,0f));
+           
             if (RotationRate != 0)
             {
-                RotationAudioSource.volume = RotationRate / (Vector3.Distance(transform.position, Camera.main.transform.position) * RotationRateLimit) * Volume;
                 RotationAudioSource.pitch = RotationRate / RotationRateLimit;
                 if (!RotationAudioSource.isPlaying) RotationAudioSource.Play();
             }
@@ -115,18 +121,12 @@ namespace ModernFirearmKitMod
 
         void initVFX()
         {
-            //VisualEffectsObject = VisualEffectsObject ?? (GameObject)Instantiate(AssetManager.mgb, transform);
-            //VisualEffectsObject.transform.position = transform.TransformPoint(Vector3.forward * 3);
-            //VisualEffectsObject.transform.localEulerAngles = new Vector3(0, 180, 0);
-            //VisualEffectsObject.GetComponent<FPSDemoReactivator>().TimeDelayToReactivate = Rate;
-            //VisualEffectsObject.SetActive(false);
+            EffectsObject = EffectsObject ?? (GameObject)Instantiate(AssetManager.Instance.MachineGun.fireEffect, transform);
+            EffectsObject.transform.position = transform.TransformPoint(Vector3.forward * 3);
+            EffectsObject.transform.localEulerAngles = new Vector3(0, 180, 0);
+            EffectsObject.GetComponent<Reactivator>().TimeDelayToReactivate = Rate;
+            EffectsObject.SetActive(false);
         }
-
-        //internal static GameObject CreateBulletObject()
-        //{
-
-
-        //}
     }
 }
 

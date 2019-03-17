@@ -1,14 +1,32 @@
 ﻿using UnityEngine;
 
-public class FPSDemoReactivator : MonoBehaviour
+public class Reactivator : MonoBehaviour
 {
 
     public float StartDelay = 0;
 	public float TimeDelayToReactivate = 3;
-	
-	void Start () {
-        InvokeRepeating("Reactivate", StartDelay, TimeDelayToReactivate);
-	}
+
+    public bool Switch { get; set; } = false;
+    bool lastSwitch = false;
+
+    void Update()
+    {
+
+        if (Switch != lastSwitch)
+        {
+            lastSwitch = Switch;
+            if (Switch)
+            {
+                InvokeRepeating("Reactivate", StartDelay, TimeDelayToReactivate);
+            }
+            else
+            {
+                Switch = lastSwitch = false;
+                CancelInvoke();         
+            }
+        }
+
+    }
 
 	void Reactivate ()
 	{
@@ -17,6 +35,5 @@ public class FPSDemoReactivator : MonoBehaviour
             gameObject.SetActive(false);
             gameObject.SetActive(true);
         }
-	
 	}
 }
