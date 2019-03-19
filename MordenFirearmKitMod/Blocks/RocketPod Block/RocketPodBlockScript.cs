@@ -103,7 +103,7 @@ namespace ModernFirearmKitMod
         private GameObject[] Rockets = new GameObject[18];
 
         //声明 火箭弹标签
-        private int Label = 0;
+        //private int Label = 0;
 
         //声明 火箭弹实例化位置
         private Vector3[] relativePositions;
