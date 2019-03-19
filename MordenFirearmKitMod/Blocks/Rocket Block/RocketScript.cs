@@ -28,29 +28,47 @@ namespace ModernFirearmKitMod
         public bool Launched { get { return isLaunched; } }
         private bool isLaunched = false;
 
-        public GameObject fire_ParticleObject;
+        public bool isExplode { get { return exploder.isExplodey; } }
+        public float ExplodePower;
+        public float ExplodeRadius;
+        public Action OnExplode,OnExploded,OnExplodeFinal;
 
-        public RocketFireScript fireScripter;
 
-        public GameObject smoke_ParticleObject;
+        //public GameObject fire_ParticleObject;
 
-        public RocketSmokeScript smokeScripter;
+        //public RocketFireScript fireScripter;
 
+        //public GameObject smoke_ParticleObject;
+
+        //public RocketSmokeScript smokeScripter;
+
+        public GameObject effect;
+        public Vector3 effectOffset;
+
+        private bool EnableCollision = false;
         void Awake()
         {
-            rigidbody = GetComponent<Rigidbody>();        
+         
+        }
+
+        void Start()
+        {
+            rigidbody = GetComponent<Rigidbody>();
             rigidbody.drag = rigidbody.angularDrag = 0;
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             initPhysical();
 
-            initParticle();
-
+            if (StatMaster.levelSimulating)
+            {
+                initParticle();
+            }    
         }
 
         void initPhysical()
         {
-            ThrustDirection = transform.TransformDirection(ThrustDirection);
+            //ThrustDirection = transform.TransformDirection(ThrustDirection);
+            //ThrustPoint = transform.TransformPoint(ThrustPoint);
 
             drager = GetComponent<DragScript>() ?? gameObject.AddComponent<DragScript>();
             drager.DragAxis = new Vector3(0, -1, -1);
@@ -59,25 +77,37 @@ namespace ModernFirearmKitMod
             drager.enabled = false;
 
             exploder = GetComponent<ExplodeScript>() ?? gameObject.AddComponent<ExplodeScript>();
-            exploder.Power = 1f;
-            exploder.Radius = 10f;         
+            exploder.Power = ExplodePower;
+            exploder.Radius = ExplodeRadius;         
             exploder.ExplosionType = ExplodeScript.explosionType.炸弹;
+            exploder.OnExplode += Explode;
+            exploder.OnExploded += Exploded;
+            exploder.OnExplodeFinal += ExplodeFinal;
 
+           
         }
 
         void initParticle()
         {
-            fire_ParticleObject = fire_ParticleObject ?? new GameObject("Rocket Fire Object");
-            fire_ParticleObject.transform.SetParent(transform);
-            fire_ParticleObject.transform.localPosition = new Vector3(-1.35f, 0, 0.5f);
-            fire_ParticleObject.transform.localRotation = Quaternion.AngleAxis(-90f, Vector3.up);
-            fireScripter = fire_ParticleObject.GetComponent<RocketFireScript>() ?? fire_ParticleObject.AddComponent<RocketFireScript>();
+            //fire_ParticleObject = fire_ParticleObject ?? new GameObject("Rocket Fire Object");
+            //fire_ParticleObject.transform.SetParent(transform);
+            //fire_ParticleObject.transform.localPosition = new Vector3(-1.35f, 0, 0.5f);
+            //fire_ParticleObject.transform.localRotation = Quaternion.AngleAxis(-90f, Vector3.up);
+            //fireScripter = fire_ParticleObject.GetComponent<RocketFireScript>() ?? fire_ParticleObject.AddComponent<RocketFireScript>();
 
-            smoke_ParticleObject = smoke_ParticleObject ?? new GameObject("Rocket Smoke Object");
-            smoke_ParticleObject.transform.SetParent(transform);
-            smoke_ParticleObject.transform.localPosition = new Vector3(-1.35f, 0, 0.5f);
-            smoke_ParticleObject.transform.localRotation = Quaternion.AngleAxis(-90f, Vector3.up);
-            smokeScripter = smoke_ParticleObject.GetComponent<RocketSmokeScript>() ?? smoke_ParticleObject.AddComponent<RocketSmokeScript>();
+            //smoke_ParticleObject = smoke_ParticleObject ?? new GameObject("Rocket Smoke Object");
+            //smoke_ParticleObject.transform.SetParent(transform);
+            //smoke_ParticleObject.transform.localPosition = new Vector3(-1.35f, 0, 0.5f);
+            //smoke_ParticleObject.transform.localRotation = Quaternion.AngleAxis(-90f, Vector3.up);
+            //smokeScripter = smoke_ParticleObject.GetComponent<RocketSmokeScript>() ?? smoke_ParticleObject.AddComponent<RocketSmokeScript>();
+
+            effect = (GameObject)Instantiate(AssetManager.Instance.Rocket.rocketTrailEffect);
+            effect.transform.SetParent(transform);
+            effect.transform.position = transform.position;
+            effect.transform.rotation = transform.rotation;
+            effect.transform.localPosition = effectOffset;
+            effect.SetActive(false);
+          
         }
 
         void Update()
@@ -85,6 +115,10 @@ namespace ModernFirearmKitMod
             if (LaunchEnabled)
             {
                 StartCoroutine(Launch());
+                if (isLaunched && !effect.activeSelf)
+                {
+                    effect.SetActive(true);
+                }
             }
             else
             {
@@ -95,38 +129,52 @@ namespace ModernFirearmKitMod
 
         void OnCollisionEnter(Collision collision)
         {
-            if (rigidbody.detectCollisions)
+            if (EnableCollision)
             {
-                //rigidbody.isKinematic = true;                
+                rigidbody.isKinematic = true;
 
-                //exploder.Position = transform.position;
-                //exploder.Explodey();
+                exploder.Position = transform.position;
+                exploder.Explodey();
 
-                //gameObject.GetComponentInChildren<CapsuleCollider>().enabled = false;
-                //gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
+                gameObject.GetComponentInChildren<CapsuleCollider>().enabled = false;
+                gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
             }
         }
 
         private IEnumerator Launch()
         {
+            StartCoroutine(CollisionTimer(DelayEnableCollisionTime));
             yield return new WaitForSeconds(DelayLaunchTime);
-          
-            if (GetComponent<ConfigurableJoint>() != null)
-            {
-                ConfigurableJoint configurableJoint = GetComponent<ConfigurableJoint>();
-                configurableJoint.breakForce = configurableJoint.breakTorque = 0;
-                rigidbody.WakeUp();
-            }
 
-            smokeScripter.EmitSwitch = !exploder.isExplodey;
-            fireScripter.EmitSwitch = !exploder.isExplodey;
-            isLaunched = drager.enabled = !exploder.isExplodey;
-            //rigidbody.AddForceAtPosition(transform.TransformDirection(ThrustDirection).normalized * ThrustForce, transform.TransformPoint(ThrustPoint));
+                if (GetComponent<ConfigurableJoint>() != null)
+                {
+                    ConfigurableJoint configurableJoint = GetComponent<ConfigurableJoint>();
+                    configurableJoint.breakForce = configurableJoint.breakTorque = 0;
+                    rigidbody.WakeUp();
+                }
+
+                //smokeScripter.EmitSwitch = !exploder.isExplodey;
+                //fireScripter.EmitSwitch = !exploder.isExplodey;
+                isLaunched = drager.enabled = !exploder.isExplodey;
+
+            rigidbody.AddForceAtPosition(transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f, transform.TransformPoint(ThrustPoint));
             yield return new WaitForSeconds(ThrustTime);
-            smokeScripter.EmitSwitch = false;
-            fireScripter.EmitSwitch = false;
+            //smokeScripter.EmitSwitch = false;
+            //fireScripter.EmitSwitch = false;
             LaunchEnabled = false;         
         }
+        private IEnumerator CollisionTimer(float time)
+        {
+            if (!EnableCollision)
+            {
+                yield return new WaitForSeconds(time);
+                EnableCollision = true;
+                StopCoroutine("CollisionTimer");
+            }
+        }
 
+        void Explode() { OnExplode?.Invoke(); }
+        void Exploded() { OnExploded?.Invoke(); }
+        void ExplodeFinal() { OnExplodeFinal?.Invoke(); }
     }
 }

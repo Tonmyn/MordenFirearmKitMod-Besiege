@@ -10,7 +10,7 @@ namespace ModernFirearmKitMod
 {
     class RocketPodBlockScript : LauncherBlockScript
     {
-        public MMenu functionPage_menu;
+        //public MMenu functionPage_menu;
 
         public static GameObject RocketTemp;
 
@@ -41,61 +41,63 @@ namespace ModernFirearmKitMod
 
         #region 尾焰变量 声明
 
-        //声明 滑条 粒子存活时间
-        MSlider lifetime_fire;
+        ////声明 滑条 粒子存活时间
+        //MSlider lifetime_fire;
 
-        //声明 滑条 半径
-        MSlider radius_fire;
+        ////声明 滑条 半径
+        //MSlider radius_fire;
 
-        //声明 滑条 角度
-        MSlider angle_fire;
+        ////声明 滑条 角度
+        //MSlider angle_fire;
 
-        //声明 滑条 尺寸
-        MSlider size_fire;
+        ////声明 滑条 尺寸
+        //MSlider size_fire;
 
-        //声明 滑条 初始尺寸
-        MSlider sizeStart_fire;
+        ////声明 滑条 初始尺寸
+        //MSlider sizeStart_fire;
 
-        //声明 滑条 结束尺寸
-        MSlider sizeEnd_fire;
+        ////声明 滑条 结束尺寸
+        //MSlider sizeEnd_fire;
 
-        MColourSlider colorStart_fire;
+        //MColourSlider colorStart_fire;
 
-        MColourSlider colorEnd_fire;
+        //MColourSlider colorEnd_fire;
 
-        MSlider colorStartTime_fire;
+        //MSlider colorStartTime_fire;
 
-        MSlider colorEndTime_fire;
+        //MSlider colorEndTime_fire;
 
         #endregion
 
         #region 尾烟变量 声明
 
-        //声明 菜单 尾烟颜色
-        protected MMenu colorsmoke_menu;
+        ////声明 菜单 尾烟颜色
+        //protected MMenu colorsmoke_menu;
 
-        //声明 滑条 粒子存活时间
-        protected MSlider lifetime_smoke;
+        ////声明 滑条 粒子存活时间
+        //protected MSlider lifetime_smoke;
 
-        //声明 滑条 角度
-        protected MSlider angle_smoke;
+        ////声明 滑条 角度
+        //protected MSlider angle_smoke;
 
-        //声明 滑条 尺寸
-        protected MSlider size_smoke;
+        ////声明 滑条 尺寸
+        //protected MSlider size_smoke;
 
-        //声明 滑条 初始尺寸
-        protected MSlider sizeStart_smoke;
+        ////声明 滑条 初始尺寸
+        //protected MSlider sizeStart_smoke;
 
-        //声明 滑条 结束尺寸
-        protected MSlider sizeEnd_smoke;
+        ////声明 滑条 结束尺寸
+        //protected MSlider sizeEnd_smoke;
 
-        public int color_smoke = 0;
+        //public int color_smoke = 0;
 
         #endregion
 
-       
+
 
         #region 内部变量声明
+
+        private GameObject RockectPool;
 
         //声明 火箭弹
         private GameObject[] Rockets = new GameObject[18];
@@ -106,13 +108,14 @@ namespace ModernFirearmKitMod
         //声明 火箭弹实例化位置
         private Vector3[] relativePositions;
 
+
         #endregion
 
         public override void SafeAwake()
         {
 
-            functionPage_menu = AddMenu("Function Page Menu", 0, new List<string> { "火箭巢参数", "尾焰参数", "尾烟参数" });
-            functionPage_menu.ValueChanged += (value) => { DisplayInMapper(value); };
+            //functionPage_menu = AddMenu("Function Page Menu", 0, new List<string> { "火箭巢参数", "尾焰参数", "尾烟参数" });
+            //functionPage_menu.ValueChanged += (value) => { DisplayInMapper(value); };
 
             LaunchKey = AddKey("发射", "Launch", KeyCode.L);
 
@@ -149,52 +152,52 @@ namespace ModernFirearmKitMod
 
             #region 尾焰组件初始化
 
-            lifetime_fire = AddSlider("时间", "LifeTimeFire", 0.5f /** transform.localScale.x*/, 0, 10);
-            lifetime_fire.ValueChanged += (value) => { changedPropertise(); };
+            //lifetime_fire = AddSlider("时间", "LifeTimeFire", 0.5f /** transform.localScale.x*/, 0, 10);
+            //lifetime_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            radius_fire = AddSlider("半径", "RadiusFire", 0f, 0, 2);
-            radius_fire.ValueChanged += (value) => { changedPropertise(); };
+            //radius_fire = AddSlider("半径", "RadiusFire", 0f, 0, 2);
+            //radius_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            angle_fire = AddSlider("角度", "AngleFire", 2f, 0, 60);
-            angle_fire.ValueChanged += (value) => { changedPropertise(); };
+            //angle_fire = AddSlider("角度", "AngleFire", 2f, 0, 60);
+            //angle_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            size_fire = AddSlider("尺寸", "SizeFire", 0.5f, 0, 5);
-            size_fire.ValueChanged += (value) => { changedPropertise(); };
+            //size_fire = AddSlider("尺寸", "SizeFire", 0.5f, 0, 5);
+            //size_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            sizeStart_fire = AddSlider("初始尺寸", "SizeStartFire", 1f, 0, 5);
-            sizeStart_fire.ValueChanged += (value) => { changedPropertise(); };
+            //sizeStart_fire = AddSlider("初始尺寸", "SizeStartFire", 1f, 0, 5);
+            //sizeStart_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            sizeEnd_fire = AddSlider("结束尺寸", "SizeEndFire", 0f, 0, 5);
-            sizeEnd_fire.ValueChanged += (value) => { changedPropertise(); };
+            //sizeEnd_fire = AddSlider("结束尺寸", "SizeEndFire", 0f, 0, 5);
+            //sizeEnd_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            colorStart_fire = AddColourSlider("渐变初始颜色", "ColorStartFire", Color.blue, false);
-            colorStart_fire.ValueChanged += (value) => { changedPropertise(); };
+            //colorStart_fire = AddColourSlider("渐变初始颜色", "ColorStartFire", Color.blue, false);
+            //colorStart_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEndFire", Color.yellow, false);
-            colorEnd_fire.ValueChanged += (value) => { changedPropertise(); };
+            //colorEnd_fire = AddColourSlider("渐变结束颜色", "ColorEndFire", Color.yellow, false);
+            //colorEnd_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTimeFire", 0f, 0, 0.5f /** transform.localScale.x*/);
-            colorStartTime_fire.ValueChanged += (value) => { changedPropertise(); };
+            //colorStartTime_fire = AddSlider("渐变初始时间", "ColorStartTimeFire", 0f, 0, 0.5f /** transform.localScale.x*/);
+            //colorStartTime_fire.ValueChanged += (value) => { changedPropertise(); };
 
-            colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTimeFire", 0.25f, 0, 0.5f/* * transform.localScale.x*/);
-            colorEndTime_fire.ValueChanged += (value) => { changedPropertise(); };
+            //colorEndTime_fire = AddSlider("渐变结束时间", "ColorEndTimeFire", 0.25f, 0, 0.5f/* * transform.localScale.x*/);
+            //colorEndTime_fire.ValueChanged += (value) => { changedPropertise(); };
 
             #endregion
 
             #region 尾烟组件初始化
 
-            colorsmoke_menu = AddMenu("尾烟颜色", color_smoke, new List<string> { "灰色", "白色", "黑色" });
-            colorsmoke_menu.ValueChanged += (value) => { changedPropertise(); };
-            lifetime_smoke = AddSlider("时间", "LifeTimeSmoke", 3f, 0, 5);
-            lifetime_smoke.ValueChanged += (value) => { changedPropertise(); };
-            angle_smoke = AddSlider("角度", "AngleSmoke", 15f, 0, 60);
-            angle_smoke.ValueChanged += (value) => { changedPropertise(); };
-            size_smoke = AddSlider("尺寸", "SizeSmoke", 1f, 0, 3);
-            size_smoke.ValueChanged += (value) => { changedPropertise(); };
-            sizeStart_smoke = AddSlider("初始尺寸", "SizeStartSmoke", 1f, 0, 1);
-            sizeStart_smoke.ValueChanged += (value) => { changedPropertise(); };
-            sizeEnd_smoke = AddSlider("结束尺寸", "SizeEndSmoke", 3f, 0, 10);
-            sizeEnd_smoke.ValueChanged += (value) => { changedPropertise(); };
+            //colorsmoke_menu = AddMenu("尾烟颜色", color_smoke, new List<string> { "灰色", "白色", "黑色" });
+            //colorsmoke_menu.ValueChanged += (value) => { changedPropertise(); };
+            //lifetime_smoke = AddSlider("时间", "LifeTimeSmoke", 3f, 0, 5);
+            //lifetime_smoke.ValueChanged += (value) => { changedPropertise(); };
+            //angle_smoke = AddSlider("角度", "AngleSmoke", 15f, 0, 60);
+            //angle_smoke.ValueChanged += (value) => { changedPropertise(); };
+            //size_smoke = AddSlider("尺寸", "SizeSmoke", 1f, 0, 3);
+            //size_smoke.ValueChanged += (value) => { changedPropertise(); };
+            //sizeStart_smoke = AddSlider("初始尺寸", "SizeStartSmoke", 1f, 0, 1);
+            //sizeStart_smoke.ValueChanged += (value) => { changedPropertise(); };
+            //sizeEnd_smoke = AddSlider("结束尺寸", "SizeEndSmoke", 3f, 0, 10);
+            //sizeEnd_smoke.ValueChanged += (value) => { changedPropertise(); };
 
             #endregion
 
@@ -210,13 +213,14 @@ namespace ModernFirearmKitMod
 
         public void DisplayInMapper(int value)
         {
-            bool show_0, show_1, show_2;
+            bool show_0 = true/*, show_1, show_2*/;
+
 
             //if ()
             //{
-            show_0 = "火箭巢参数" == functionPage_menu.Items[value];
-            show_1 = "尾焰参数" == functionPage_menu.Items[value];
-            show_2 = "尾烟参数" == functionPage_menu.Items[value];
+            //show_0 = "火箭巢参数" == functionPage_menu.Items[value];
+            //show_1 = "尾焰参数" == functionPage_menu.Items[value];
+            //show_2 = "尾烟参数" == functionPage_menu.Items[value];
             //}
             //else if ()
             //{
@@ -248,101 +252,104 @@ namespace ModernFirearmKitMod
 
             #region 页码1控件   
 
-            //toggle_fire.DisplayInMapper = show_1;
+            ////toggle_fire.DisplayInMapper = show_1;
 
-            lifetime_fire.DisplayInMapper = show_1;
+            //lifetime_fire.DisplayInMapper = show_1;
 
-            radius_fire.DisplayInMapper = show_1;
+            //radius_fire.DisplayInMapper = show_1;
 
-            angle_fire.DisplayInMapper = show_1;
+            //angle_fire.DisplayInMapper = show_1;
 
-            size_fire.DisplayInMapper = show_1;
+            //size_fire.DisplayInMapper = show_1;
 
-            sizeStart_fire.DisplayInMapper = show_1;
+            //sizeStart_fire.DisplayInMapper = show_1;
 
-            sizeEnd_fire.DisplayInMapper = show_1;
+            //sizeEnd_fire.DisplayInMapper = show_1;
 
-            colorStart_fire.DisplayInMapper = show_1;
+            //colorStart_fire.DisplayInMapper = show_1;
 
-            colorEnd_fire.DisplayInMapper = show_1;
+            //colorEnd_fire.DisplayInMapper = show_1;
 
-            colorStartTime_fire.DisplayInMapper = show_1;
+            //colorStartTime_fire.DisplayInMapper = show_1;
 
-            colorEndTime_fire.DisplayInMapper = show_1;
+            //colorEndTime_fire.DisplayInMapper = show_1;
 
-            //alphaStart_fire.DisplayInMapper = show_1;
+            ////alphaStart_fire.DisplayInMapper = show_1;
 
-            //alphaEnd_fire.DisplayInMapper = show_1;
+            ////alphaEnd_fire.DisplayInMapper = show_1;
 
-            //alphaStartTime_fire.DisplayInMapper = show_1;
+            ////alphaStartTime_fire.DisplayInMapper = show_1;
 
-            //alphaEndTime_fire.DisplayInMapper = show_1;
+            ////alphaEndTime_fire.DisplayInMapper = show_1;
 
             #endregion
 
             #region 页码2控件   
 
-            colorsmoke_menu.DisplayInMapper = show_2;
+            //colorsmoke_menu.DisplayInMapper = show_2;
 
-            //toggle_smoke.DisplayInMapper = show_2;
+            ////toggle_smoke.DisplayInMapper = show_2;
 
-            lifetime_smoke.DisplayInMapper = show_2;
+            //lifetime_smoke.DisplayInMapper = show_2;
 
-            //radius_smoke.DisplayInMapper = show_2;
+            ////radius_smoke.DisplayInMapper = show_2;
 
-            angle_smoke.DisplayInMapper = show_2;
+            //angle_smoke.DisplayInMapper = show_2;
 
-            size_smoke.DisplayInMapper = show_2;
+            //size_smoke.DisplayInMapper = show_2;
 
-            sizeStart_smoke.DisplayInMapper = show_2;
+            //sizeStart_smoke.DisplayInMapper = show_2;
 
-            sizeEnd_smoke.DisplayInMapper = show_2;
+            //sizeEnd_smoke.DisplayInMapper = show_2;
 
-            //colorStart_smoke.DisplayInMapper = show_2;
+            ////colorStart_smoke.DisplayInMapper = show_2;
 
-            //colorEnd_smoke.DisplayInMapper = show_2;
+            ////colorEnd_smoke.DisplayInMapper = show_2;
 
-            //colorStartTime_smoke.DisplayInMapper = show_2;
+            ////colorStartTime_smoke.DisplayInMapper = show_2;
 
-            //colorEndTime_smoke.DisplayInMapper = show_2;
+            ////colorEndTime_smoke.DisplayInMapper = show_2;
 
-            //alphaStart_smoke.DisplayInMapper = show_2;
+            ////alphaStart_smoke.DisplayInMapper = show_2;
 
-            //alphaEnd_smoke.DisplayInMapper = show_2;
+            ////alphaEnd_smoke.DisplayInMapper = show_2;
 
-            //alphaStartTime_smoke.DisplayInMapper = show_2;
+            ////alphaStartTime_smoke.DisplayInMapper = show_2;
 
-            //alphaEndTime_smoke.DisplayInMapper = show_2;
+            ////alphaEndTime_smoke.DisplayInMapper = show_2;
 
             #endregion
         }
 
         public override void OnSimulateStart()
         {
+            InitPool();
 
             BulletMaxNumber = Mathf.Clamp(BulletMaxNumber, 1, 18);
             //GetRelativePositions();
 
             Reload(true);
+
+            void InitPool()
+            {
+                RockectPool = new GameObject("Rocket Pool");
+                RockectPool.transform.SetParent(transform);
+                RockectPool.transform.position = transform.position;
+                RockectPool.transform.rotation = transform.rotation;
+            }
         }
 
         public override void SimulateUpdateHost()
         {
-            base.SimulateUpdateHost();
             Reload();
 
             if (LaunchKey.IsDown )
             {
-                if (!LaunchEnable)
+                if (!LaunchEnable&& RockectPool.transform.childCount > 0)
                 {
                     LaunchEnable = true;
-                    int index = Label++ % BulletMaxNumber;                   
-                    StartCoroutine(Launch(Rockets[index]));
+                    StartCoroutine(Launch(RockectPool.transform.GetChild(0).gameObject));
                 }
-            }
-            else
-            {
-                LaunchEnable = false;
             }
         }
 
@@ -399,7 +406,8 @@ namespace ModernFirearmKitMod
             Vector3 pos = getRealPosition(label, offset);
 
             //火箭弹实例化
-            GameObject Rocket = (GameObject)Instantiate(RocketTemp, pos, transform.rotation, transform);
+            GameObject Rocket = (GameObject)Instantiate(RocketTemp, pos, RockectPool.transform.rotation,RockectPool.transform);
+            Rocket.name = "Rocket " + label;
             Rocket.SetActive(true);
             Rockets[label] = Rocket;
             //Rocket.transform.localScale = new Vector3(1f, 0.5f, 0.5f);
@@ -409,50 +417,63 @@ namespace ModernFirearmKitMod
             rigidbody.detectCollisions = false;
             rigidbody.isKinematic = true;
             //火箭弹脚本 初始化
-            RocketScript rocketScript = RocketTemp.GetComponent<RocketScript>();
-            rocketScript.ThrustDirection = Rocket.transform.InverseTransformDirection(Vector3.right);
+            RocketScript rocketScript = Rocket.GetComponent<RocketScript>();
+            rocketScript.ThrustDirection = Vector3.right;
             rocketScript.ThrustPoint = rigidbody.centerOfMass;
-            rocketScript.ThrustForce = thrustForce_slider.Value * 30;
-            rocketScript.ThrustTime = thrustTime_slider.Value * 10;
+            rocketScript.ThrustForce = thrustForce_slider.Value;
+            rocketScript.ThrustTime = thrustTime_slider.Value*10f;
             rocketScript.DelayLaunchTime = 0f;
-            rocketScript.DelayEnableCollisionTime = 1f;
+            rocketScript.DelayEnableCollisionTime = 0.02f;
+            rocketScript.ExplodePower = 1f;
+            rocketScript.ExplodeRadius = 10f;
             rocketScript.DragClamp = DragForce_slider.Value;
 
-            RocketFireScript fireScripter = rocketScript.fireScripter;
-            fireScripter.LifeTime = lifetime_fire.Value;
-            fireScripter.Radius = radius_fire.Value;
-            fireScripter.Angle = angle_fire.Value;
-            fireScripter.Size = (transform.localScale.y + transform.localScale.z) / 2 * size_fire.Value;
-            fireScripter.StartSize = sizeStart_fire.Value;
-            fireScripter.EndSize = sizeEnd_fire.Value;
-            fireScripter.StartColor = colorStart_fire.Value;
-            fireScripter.EndColor = colorEnd_fire.Value;
-            fireScripter.ColorStartTime = colorStartTime_fire.Value;
-            fireScripter.ColorEndTime = colorEndTime_fire.Value * transform.localScale.x;
+            rocketScript.effectOffset = new Vector3(-1.15f, 0, 0f);
+            rocketScript.OnExplode += () => { Destroy(rocketScript.effect); };
+            rocketScript.OnExplodeFinal += () => { Destroy(rocketScript.transform.gameObject); };
 
-            RocketSmokeScript smokeScript = rocketScript.smokeScripter;
-            smokeScript.StartColor = smokeScript.EndColor = getColor(colorsmoke_menu.Value);
-            smokeScript.LifeTime = lifetime_smoke.Value;
-            smokeScript.Angle = angle_smoke.Value;
-            smokeScript.Size = size_smoke.Value * (transform.localScale.y + transform.localScale.z) / 3;
-            smokeScript.StartSize = sizeStart_smoke.Value;
-            smokeScript.EndSize = sizeEnd_smoke.Value;
+            //RocketFireScript fireScripter = rocketScript.fireScripter;
+            //fireScripter.LifeTime = lifetime_fire.Value;
+            //fireScripter.Radius = radius_fire.Value;
+            //fireScripter.Angle = angle_fire.Value;
+            //fireScripter.Size = (transform.localScale.y + transform.localScale.z) / 2 * size_fire.Value;
+            //fireScripter.StartSize = sizeStart_fire.Value;
+            //fireScripter.EndSize = sizeEnd_fire.Value;
+            //fireScripter.StartColor = colorStart_fire.Value;
+            //fireScripter.EndColor = colorEnd_fire.Value;
+            //fireScripter.ColorStartTime = colorStartTime_fire.Value;
+            //fireScripter.ColorEndTime = colorEndTime_fire.Value * transform.localScale.x;
 
-            Color getColor(int index)
-            {
-                List<string> colorList = new List<string> { "灰色", "白色", "黑色" };
+            //RocketSmokeScript smokeScript = rocketScript.smokeScripter;
+            //smokeScript.StartColor = smokeScript.EndColor = getColor(colorsmoke_menu.Value);
+            //smokeScript.LifeTime = lifetime_smoke.Value;
+            //smokeScript.Angle = angle_smoke.Value;
+            //smokeScript.Size = size_smoke.Value * (transform.localScale.y + transform.localScale.z) / 3;
+            //smokeScript.StartSize = sizeStart_smoke.Value;
+            //smokeScript.EndSize = sizeEnd_smoke.Value;
 
-                Color color;
-                switch (index)
-                {
-                    case 0: color = Color.gray; break;
-                    case 1: color = Color.white; break;
-                    default: color = Color.black; break;
-                }
+            //Color getColor(int index)
+            //{
+            //    List<string> colorList = new List<string> { "灰色", "白色", "黑色" };
 
-                return color;
-            }         
-            
+            //    Color color;
+            //    switch (index)
+            //    {
+            //        case 0: color = Color.gray; break;
+            //        case 1: color = Color.white; break;
+            //        default: color = Color.black; break;
+            //    }
+
+            //    return color;
+            //}         
+
+            //effect = (GameObject)Instantiate(AssetManager.Instance.Rocket.rocketTrailEffect);
+            //effect.transform.SetParent(Rocket.transform);
+            //effect.transform.position = Rocket.transform.position;
+            //effect.transform.rotation = Rocket.transform.rotation;
+            //effect.transform.localPosition = new Vector3(-1.4f, 0, 0f);
+            //effect.SetActive(false);
+
         }
 
         private void delayLaunch(GameObject gameObject)
@@ -463,13 +484,14 @@ namespace ModernFirearmKitMod
             rocketScript.LaunchEnabled = true;        
             Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
             rigidbody.isKinematic = false;
-            
+
             StartCoroutine(delay());
             IEnumerator delay()
             {
-                yield return new WaitForSeconds(rocketScript.DelayEnableCollisionTime * 0.1f);            
-                rigidbody.detectCollisions =  true;
+                yield return new WaitForSeconds(rocketScript.DelayEnableCollisionTime);
+                rigidbody.detectCollisions = true;
                 gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = false;
+                yield break;
             }
         }   
         //火箭弹重装
@@ -483,6 +505,7 @@ namespace ModernFirearmKitMod
                     if (!Rockets[i] || Rockets[i].GetComponent<RocketScript>().Launched)
                     {
                         Rocket_Instantiate(i);
+                        BulletCurrentNumber = Mathf.Clamp(BulletCurrentNumber + 1, 1, BulletMaxNumber);
                     }
                 }
             }
@@ -518,6 +541,8 @@ namespace ModernFirearmKitMod
             RocketTemp.AddComponent<RocketScript>();
             RocketTemp.AddComponent<DestroyIfEditMode>();
             RocketTemp.SetActive(false); 
+
+
         }
 
     }

@@ -25,6 +25,7 @@ namespace ModernFirearmKitMod
 
         public Action OnExplode;
         public Action OnExploded;
+        public Action OnExplodeFinal;
 
         //爆炸类型
         public enum explosionType
@@ -38,8 +39,7 @@ namespace ModernFirearmKitMod
 
         void Awake()
         {
-            rigidbody = GetComponent<Rigidbody>();
-            
+            rigidbody = GetComponent<Rigidbody>();          
         }
 
         public void Explodey()
@@ -60,7 +60,8 @@ namespace ModernFirearmKitMod
                 fireEffect = (GameObject)Instantiate(AssetManager.Instance.Explosion.explosionEffect, position, Quaternion.identity);
                 fireEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
                 fireEffect.AddComponent<TimedSelfDestruct>().lifeTime = 30f;
-                fireEffect.transform.localScale *= 5f;              
+                fireEffect.transform.localScale *= 5f;
+                fireEffect.GetComponent<TimedSelfDestruct>().OnDestruct += OnExplodeFinal;
             }
 
             yield return new WaitForFixedUpdate();

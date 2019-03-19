@@ -12,6 +12,7 @@ namespace ModernFirearmKitMod
     {
         public override string Name { get; } = "Asset Manager";
 
+        public Asset_Rocket Rocket { get; private set; }
         public Asset_Explosion Explosion { get; private set; }
         public Asset_MachineGun MachineGun { get; private set; }
               
@@ -24,12 +25,21 @@ namespace ModernFirearmKitMod
             ModResource.CreateAssetBundleResource("Effect", @"Resources/bundle");
             ModAssetBundle modAssetBundle = ModResource.GetAssetBundle("Effect");
             yield return new WaitUntil(() => modAssetBundle.Available);
+            Rocket = new Asset_Rocket(modAssetBundle);
             Explosion = new Asset_Explosion(modAssetBundle);
             MachineGun = new Asset_MachineGun(modAssetBundle);
         }     
     }
 
+    public class Asset_Rocket
+    {
+        public GameObject rocketTrailEffect;
 
+        public Asset_Rocket(ModAssetBundle modAssetBundle)
+        {
+            rocketTrailEffect = modAssetBundle.LoadAsset<GameObject>("RocketTrailEffect");
+        }
+    }
     public class Asset_Explosion 
     {
         //爆炸特效
