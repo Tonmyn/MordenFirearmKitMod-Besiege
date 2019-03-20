@@ -261,10 +261,12 @@ namespace ModernFirearmKitMod
         {          
             gameObject.transform.localPosition += Vector3.right * 3.25f;
             gameObject.transform.SetParent(transform.parent.transform);
-            RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
-            rocketScript.LaunchEnabled = true;        
-            Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
+     
+            Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();      
             rigidbody.isKinematic = false;
+            rigidbody.AddRelativeForce(Vector3.right * 20f, ForceMode.Impulse);
+            RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
+            rocketScript.LaunchEnabled = true;
 
             StartCoroutine(delay());
             IEnumerator delay()

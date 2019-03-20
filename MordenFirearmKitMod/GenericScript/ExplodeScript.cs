@@ -39,7 +39,14 @@ namespace ModernFirearmKitMod
 
         void Awake()
         {
-            rigidbody = GetComponent<Rigidbody>();          
+            rigidbody = GetComponent<Rigidbody>();
+            fireEffect = (GameObject)Instantiate(AssetManager.Instance.Explosion.explosionEffect);
+            fireEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
+            fireEffect.transform.localScale *= 5f;
+            fireEffect.SetActive(false);
+            //fireEffect.AddComponent<TimedSelfDestruct>().lifeTime = 30f;
+
+            //fireEffect.GetComponent<TimedSelfDestruct>().OnDestruct += OnExplodeFinal;
         }
 
         public void Explodey()
@@ -57,17 +64,14 @@ namespace ModernFirearmKitMod
             }
             else
             {
-                fireEffect = (GameObject)Instantiate(AssetManager.Instance.Explosion.explosionEffect, position, Quaternion.identity);
-                fireEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
-                fireEffect.AddComponent<TimedSelfDestruct>().lifeTime = 30f;
-                fireEffect.transform.localScale *= 5f;
-                fireEffect.GetComponent<TimedSelfDestruct>().OnDestruct += OnExplodeFinal;
+                fireEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
+                fireEffect.transform.position = position;
             }
 
             yield return new WaitForFixedUpdate();
 
             isExplodey = true;
-
+            fireEffect.SetActive(true);
             OnExplode?.Invoke();
 
             //定义爆炸位置为炸弹位置
@@ -87,6 +91,10 @@ namespace ModernFirearmKitMod
             }
 
             OnExploded?.Invoke();
+            yield return new WaitForSeconds(3f);
+            Debug.Log("false");
+            fireEffect.SetActive(false);
+            OnExplodeFinal?.Invoke();
         }
     }
 }
