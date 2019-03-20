@@ -188,7 +188,6 @@ namespace ModernFirearmKitMod
             rocketScript.ExplodePower = 1f;
             rocketScript.ExplodeRadius = 10f;
             rocketScript.effectOffset = new Vector3(-1.4f, 0, 0.5f);
-            rocketScript.OnExplode += () => { Destroy( rocketScript.effect);  };
             rocketScript.OnExplodeFinal += () => { Destroy(rocketScript.transform.gameObject); };
         }
 

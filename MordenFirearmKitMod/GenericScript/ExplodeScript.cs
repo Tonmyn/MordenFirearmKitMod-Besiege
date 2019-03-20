@@ -11,7 +11,7 @@ namespace ModernFirearmKitMod
     public class ExplodeScript :MonoBehaviour
     {
 
-        public bool isExplodey { get; private set; } = false;
+        public bool isExplodey { get; set; } = false;
 
         public float Power { get; set; }
 

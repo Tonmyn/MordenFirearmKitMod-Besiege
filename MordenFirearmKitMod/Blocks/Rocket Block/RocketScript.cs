@@ -46,10 +46,6 @@ namespace ModernFirearmKitMod
         public Vector3 effectOffset;
 
         private bool EnableCollision = false;
-        void Awake()
-        {
-         
-        }
 
         void Start()
         {
@@ -107,6 +103,7 @@ namespace ModernFirearmKitMod
             effect.transform.rotation = transform.rotation;
             effect.transform.localPosition = effectOffset;
             effect.SetActive(false);
+            //effect.GetComponent<ParticleSystem>().Stop();
           
         }
 
@@ -118,6 +115,7 @@ namespace ModernFirearmKitMod
                 if (isLaunched && !effect.activeSelf)
                 {
                     effect.SetActive(true);
+                    Debug.Log("effect active");
                 }
             }
             else
@@ -131,12 +129,13 @@ namespace ModernFirearmKitMod
         {
             if (EnableCollision)
             {
+                Debug.Log("collision");
                 rigidbody.isKinematic = true;
 
                 exploder.Position = transform.position;
                 exploder.Explodey();
 
-                gameObject.GetComponentInChildren<CapsuleCollider>().enabled = false;
+                gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = true;
                 gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
             }
         }
@@ -173,8 +172,37 @@ namespace ModernFirearmKitMod
             }
         }
 
-        void Explode() { OnExplode?.Invoke(); }
+        void Explode()
+        {           
+            //effect.GetComponent<Light>().enabled = false;
+            effect.GetComponentInChildren<ParticleSystem>().Stop();
+            OnExplode?.Invoke();
+        }
         void Exploded() { OnExploded?.Invoke(); }
-        void ExplodeFinal() { OnExplodeFinal?.Invoke(); }
+        void ExplodeFinal()
+        {
+            gameObject.SetActive(false);
+            OnExplodeFinal?.Invoke();
+        }
+
+
+        public void Reusing(float thrustForce,float thrustTime,float dragClamp)
+        {
+            gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = false;
+            gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = true;
+
+            Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
+            rigidbody.detectCollisions = false;
+            rigidbody.isKinematic = true;
+
+            LaunchEnabled = false;
+
+            ThrustForce = thrustForce;
+            ThrustTime = thrustTime;
+            DragClamp = dragClamp;
+            effect.SetActive(false);
+
+            exploder.isExplodey = false;
+        }
     }
 }

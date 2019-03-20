@@ -39,7 +39,7 @@ namespace ModernFirearmKitMod
 
         public IEnumerator Launch()
         {
-            if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber--; }
+            if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
 
             if (BulletCurrentNumber < 0||!LaunchEnable) yield break;        
 
@@ -53,12 +53,13 @@ namespace ModernFirearmKitMod
             LaunchEvent?.Invoke(bullet);
            
             yield return new WaitForSeconds(Rate);
-            LaunchEnable = false;   
+            LaunchEnable = false;
+            yield break;
         }
 
         public IEnumerator Launch(GameObject bullet)
         {
-            if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber--; }
+            if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
 
             if (BulletCurrentNumber < 0 || !LaunchEnable) yield break;
 
