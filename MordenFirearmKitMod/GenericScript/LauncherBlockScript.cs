@@ -15,6 +15,9 @@ namespace ModernFirearmKitMod
 
         /// <summary>发射按键</summary>
         public MKey LaunchKey;
+        public MSlider RateSlider;
+        public MSlider BulletNumberSlider;
+        public MSlider KnockBackSlider;
 
         /// <summary>子弹物体</summary>
         public abstract GameObject BulletObject { get; set; }

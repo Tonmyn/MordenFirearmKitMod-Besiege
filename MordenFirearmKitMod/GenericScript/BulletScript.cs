@@ -486,7 +486,7 @@ namespace ModernFirearmKitMod
         public float Strength;
 
         //public float LaunchTime;
-        /// <summary>碰撞开启时间(0.1s)</summary>
+        /// <summary>碰撞开启时间(0.01s)</summary>
         public float CollisionEnableTime;
         /// <summary>发射使能</summary>
         public bool FireEnabled { get; set; } = false;
@@ -533,7 +533,7 @@ namespace ModernFirearmKitMod
         public IEnumerator Launch()
         {
             rigidbody.AddRelativeForce(Direction * Strength, ForceMode.Impulse);
-            yield return new WaitForSeconds(CollisionEnableTime * 0.1f);
+            yield return new WaitForSeconds(CollisionEnableTime * 0.01f);
             rigidbody.detectCollisions = true;
         }
     }

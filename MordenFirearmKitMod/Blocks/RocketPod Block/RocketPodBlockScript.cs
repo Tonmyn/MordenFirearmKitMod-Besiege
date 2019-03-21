@@ -11,8 +11,6 @@ namespace ModernFirearmKitMod
     class RocketPodBlockScript : LauncherBlockScript
     {
 
-        public static GameObject RocketTemp;
-
         #region 功能变量声明
 
         public override float Rate { get; set; }
@@ -63,7 +61,7 @@ namespace ModernFirearmKitMod
 
             KnockBack = 0f;
             SpawnPoint = new Vector3(0, 0, 3.5f);
-            BulletObject = RocketTemp;
+            BulletObject = AssetManager.Instance.Rocket.rocketTemp;
             
             BulletCurrentNumber = BulletMaxNumber = 18;
             Rate = 2f;
@@ -208,7 +206,7 @@ namespace ModernFirearmKitMod
             Vector3 pos = getRealPosition(index, offset);
 
             //火箭弹实例化
-            GameObject rocket = (GameObject)Instantiate(RocketTemp, pos, RocketPool.transform.rotation,RocketPool.transform);
+            GameObject rocket = (GameObject)Instantiate(BulletObject, pos, RocketPool.transform.rotation,RocketPool.transform);
             rocket.name = "Rocket " + index;
             rocket.SetActive(true);
             Rockets[index] = rocket;
@@ -304,36 +302,36 @@ namespace ModernFirearmKitMod
        
 
 
-        internal static void CreateRocketBlockTemp()
-        {
-            RocketTemp = new GameObject("Rocket Temp");
-            RocketTemp.transform.localScale = new Vector3(1f, 0.75f, 0.75f);
+        //internal static void CreateRocketBlockTemp()
+        //{
+        //    RocketTemp = new GameObject("Rocket Temp");
+        //    RocketTemp.transform.localScale = new Vector3(1f, 0.75f, 0.75f);
 
-            GameObject vis = new GameObject("Vis");
-            vis.transform.SetParent(RocketTemp.transform);
-            vis.transform.localPosition -= RocketTemp.transform.right;
-            vis.transform.localScale = RocketTemp.transform.localScale;
-            vis.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
-            vis.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("Rocket Texture");
+        //    GameObject vis = new GameObject("Vis");
+        //    vis.transform.SetParent(RocketTemp.transform);
+        //    vis.transform.localPosition -= RocketTemp.transform.right;
+        //    vis.transform.localScale = RocketTemp.transform.localScale;
+        //    vis.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
+        //    vis.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("Rocket Texture");
 
-            GameObject collider = new GameObject("Collider");
-            collider.transform.SetParent(RocketTemp.transform);
-            collider.transform.localScale = RocketTemp.transform.localScale;
-            CapsuleCollider capsuleCollider = collider.AddComponent<CapsuleCollider>();            
-            capsuleCollider.radius = 0.15f;
-            capsuleCollider.height = 2.5f;
-            capsuleCollider.direction = 0;
-            capsuleCollider.isTrigger = true;
+        //    GameObject collider = new GameObject("Collider");
+        //    collider.transform.SetParent(RocketTemp.transform);
+        //    collider.transform.localScale = RocketTemp.transform.localScale;
+        //    CapsuleCollider capsuleCollider = collider.AddComponent<CapsuleCollider>();            
+        //    capsuleCollider.radius = 0.15f;
+        //    capsuleCollider.height = 2.5f;
+        //    capsuleCollider.direction = 0;
+        //    capsuleCollider.isTrigger = true;
 
-            Rigidbody rigidbody = RocketTemp.AddComponent<Rigidbody>();
-            rigidbody.mass = 0.25f;
+        //    Rigidbody rigidbody = RocketTemp.AddComponent<Rigidbody>();
+        //    rigidbody.mass = 0.25f;
 
-            RocketTemp.AddComponent<RocketScript>();
-            RocketTemp.AddComponent<DestroyIfEditMode>();
-            RocketTemp.SetActive(false); 
+        //    RocketTemp.AddComponent<RocketScript>();
+        //    RocketTemp.AddComponent<DestroyIfEditMode>();
+        //    RocketTemp.SetActive(false); 
 
 
-        }
+        //}
 
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using Modding;
 using System.Collections.Generic;
+using System;
 
 namespace ModernFirearmKitMod
 {
@@ -15,6 +16,8 @@ namespace ModernFirearmKitMod
         public override GameObject BulletObject { get; set; }
         public override Vector3 SpawnPoint { get; set; }
         public override bool LaunchEnable { get; set; }
+
+        public float Strength { get; set; }
         //加特林热度
         float heat = 0;
         //加特林转速
@@ -30,20 +33,29 @@ namespace ModernFirearmKitMod
         GameObject GunVis;    
         Material material;
 
+        MSlider StrengthSlider;
+
         public override void SafeAwake()
         {
             LaunchKey = AddKey("Fire", "Fire", KeyCode.C);
+            StrengthSlider = AddSlider("Strength", "Strength", 1f, 0.5f, 3f);
+            //StrengthSlider.ValueChanged += (value) => { Strength = value; };
+            RateSlider = AddSlider("Rate", "Rate", 0.2f, 0.1f, 0.3f);
+            //RateSlider.ValueChanged += (value) => { Rate = value; };
+            KnockBackSlider = AddSlider("KnockBack", "KnockBack", 3f, 1f, 3f);
+            //KnockBackSlider.ValueChanged += (value) => { KnockBack = value; };
+            BulletNumberSlider = AddSlider("Bullet" + Environment.NewLine + "Number", "Number", 200f, 1f, 500f);
+            //BulletNumberSlider.ValueChanged += (value) => { BulletMaxNumber = (int)value; };
 
-            KnockBack = 1f;
-            SpawnPoint = new Vector3(0, 0, 3.5f);
-            BulletObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            BulletObject.AddComponent<Rigidbody>();
-            BulletScript bulletScript = BulletObject.AddComponent<BulletScript>();
-            bulletScript.Strength = 50f;
+            //KnockBack = 1f;
+            SpawnPoint = new Vector3(0, 0.125f, 3.5f);
+
+            BulletObject = AssetManager.Instance.MachineGun.bulletTemp;
+            BulletScript bulletScript = BulletObject.GetComponent<BulletScript>();
+            //bulletScript.Strength = Strength*200f;
             bulletScript.Direction = transform.InverseTransformDirection(transform.forward);
-            bulletScript.CollisionEnableTime = 1f;
-            BulletCurrentNumber = BulletMaxNumber = 500;
-            Rate = 0.2f;
+            //BulletCurrentNumber = BulletMaxNumber = 500;
+            //Rate = 0.2f;
             LaunchEnable = false;
 
 
@@ -66,10 +78,12 @@ namespace ModernFirearmKitMod
 
         public override void OnSimulateStart()
         {
+            BulletObject.GetComponent<BulletScript>().Strength = Strength = StrengthSlider.Value * 200f;
+            Rate = RateSlider.Value;
+            KnockBack = KnockBackSlider.Value;
+            BulletCurrentNumber = BulletMaxNumber = (int)BulletNumberSlider.Value;
+
             initVFX();
-            material = GunVis.GetComponent<MeshRenderer>().material = AssetManager.Instance.MachineGun.material;
-            material.SetTexture("_MainTex", ModResource.GetTexture("MachineGun Texture"));
-            material.SetTexture("_EmissionMap", ModResource.GetTexture("MachineGun-e Texture"));
         }
 
         public override void SimulateUpdateHost()
@@ -126,6 +140,10 @@ namespace ModernFirearmKitMod
             EffectsObject.transform.localEulerAngles = new Vector3(0, 180, 0);
             EffectsObject.GetComponent<Reactivator>().TimeDelayToReactivate = Rate;
             EffectsObject.SetActive(false);
+
+            material = GunVis.GetComponent<MeshRenderer>().material = AssetManager.Instance.MachineGun.material;
+            material.SetTexture("_MainTex", ModResource.GetTexture("MachineGun Texture"));
+            material.SetTexture("_EmissionMap", ModResource.GetTexture("MachineGun-e Texture"));
         }
     }
 }

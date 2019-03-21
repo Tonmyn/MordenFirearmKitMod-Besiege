@@ -130,6 +130,10 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
     <Texture name="MachineGun Texture" path="Texture\MachineGun.png"/>
     <Texture name="MachineGun-e Texture" path="Texture\MachineGun-e.png"/>
     <AudioClip name="MachineGun AudioClip" path ="Other\MachineGun.ogg"/>
+  
+  <Mesh name ="Bullet Mesh" path="Obj\Bullet.obj"/>
+    <Texture name="Bullet Texture" path="Texture\Bullet.png"/>
+  
 	</Resources>
 
 

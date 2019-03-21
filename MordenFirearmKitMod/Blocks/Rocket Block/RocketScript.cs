@@ -115,7 +115,6 @@ namespace ModernFirearmKitMod
                 if (isLaunched && !effect.activeSelf)
                 {
                     effect.SetActive(true);
-                    Debug.Log("effect active");
                 }
             }
             else
@@ -129,7 +128,6 @@ namespace ModernFirearmKitMod
         {
             if (EnableCollision)
             {
-                Debug.Log("collision");
                 rigidbody.isKinematic = true;
 
                 exploder.Position = transform.position;
