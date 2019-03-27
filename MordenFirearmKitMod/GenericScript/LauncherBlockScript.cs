@@ -52,6 +52,7 @@ namespace ModernFirearmKitMod
 
             bullet.SetActive(true);
             bullet.GetComponent<BulletScript>().FireEnabled = true;
+            //bullet.GetComponent<BulletScript>().OnCollisionEvent += () => { Debug.Log("bullet colli"); };
 
             LaunchEvent?.Invoke(bullet);
            
@@ -65,7 +66,7 @@ namespace ModernFirearmKitMod
             if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
 
             if (BulletCurrentNumber < 0 || !LaunchEnable) yield break;
-
+            bullet.SetActive(true);
             Rigidbody.AddForce(-transform.forward * KnockBack, ForceMode.Impulse);
 
             LaunchEvent?.Invoke(bullet);

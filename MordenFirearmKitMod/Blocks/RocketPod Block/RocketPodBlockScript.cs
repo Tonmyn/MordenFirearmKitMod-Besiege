@@ -40,7 +40,7 @@ namespace ModernFirearmKitMod
         #region 内部变量声明
 
         private GameObject RocketPool;
-        private GameObject RocketPool_Idle;
+        private GameObject RocketPool_Idle = MordenFirearmKitBlockMod.RocketPool_Idle;
 
         //声明 火箭弹
         private GameObject[] Rockets = new GameObject[18];
@@ -133,9 +133,7 @@ namespace ModernFirearmKitMod
                 RocketPool = new GameObject("Rocket Pool");
                 RocketPool.transform.SetParent(transform);
                 RocketPool.transform.position = transform.position;
-                RocketPool.transform.rotation = transform.rotation;
-
-                RocketPool_Idle = MordenFirearmKitBlockMod.RocketPool_Idle;
+                RocketPool.transform.rotation = transform.rotation;              
             }
         }
 
@@ -230,7 +228,6 @@ namespace ModernFirearmKitMod
             rocketScript.effectOffset = new Vector3(-1.15f, 0, 0f);
             rocketScript.OnExplodeFinal += () => 
             {
-                Debug.Log(" rocket final");
                 string i = rocketScript.gameObject.name;
                 i = i.Substring(i.LastIndexOf(' '));
                 Rockets[int.Parse(i)] = null;

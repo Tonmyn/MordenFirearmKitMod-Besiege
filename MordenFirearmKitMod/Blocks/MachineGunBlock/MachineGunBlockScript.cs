@@ -30,7 +30,8 @@ namespace ModernFirearmKitMod
 
         ConfigurableJoint CJ;
         GameObject EffectsObject;
-        GameObject GunVis;    
+        GameObject GunVis;
+        GameObject BulletPool;
         Material material;
 
         MSlider StrengthSlider;
@@ -50,10 +51,14 @@ namespace ModernFirearmKitMod
             //KnockBack = 1f;
             SpawnPoint = new Vector3(0, 0.125f, 3.5f);
 
-            BulletObject = AssetManager.Instance.MachineGun.bulletTemp;
-            BulletScript bulletScript = BulletObject.GetComponent<BulletScript>();
+            
+
+            GameObject bulletObject = AssetManager.Instance.MachineGun.bulletTemp;
+            BulletScript bulletScript = bulletObject.GetComponent<BulletScript>();
             //bulletScript.Strength = Strength*200f;
             bulletScript.Direction = transform.InverseTransformDirection(transform.forward);
+            bulletScript.OnCollisionEvent += () => { Debug.Log("bullet colli"); };
+            BulletObject = bulletObject;
             //BulletCurrentNumber = BulletMaxNumber = 500;
             //Rate = 0.2f;
             LaunchEnable = false;
@@ -78,12 +83,41 @@ namespace ModernFirearmKitMod
 
         public override void OnSimulateStart()
         {
-            BulletObject.GetComponent<BulletScript>().Strength = Strength = StrengthSlider.Value * 200f;
+            BulletScript bulletScript = BulletObject.GetComponent<BulletScript>();
+            bulletScript.Strength = Strength = StrengthSlider.Value * 200f;
+            
             Rate = RateSlider.Value;
             KnockBack = KnockBackSlider.Value;
             BulletCurrentNumber = BulletMaxNumber = (int)BulletNumberSlider.Value;
 
             initVFX();
+
+            StartCoroutine(preperBullet());
+
+            IEnumerator preperBullet()
+            {
+                int index = 0;
+                GameObject go;
+
+                BulletPool = new GameObject("Bullet Pool");
+                BulletPool.transform.SetParent(transform);
+
+                for (int i = 0; i < 1; i++)
+                {
+                    if (++index > 5)
+                    {
+                        index = 0;
+                        yield return 0;
+                    }
+                    else
+                    {
+                        go = Instantiate(BulletObject);
+                        go.transform.SetParent(BulletPool.transform);
+                        go.SetActive(true);
+                    }
+                }
+                yield break;
+            }
         }
 
         public override void SimulateUpdateHost()
@@ -100,7 +134,7 @@ namespace ModernFirearmKitMod
                 if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
                 {
                     LaunchEnable = true;                  
-                    StartCoroutine(Launch());
+                    StartCoroutine(Launch(BulletObject));
                     heat=Mathf.Clamp01(heat + 0.01f);
                     EffectsObject.SetActive(true);
                     EffectsObject.GetComponent<Reactivator>().Switch = true;

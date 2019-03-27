@@ -503,7 +503,6 @@ namespace ModernFirearmKitMod
         public event Action OnLaunchEvent;
         //public event Action OnLaunchedEvent;
 
-
         void Start()
         {
             rigidbody = GetComponent<Rigidbody>();

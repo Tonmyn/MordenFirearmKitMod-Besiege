@@ -25,6 +25,7 @@ namespace ModernFirearmKitMod
 
         public static GameObject Mod;
         public static GameObject RocketPool_Idle;
+        public static GameObject MachineGunBulletPool_Idle;
 
         public override void OnLoad()
         {
@@ -34,6 +35,8 @@ namespace ModernFirearmKitMod
             UnityEngine.Object.DontDestroyOnLoad(Mod);
             RocketPool_Idle = new GameObject("Rocket Pool Idle");
             RocketPool_Idle.transform.SetParent(Mod.transform);
+            MachineGunBulletPool_Idle = new GameObject("MachineGunBullet Pool Idle");
+            MachineGunBulletPool_Idle.transform.SetParent(Mod.transform);
 
             AssetManager.Instance.transform.SetParent(Mod.transform);
 
