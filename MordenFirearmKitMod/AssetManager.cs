@@ -51,8 +51,8 @@ namespace ModernFirearmKitMod
             vis.transform.SetParent(RocketTemp.transform);
             vis.transform.localPosition -= RocketTemp.transform.right;
             vis.transform.localScale = RocketTemp.transform.localScale;
-            vis.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
-            vis.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("Rocket Texture");
+            vis.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("RocketPod_r Mesh");
+            vis.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("RocketPod_r Texture");
 
             GameObject collider = new GameObject("Collider");
             collider.transform.SetParent(RocketTemp.transform);

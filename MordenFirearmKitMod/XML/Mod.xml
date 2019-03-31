@@ -118,21 +118,23 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
 	<Resources>
 		<!-- <Mesh name="some-mesh-name" path="some_mesh_file.obj" /> -->
 		<!-- <Texture name="some-texture-name" path="some_texture_file.png" /> -->
-    <Mesh name="Rocket Mesh" path="Obj\Rocket.obj"/>
-    <Texture name="Rocket Texture" path="Texture\Rocket.png"/>
-    <Texture name="Rocket Fire Texture" path="Other\RocketFire.png"/>
-    <Texture name="Rocket Smoke Texture" path="Other\RocketSmoke.png"/>
+    <Mesh name="Rocket Mesh" path="Rocket\Rocket.obj"/>
+    <Texture name="Rocket Texture" path="Rocket\Rocket.png"/>
+    <!--<Texture name="Rocket Fire Texture" path="Other\RocketFire.png"/>
+    <Texture name="Rocket Smoke Texture" path="Other\RocketSmoke.png"/>-->
 
-    <Mesh name="RocketPod Mesh" path="Obj\RocketPod.obj"/>
-    <Texture name="RocketPod Texture" path="Texture\RocketPod.png"/>
+    <Mesh name="RocketPod_r Mesh" path="RocketPod\Rocket.obj"/> 
+    <Mesh name="RocketPod Mesh" path="RocketPod\RocketPod.obj"/>
+    <Texture name="RocketPod_r Texture" path="RocketPod\Rocket.png"/>
+    <Texture name="RocketPod Texture" path="RocketPod\RocketPod.png"/>
     
-    <Mesh name ="MachineGun Mesh" path="Obj\MachineGun.obj"/>
-    <Texture name="MachineGun Texture" path="Texture\MachineGun.png"/>
-    <Texture name="MachineGun-e Texture" path="Texture\MachineGun-e.png"/>
-    <AudioClip name="MachineGun AudioClip" path ="Other\MachineGun.ogg"/>
+    <Mesh name ="MachineGun Mesh" path="MachineGun\MachineGun.obj"/>
+    <Texture name="MachineGun Texture" path="MachineGun\MachineGun.png"/>
+    <Texture name="MachineGun-e Texture" path="MachineGun\MachineGun-e.png"/>
+    <AudioClip name="MachineGun AudioClip" path ="MachineGun\MachineGun.ogg"/>
   
-  <Mesh name ="Bullet Mesh" path="Obj\Bullet.obj"/>
-    <Texture name="Bullet Texture" path="Texture\Bullet.png"/>
+  <Mesh name ="Bullet Mesh" path="MachineGun\Bullet.obj"/>
+    <Texture name="Bullet Texture" path="MachineGun\Bullet.png"/>
   
 	</Resources>
 

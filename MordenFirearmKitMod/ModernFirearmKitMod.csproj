@@ -30,7 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <RunPostBuildEvent>Always</RunPostBuildEvent>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -94,41 +94,23 @@
     <Compile Include="Blocks\Rocket Block\RocketScript.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\bundle" />
-    <None Include="Resources\bundle.manifest" />
-    <None Include="Resources\obj\AutoCannon.obj" />
-    <None Include="Resources\obj\Barrel.obj" />
-    <None Include="Resources\obj\bullet.obj" />
-    <None Include="Resources\obj\Butt.obj" />
-    <None Include="Resources\obj\Cannon.obj" />
-    <None Include="Resources\obj\MachineGun.obj" />
-    <None Include="Resources\obj\QuickCannon.obj" />
-    <None Include="Resources\obj\Rocket.obj" />
-    <None Include="Resources\obj\RocketPod.obj" />
-    <None Include="Resources\other\AutoCannon.obj" />
-    <None Include="Resources\other\FPSDistortionParticles.shader" />
-    <None Include="Resources\other\GunAudio.ogg" />
-    <None Include="Resources\other\MachineGun.obj" />
-    <None Include="Resources\other\MachineGun.ogg" />
-    <None Include="Resources\other\MuzzleFlashCone.obj" />
-    <None Include="Resources\other\QuickCannon.obj" />
+    <None Include="Resources\bundle_mfk" />
+    <None Include="Resources\bundle_mfk.manifest" />
+    <None Include="Resources\MachineGun\Bullet.obj" />
+    <None Include="Resources\MachineGun\MachineGun.obj" />
+    <None Include="Resources\MachineGun\MachineGun.ogg" />
+    <None Include="Resources\MachineGun\MachineGun.ps" />
+    <None Include="Resources\RocketPod\Rocket.obj" />
+    <None Include="Resources\RocketPod\RocketPod.obj" />
+    <None Include="Resources\Rocket\Rocket.obj" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\other\AutoCannon.png" />
-    <Content Include="Resources\other\MachineGun.png" />
-    <Content Include="Resources\other\MuzzleFlame.png" />
-    <Content Include="Resources\other\MuzzleFlash.png" />
-    <Content Include="Resources\other\MuzzleFlash2.png" />
-    <Content Include="Resources\other\MuzzleHeat.png" />
-    <Content Include="Resources\other\MuzzleSmoke.png" />
-    <Content Include="Resources\other\QuickCannon.png" />
-    <Content Include="Resources\other\RocketFire.png" />
-    <Content Include="Resources\other\RocketSmoke.png" />
-    <Content Include="Resources\tex\AutoCannon.png" />
-    <Content Include="Resources\tex\MachineGun.png" />
-    <Content Include="Resources\tex\QuickCannon.png" />
-    <Content Include="Resources\tex\Rocket.png" />
-    <Content Include="Resources\tex\RocketPod.png" />
+    <Content Include="Resources\MachineGun\Bullet.png" />
+    <Content Include="Resources\MachineGun\MachineGun-e.png" />
+    <Content Include="Resources\MachineGun\MachineGun.png" />
+    <Content Include="Resources\RocketPod\Rocket.png" />
+    <Content Include="Resources\RocketPod\RocketPod.png" />
+    <Content Include="Resources\Rocket\Rocket.png" />
     <Content Include="XML\MachineGunBlock.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -146,9 +128,10 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetPath)" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\$(TargetName).dll"
-copy /Y "$(ProjectDir)Resources\obj\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\Obj\"
-copy /Y "$(ProjectDir)Resources\tex\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\Texture\"
-copy /Y "$(ProjectDir)Resources\other\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\Other\"
+copy /Y "$(ProjectDir)Resources\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\"
+copy /Y "$(ProjectDir)Resources\Rocket\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\Rocket\"
+copy /Y "$(ProjectDir)Resources\RocketPod\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\RocketPod\"
+copy /Y "$(ProjectDir)Resources\MachineGun\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\MachineGun\"
 copy /Y "$(ProjectDir)XML\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\"
 
 if $(ConfigurationName) == Release "$(ProjectDir)PackageRelease.bat" "$(ProjectDir)" "$(TargetPath)" "$(ProjectDir)Release\$(TargetName)\"</PostBuildEvent>
