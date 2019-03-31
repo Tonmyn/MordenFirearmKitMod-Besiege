@@ -140,7 +140,11 @@ namespace ModernFirearmKitMod
 
         private IEnumerator Launch()
         {
-            StartCoroutine(CollisionTimer(DelayEnableCollisionTime));
+            if (!EnableCollision)
+            {
+                StartCoroutine(CollisionTimer(DelayEnableCollisionTime));
+            }
+            
             yield return new WaitForSeconds(DelayLaunchTime);
 
                 if (GetComponent<ConfigurableJoint>() != null)
@@ -158,17 +162,16 @@ namespace ModernFirearmKitMod
             yield return new WaitForSeconds(ThrustTime);
             //smokeScripter.EmitSwitch = false;
             //fireScripter.EmitSwitch = false;
-            LaunchEnabled = false;         
-        }
-        private IEnumerator CollisionTimer(float time)
-        {
-            if (!EnableCollision)
+            LaunchEnabled = false;
+
+            IEnumerator CollisionTimer(float time)
             {
                 yield return new WaitForSeconds(time);
                 EnableCollision = true;
                 StopCoroutine("CollisionTimer");
             }
         }
+       
 
         void Explode()
         {           
