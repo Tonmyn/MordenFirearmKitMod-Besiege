@@ -1,0 +1,40 @@
+ManifestFileVersion: 0
+CRC: 132638846
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: f198f1d6c181049cdfb80bc8733b6c91
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 51aa6a82c65b068721ecd3705dc924df
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 82
+  Script: {instanceID: 0}
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+Assets:
+- Assets/MFK-Effects/MachineGun/MachineGunSmokeEffect.prefab
+- Assets/MFK-Effects/Rocket/RocketTrailEffect.prefab
+- Assets/MFK-Effects/MachineGun/Materials/MachineGunMat.mat
+- Assets/MFK-Effects/BigExplosion/BigExplosion.prefab
+- Assets/MFK-Effects/MachineGun/MachineGunFireEffect.prefab
+Dependencies: []

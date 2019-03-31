@@ -10,12 +10,23 @@ namespace ModernFirearmKitMod
     class TimedSelfDestruct:MonoBehaviour
     {
         /// <summary>存活时间 0.1秒</summary>
-        public float lifeTime { get; set; } = 300;
+        public float lifeTime { get; set; } 
+        public bool Switch { get; set; } = false;
 
         public Action OnDestruct;
-        private void Start()
+
+        void Awake()
         {
-            StartCoroutine(Timer(lifeTime));
+            lifeTime = 300;
+        }
+
+        void Update()
+        {
+            if (Switch)
+            {
+                Switch = false;
+                StartCoroutine(Timer(lifeTime));
+            }
         }
 
         IEnumerator Timer(float t)
@@ -24,7 +35,6 @@ namespace ModernFirearmKitMod
             if (gameObject)
             {
                 OnDestruct?.Invoke();
-                Destroy(gameObject);
             }
         }
     }

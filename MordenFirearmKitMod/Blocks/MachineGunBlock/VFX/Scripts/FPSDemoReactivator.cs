@@ -32,8 +32,12 @@ public class Reactivator : MonoBehaviour
 	{
         if (enabled)
         {
-            gameObject.SetActive(false);
             gameObject.SetActive(true);
+
+            //gameObject.GetComponentInChildren<Light>().range = 6;
+
+            gameObject.SetActive(false);
+            //gameObject.GetComponentInChildren<Light>().range = 0;
         }
 	}
 }

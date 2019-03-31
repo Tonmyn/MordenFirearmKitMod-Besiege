@@ -22,7 +22,7 @@ namespace ModernFirearmKitMod
         }
         private IEnumerator LoadAssetBundle()
         {
-            ModResource.CreateAssetBundleResource("Effect", @"Resources/bundle");
+            ModResource.CreateAssetBundleResource("Effect", @"Resources/bundle_mfk");
             ModAssetBundle modAssetBundle = ModResource.GetAssetBundle("Effect");
             yield return new WaitUntil(() => modAssetBundle.Available);
             Rocket = new Asset_Rocket(modAssetBundle);
@@ -163,11 +163,13 @@ namespace ModernFirearmKitMod
 
             BoxCollider boxCollider = temp.AddComponent<BoxCollider>();
             boxCollider.size = new Vector3(0.1f, 0.1f, 0.25f);
-            boxCollider.material.bounciness = 0;          
+            boxCollider.material.bounciness = 0f;          
 
             BulletScript bulletScript = temp.AddComponent<BulletScript>();
             bulletScript.Direction = Vector3.forward;
             bulletScript.CollisionEnableTime = 1f;
+
+            TimedSelfDestruct tsd = temp.AddComponent<TimedSelfDestruct>();
 
             temp.SetActive(false);
             return temp;

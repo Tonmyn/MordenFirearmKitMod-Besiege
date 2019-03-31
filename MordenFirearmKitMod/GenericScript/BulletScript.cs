@@ -489,10 +489,11 @@ namespace ModernFirearmKitMod
         /// <summary>碰撞开启时间(0.01s)</summary>
         public float CollisionEnableTime;
         /// <summary>发射使能</summary>
-        public bool FireEnabled { get; set; } = false;
+        public bool FireEnabled { get; set; }
         /// <summary>已经发射</summary>
-        public bool Fired { get { return isFired; } }
+        public bool Fired { get { return isFired; } set { isFired = value; } }
         private bool isFired = false;
+        public bool Collisioned { get; private set; }
         /// <summary>发射方向</summary>
         public Vector3 Direction;
 
@@ -502,17 +503,24 @@ namespace ModernFirearmKitMod
         public event Action OnCollisionEvent;
         public event Action OnLaunchEvent;
         //public event Action OnLaunchedEvent;
+        Collider collider;
 
-        void Start()
+        void Awake()
         {
             rigidbody = GetComponent<Rigidbody>();
-            rigidbody.detectCollisions = false;
+            collider = GetComponent<Collider>();
+        }
+
+        void OnEnable()
+        {
+            FireEnabled = isFired = false;
+            
+            collider.enabled = false;
+            Collisioned = /*rigidbody.detectCollisions =*/ false;
         }
 
         void Update()
         {
-
-
             if (FireEnabled && !Fired)
             {
                 isFired = true;
@@ -523,8 +531,9 @@ namespace ModernFirearmKitMod
 
         void OnCollisionEnter(Collision collision)
         {         
-            if (rigidbody.detectCollisions == true)
+            if (/*rigidbody.detectCollisions*/ collider.enabled== true && !Collisioned)
             {
+                Collisioned = true;
                 OnCollisionEvent?.Invoke();
             }      
         }
@@ -533,7 +542,8 @@ namespace ModernFirearmKitMod
         {
             rigidbody.AddRelativeForce(Direction * Strength, ForceMode.Impulse);
             yield return new WaitForSeconds(CollisionEnableTime * 0.01f);
-            rigidbody.detectCollisions = true;
+            //rigidbody.detectCollisions = true;
+            collider.enabled = true;
         }
     }
 }

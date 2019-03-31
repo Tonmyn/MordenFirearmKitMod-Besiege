@@ -92,7 +92,6 @@ namespace ModernFirearmKitMod
 
             OnExploded?.Invoke();
             yield return new WaitForSeconds(3f);
-            Debug.Log("false");
             fireEffect.SetActive(false);
             OnExplodeFinal?.Invoke();
         }

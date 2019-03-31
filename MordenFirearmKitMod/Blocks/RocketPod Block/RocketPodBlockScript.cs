@@ -39,14 +39,10 @@ namespace ModernFirearmKitMod
 
         #region 内部变量声明
 
-        private GameObject RocketPool;
-        private GameObject RocketPool_Idle = MordenFirearmKitBlockMod.RocketPool_Idle;
+        private BulletPool rocketPool;
 
         //声明 火箭弹
         private GameObject[] Rockets = new GameObject[18];
-
-        //声明 火箭弹标签
-        //private int Label = 0;
 
         //声明 火箭弹实例化位置
         private Vector3[] relativePositions;
@@ -122,19 +118,12 @@ namespace ModernFirearmKitMod
 
         public override void OnSimulateStart()
         {
-            InitPool();
+
+            rocketPool = new BulletPool(transform, MordenFirearmKitBlockMod.RocketPool_Idle, 18);
 
             BulletMaxNumber = Mathf.Clamp(BulletMaxNumber, 1, 18);
 
             Reload(true);
-
-            void InitPool()
-            {
-                RocketPool = new GameObject("Rocket Pool");
-                RocketPool.transform.SetParent(transform);
-                RocketPool.transform.position = transform.position;
-                RocketPool.transform.rotation = transform.rotation;              
-            }
         }
 
         public override void SimulateUpdateHost()
@@ -143,10 +132,10 @@ namespace ModernFirearmKitMod
 
             if (LaunchKey.IsDown )
             {
-                if (!LaunchEnable&& RocketPool.transform.childCount > 0)
+                if (!LaunchEnable && BulletCurrentNumber > 0)
                 {
                     LaunchEnable = true;
-                    StartCoroutine(Launch(RocketPool.transform.GetChild(0).gameObject));
+                    StartCoroutine(Launch(rocketPool.Work.GetChild(0).gameObject));
                 }
             }
         }
@@ -204,7 +193,7 @@ namespace ModernFirearmKitMod
             Vector3 pos = getRealPosition(index, offset);
 
             //火箭弹实例化
-            GameObject rocket = (GameObject)Instantiate(BulletObject, pos, RocketPool.transform.rotation,RocketPool.transform);
+            GameObject rocket = (GameObject)Instantiate(BulletObject, pos, transform.rotation,rocketPool.Work);
             rocket.name = "Rocket " + index;
             rocket.SetActive(true);
             Rockets[index] = rocket;
@@ -231,7 +220,7 @@ namespace ModernFirearmKitMod
                 string i = rocketScript.gameObject.name;
                 i = i.Substring(i.LastIndexOf(' '));
                 Rockets[int.Parse(i)] = null;
-                rocketScript.gameObject.transform.SetParent(RocketPool_Idle.transform);
+                rocketScript.gameObject.transform.SetParent(rocketPool.Idle);
             };
         }
 
@@ -241,10 +230,10 @@ namespace ModernFirearmKitMod
             Vector3 offset = new Vector3(-0.375f, 0f, 0.15f);
             Vector3 pos = getRealPosition(index, offset);
             //火箭弹重新设置
-            GameObject rocket = Rockets[index] = RocketPool_Idle.transform.GetChild(0).gameObject;
-            rocket.transform.SetParent(RocketPool.transform);
+            GameObject rocket = Rockets[index] = rocketPool.Idle.GetChild(0).gameObject;
+            rocket.transform.SetParent(rocketPool.Work);
             rocket.transform.position = pos;
-            rocket.transform.rotation = RocketPool.transform.rotation;         
+            rocket.transform.rotation = transform.rotation;         
             rocket.name = "Rocket " + index;
             rocket.SetActive(true);
             //火箭弹脚本 参数重新设置
@@ -253,9 +242,10 @@ namespace ModernFirearmKitMod
         }
 
         private void delayLaunch(GameObject gameObject)
-        {          
+        {                  
             gameObject.transform.localPosition += Vector3.right * 3.25f;
-            gameObject.transform.SetParent(transform.parent.transform);
+            gameObject.transform.SetParent(transform.parent);
+            gameObject.SetActive(true);
      
             Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();      
             rigidbody.isKinematic = false;
@@ -275,14 +265,26 @@ namespace ModernFirearmKitMod
         //火箭弹重装
         public override void Reload(bool constraint = false)
         {
-            //火箭弹在无限弹药模式下 有空位的情况下实例化新火箭弹
-            if ((StatMaster.GodTools.InfiniteAmmoMode || constraint) && RocketPool.transform.childCount < BulletMaxNumber)
+            if (StatMaster.GodTools.InfiniteAmmoMode)
+            {
+                BulletCurrentNumber = BulletMaxNumber;
+            }
+
+            if (constraint)
+            {
+                for (int i = 0; i < BulletMaxNumber; i++)
+                {
+                    Rocket_Instantiate(i);
+                }
+            }
+
+            if ((rocketPool.WorkCount < BulletCurrentNumber) && (rocketPool.WorkCount < rocketPool.Volume))
             {
                 for (int i = 0; i < BulletMaxNumber; i++)
                 {
                     if (!Rockets[i] || Rockets[i].GetComponent<RocketScript>().Launched)
                     {
-                        if (RocketPool_Idle.transform.childCount > 0)
+                        if (rocketPool.IdleCount > 0)
                         {
                             Rocket_Reusing(i);
                         }
@@ -290,45 +292,14 @@ namespace ModernFirearmKitMod
                         {
                             Rocket_Instantiate(i);
                         }
-                        BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, BulletMaxNumber, 1);
+                        //BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, BulletMaxNumber, 1);
                     }
                 }
             }
+
+
+
         }
-
-       
-
-
-        //internal static void CreateRocketBlockTemp()
-        //{
-        //    RocketTemp = new GameObject("Rocket Temp");
-        //    RocketTemp.transform.localScale = new Vector3(1f, 0.75f, 0.75f);
-
-        //    GameObject vis = new GameObject("Vis");
-        //    vis.transform.SetParent(RocketTemp.transform);
-        //    vis.transform.localPosition -= RocketTemp.transform.right;
-        //    vis.transform.localScale = RocketTemp.transform.localScale;
-        //    vis.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Rocket Mesh");
-        //    vis.AddComponent<MeshRenderer>().material.mainTexture = ModResource.GetTexture("Rocket Texture");
-
-        //    GameObject collider = new GameObject("Collider");
-        //    collider.transform.SetParent(RocketTemp.transform);
-        //    collider.transform.localScale = RocketTemp.transform.localScale;
-        //    CapsuleCollider capsuleCollider = collider.AddComponent<CapsuleCollider>();            
-        //    capsuleCollider.radius = 0.15f;
-        //    capsuleCollider.height = 2.5f;
-        //    capsuleCollider.direction = 0;
-        //    capsuleCollider.isTrigger = true;
-
-        //    Rigidbody rigidbody = RocketTemp.AddComponent<Rigidbody>();
-        //    rigidbody.mass = 0.25f;
-
-        //    RocketTemp.AddComponent<RocketScript>();
-        //    RocketTemp.AddComponent<DestroyIfEditMode>();
-        //    RocketTemp.SetActive(false); 
-
-
-        //}
-
+     
     }
 }

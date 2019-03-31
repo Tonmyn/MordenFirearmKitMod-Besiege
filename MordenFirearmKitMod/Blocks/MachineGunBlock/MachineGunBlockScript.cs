@@ -31,8 +31,8 @@ namespace ModernFirearmKitMod
         ConfigurableJoint CJ;
         GameObject EffectsObject;
         GameObject GunVis;
-        GameObject BulletPool;
         Material material;
+        BulletPool bulletPool;
 
         MSlider StrengthSlider;
 
@@ -49,18 +49,8 @@ namespace ModernFirearmKitMod
             //BulletNumberSlider.ValueChanged += (value) => { BulletMaxNumber = (int)value; };
 
             //KnockBack = 1f;
-            SpawnPoint = new Vector3(0, 0.125f, 3.5f);
-
-            
-
-            GameObject bulletObject = AssetManager.Instance.MachineGun.bulletTemp;
-            BulletScript bulletScript = bulletObject.GetComponent<BulletScript>();
-            //bulletScript.Strength = Strength*200f;
-            bulletScript.Direction = transform.InverseTransformDirection(transform.forward);
-            bulletScript.OnCollisionEvent += () => { Debug.Log("bullet colli"); };
-            BulletObject = bulletObject;
-            //BulletCurrentNumber = BulletMaxNumber = 500;
-            //Rate = 0.2f;
+            SpawnPoint = new Vector3(0, 0.125f, 3.75f+5f);
+            BulletObject = AssetManager.Instance.MachineGun.bulletTemp;
             LaunchEnable = false;
 
 
@@ -78,51 +68,43 @@ namespace ModernFirearmKitMod
             List<MeshFilter> meshFilters = new List<MeshFilter>();
             GetComponentsInChildren(false, meshFilters);
             GunVis = meshFilters.Find(match => match.name == "Vis").gameObject;
-           
+
         }
 
         public override void OnSimulateStart()
         {
-            BulletScript bulletScript = BulletObject.GetComponent<BulletScript>();
-            bulletScript.Strength = Strength = StrengthSlider.Value * 200f;
-            
-            Rate = RateSlider.Value;
-            KnockBack = KnockBackSlider.Value;
             BulletCurrentNumber = BulletMaxNumber = (int)BulletNumberSlider.Value;
+            Strength = StrengthSlider.Value * 200f;
+            KnockBack = KnockBackSlider.Value;
+            Rate = RateSlider.Value;
 
+            LaunchEvent += PrepareForLaunch;
+
+            initPool();
             initVFX();
 
-            StartCoroutine(preperBullet());
-
-            IEnumerator preperBullet()
+            void initPool()
             {
-                int index = 0;
-                GameObject go;
-
-                BulletPool = new GameObject("Bullet Pool");
-                BulletPool.transform.SetParent(transform);
-
-                for (int i = 0; i < 1; i++)
-                {
-                    if (++index > 5)
-                    {
-                        index = 0;
-                        yield return 0;
-                    }
-                    else
-                    {
-                        go = Instantiate(BulletObject);
-                        go.transform.SetParent(BulletPool.transform);
-                        go.SetActive(true);
-                    }
-                }
-                yield break;
+                bulletPool = new BulletPool(transform, MordenFirearmKitBlockMod.MachineGunBulletPool_Idle, 50);
+                Reload(true);            
             }
+            void initVFX()
+            {
+                EffectsObject = EffectsObject ?? (GameObject)Instantiate(AssetManager.Instance.MachineGun.fireEffect, transform);
+                EffectsObject.transform.position = transform.TransformPoint(Vector3.forward * 3);
+                EffectsObject.transform.localEulerAngles = new Vector3(0, 180, 0);
+                EffectsObject.GetComponent<Reactivator>().TimeDelayToReactivate = Rate;
+                EffectsObject.SetActive(false);
+
+                material = GunVis.GetComponent<MeshRenderer>().material = AssetManager.Instance.MachineGun.material;
+                material.SetTexture("_MainTex", ModResource.GetTexture("MachineGun Texture"));
+                material.SetTexture("_EmissionMap", ModResource.GetTexture("MachineGun-e Texture"));
+            }     
         }
 
         public override void SimulateUpdateHost()
         {
-            
+
             if (CJ == null)
             {
                 return;
@@ -133,9 +115,9 @@ namespace ModernFirearmKitMod
                 RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 20 * Time.timeScale * Time.deltaTime);
                 if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
                 {
-                    LaunchEnable = true;                  
-                    StartCoroutine(Launch(BulletObject));
-                    heat=Mathf.Clamp01(heat + 0.01f);
+                    LaunchEnable = true;
+                    StartCoroutine(Launch(bulletPool.Work.gameObject));
+                    heat = Mathf.Clamp01(heat + 0.01f);
                     EffectsObject.SetActive(true);
                     EffectsObject.GetComponent<Reactivator>().Switch = true;
                 }
@@ -144,13 +126,13 @@ namespace ModernFirearmKitMod
             {
                 LaunchEnable = false;
                 heat = Mathf.Clamp01(heat - 0.05f * Time.deltaTime);
-                EffectsObject.GetComponent<Reactivator>().Switch = false;       
-                RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 10);         
+                EffectsObject.GetComponent<Reactivator>().Switch = false;
+                RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 10);
             }
 
             GunVis.transform.Rotate(new Vector3(0, RotationRate, 0) * Time.timeScale);
-            material.SetColor("_EmissionColor",new Color(heat,0f,0f,0f));
-           
+            material.SetColor("_EmissionColor", new Color(heat, 0f, 0f, 0f));
+
             if (RotationRate != 0)
             {
                 RotationAudioSource.pitch = RotationRate / RotationRateLimit;
@@ -164,20 +146,82 @@ namespace ModernFirearmKitMod
 
         public override void Reload(bool constraint = false)
         {
-            if (StatMaster.GodTools.InfiniteAmmoMode) BulletCurrentNumber = BulletMaxNumber;
+            if (StatMaster.GodTools.InfiniteAmmoMode)
+            {
+                BulletCurrentNumber = BulletMaxNumber;
+            }
+
+            if (constraint)
+            {
+                for (int i = 0; i < bulletPool.Volume; i++)
+                {
+                    InstanstiateBullet();
+                }
+            }
+
+            if ((bulletPool.WorkCount < BulletCurrentNumber && bulletPool.WorkCount < bulletPool.Volume) )
+            {
+                if (bulletPool.IdleCount > 0)
+                {
+                    ReusingBullet();
+                }
+                else
+                {
+                    InstanstiateBullet();
+                }
+            }
         }
 
-        void initVFX()
+        GameObject InstanstiateBullet()
         {
-            EffectsObject = EffectsObject ?? (GameObject)Instantiate(AssetManager.Instance.MachineGun.fireEffect, transform);
-            EffectsObject.transform.position = transform.TransformPoint(Vector3.forward * 3);
-            EffectsObject.transform.localEulerAngles = new Vector3(0, 180, 0);
-            EffectsObject.GetComponent<Reactivator>().TimeDelayToReactivate = Rate;
-            EffectsObject.SetActive(false);
+            var bullet = (GameObject)Instantiate(BulletObject, bulletPool.Work);
+            bullet.name = "Bullet";
+            var bulletScript = bullet.GetComponent<BulletScript>();
+            bulletScript.Strength = Strength;
+            bulletScript.OnCollisionEvent += () =>
+            {
+                TimedSelfDestruct tsd = bullet.GetComponent<TimedSelfDestruct>();
+                tsd.lifeTime = 30f;
+                tsd.Switch = true;
+                tsd.OnDestruct += () =>
+                {
+                    bullet.transform.SetParent(bulletPool.Idle);
+                    bullet.SetActive(false);
+                };
+            };
 
-            material = GunVis.GetComponent<MeshRenderer>().material = AssetManager.Instance.MachineGun.material;
-            material.SetTexture("_MainTex", ModResource.GetTexture("MachineGun Texture"));
-            material.SetTexture("_EmissionMap", ModResource.GetTexture("MachineGun-e Texture"));
+            return bullet;
+
+        }
+        GameObject ReusingBullet()
+        {
+            var bullet = bulletPool.Idle.GetChild(0).gameObject;
+            bullet.transform.SetParent(bulletPool.Work);
+
+            var bulletScript = bullet.GetComponent<BulletScript>();
+            bulletScript.Strength = Strength;
+         
+            return bullet;
+        }
+        void PrepareForLaunch(GameObject pool)
+        {
+            GameObject bullet;
+
+            if (pool.transform.childCount > 0)
+            {
+                bullet = pool.transform.GetChild(0).gameObject;
+            }
+            else
+            {
+                bullet = InstanstiateBullet();
+            }
+
+            bullet.transform.SetParent(transform.parent);
+            bullet.transform.rotation = transform.rotation;
+            bullet.transform.position = transform.TransformPoint(SpawnPoint);
+                        
+            bullet.SetActive(true);
+            bullet.GetComponent<BulletScript>().FireEnabled = true;       
         }
     }
 }

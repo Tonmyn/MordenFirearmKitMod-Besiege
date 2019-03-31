@@ -40,7 +40,7 @@ namespace ModernFirearmKitMod
 
             AssetManager.Instance.transform.SetParent(Mod.transform);
 
-            //增加灯关渲染数量
+            //增加灯光渲染数量
             //QualitySettings.pixelLightCount += 10;
 
         }

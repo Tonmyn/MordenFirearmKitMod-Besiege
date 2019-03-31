@@ -36,7 +36,6 @@ namespace ModernFirearmKitMod
 
         public event Action<GameObject> LaunchEvent;
 
-
         public abstract void Reload(bool constraint = false);
 
 
@@ -61,12 +60,14 @@ namespace ModernFirearmKitMod
             yield break;
         }
 
+
+
         public IEnumerator Launch(GameObject bullet)
         {
             if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
 
             if (BulletCurrentNumber < 0 || !LaunchEnable) yield break;
-            bullet.SetActive(true);
+            //bullet.SetActive(true);
             Rigidbody.AddForce(-transform.forward * KnockBack, ForceMode.Impulse);
 
             LaunchEvent?.Invoke(bullet);
@@ -75,6 +76,5 @@ namespace ModernFirearmKitMod
             LaunchEnable = false;
             yield break;
         }
-
     }
 }

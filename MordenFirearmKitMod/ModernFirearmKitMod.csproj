@@ -62,7 +62,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blocks\DirectionBlock.cs" />
-    <Compile Include="Blocks\GunBlock.cs" />
     <Compile Include="Blocks\MachineGunBlock\MachineGunBlockScript.cs" />
     <Compile Include="Blocks\MachineGunBlock\VFX\Scripts\FPSDemoReactivator.cs" />
     <Compile Include="Blocks\MachineGunBlock\VFX\Scripts\FPSLightCurves.cs" />
@@ -74,6 +73,7 @@
     <Compile Include="Blocks\Missile Block\MissileBlockScript.cs" />
     <Compile Include="Blocks\RocketBlock.cs" />
     <Compile Include="Blocks\RocketPod Block\RocketPodBlockScript.cs" />
+    <Compile Include="GenericScript\BulletPool.cs" />
     <Compile Include="GenericScript\TimedSelfDestruct.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolBase.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolListComponent.cs" />
@@ -82,13 +82,10 @@
     <Compile Include="ObjectPoolManager\PoolUnitBehavior.cs" />
     <Compile Include="ObjectPoolManager\PoolUnitList.cs" />
     <Compile Include="AssetManager.cs" />
-    <Compile Include="GenericScript\BulletBase.cs" />
     <Compile Include="GenericScript\DragScript.cs" />
     <Compile Include="GenericScript\ExplodeScript.cs" />
     <Compile Include="GenericScript\BulletScript.cs" />
     <Compile Include="GenericScript\LauncherBlockScript.cs" />
-    <Compile Include="GenericScript\LauncherScript.cs" />
-    <Compile Include="GenericScript\MuzzleFlashScript.cs" />
     <Compile Include="Mod.cs" />
     <Compile Include="Blocks\Rocket Block\RocketSmokeScript.cs" />
     <Compile Include="Blocks\Rocket Block\RocketFireScript.cs" />
