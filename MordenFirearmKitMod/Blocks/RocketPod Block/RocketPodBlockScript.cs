@@ -53,7 +53,7 @@ namespace ModernFirearmKitMod
         public override void SafeAwake()
         {
 
-            LaunchKey = AddKey("发射", "Launch", KeyCode.L);
+            LaunchKey = AddKey(LanguageManager.Instance.CurrentLanguage.launch, "Launch", KeyCode.L);
 
             KnockBack = 0f;
             SpawnPoint = new Vector3(0, 0, 3.5f);
@@ -70,18 +70,18 @@ namespace ModernFirearmKitMod
             #region 基本功能参数初始化
 
             //添加 滑条 参数
-            number_slider = AddSlider("载弹数量", "Number", BulletMaxNumber, 1, 18);
+            number_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletNumber, "Number", BulletMaxNumber, 1, 18);
             number_slider.ValueChanged += (value) => { BulletMaxNumber = (int)value; };
-            rate_slider = AddSlider("射速 0.1s", "Rate", Rate, 1f, 5f);
+            rate_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.rate, "Rate", Rate, 1f, 5f);
             rate_slider.ValueChanged += (value)=> { Rate = value * 0.1f; };
 
-            thrustForce_slider = AddSlider("推力大小", "Thrust Force", 1, 0f, 10f);
-            thrustForce_slider.ValueChanged += (value) => { changedPropertise(); };
+            thrustForce_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.thrustForce, "Thrust Force", 1, 0f, 10f);
+            thrustForce_slider.ValueChanged += (value) =>{ changedPropertise(); };
 
-            thrustTime_slider = AddSlider("推力时间 10s", "Thrust Time", 1, 0f, 10f);
+            thrustTime_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.thrustTime, "Thrust Time", 1, 0f, 10f);
             thrustTime_slider.ValueChanged += (value) => { changedPropertise(); };
 
-            DragForce_slider = AddSlider("阻力大小", "DRAG", 0.5f, 0.2f, 3f);
+            DragForce_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.drag, "DRAG", 0.5f, 0.2f, 3f);
             DragForce_slider.ValueChanged += (value) => { changedPropertise(); };
 
             #endregion

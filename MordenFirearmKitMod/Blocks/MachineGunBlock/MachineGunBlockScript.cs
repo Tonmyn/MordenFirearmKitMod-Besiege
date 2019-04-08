@@ -38,14 +38,14 @@ namespace ModernFirearmKitMod
 
         public override void SafeAwake()
         {
-            LaunchKey = AddKey("Fire", "Fire", KeyCode.C);
-            StrengthSlider = AddSlider("Strength", "Strength", 1f, 0.5f, 3f);
+            LaunchKey = AddKey(LanguageManager.Instance.CurrentLanguage.fire, "Fire", KeyCode.C);
+            StrengthSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.strength, "Strength", 1f, 0.5f, 3f);
             //StrengthSlider.ValueChanged += (value) => { Strength = value; };
-            RateSlider = AddSlider("Rate", "Rate", 0.2f, 0.1f, 0.3f);
+            RateSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.rate, "Rate", 0.2f, 0.1f, 0.3f);
             //RateSlider.ValueChanged += (value) => { Rate = value; };
-            KnockBackSlider = AddSlider("KnockBack", "KnockBack", 3f, 1f, 3f);
+            KnockBackSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.knockBack, "KnockBack", 3f, 1f, 3f);
             //KnockBackSlider.ValueChanged += (value) => { KnockBack = value; };
-            BulletNumberSlider = AddSlider("Bullet" + Environment.NewLine + "Number", "Number", 200f, 1f, 500f);
+            BulletNumberSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletNumber, "Number", 200f, 1f, 500f);
             //BulletNumberSlider.ValueChanged += (value) => { BulletMaxNumber = (int)value; };
 
             //KnockBack = 1f;

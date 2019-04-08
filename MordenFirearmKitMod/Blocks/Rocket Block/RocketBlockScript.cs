@@ -35,19 +35,19 @@ namespace ModernFirearmKitMod
 
             #region 基本功能参数初始化
 
-            launch_key = AddKey("发射", "Launch", KeyCode.L);
+            launch_key = AddKey(LanguageManager.Instance.CurrentLanguage.launch, "Launch", KeyCode.L);
             launch_key.KeysChanged += () => { changedPropertise(); };
 
-            thrustForce_slider = AddSlider("推力大小", "Thrust Force", 1, 0f, 10f);
+            thrustForce_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.thrustForce, "Thrust Force", 1, 0f, 10f);
             thrustForce_slider.ValueChanged += (value) => { changedPropertise(); };
 
-            thrustTime_slider = AddSlider("推力时间 10s", "Thrust Time", 1, 0f, 10f);
+            thrustTime_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.thrustTime, "Thrust Time", 1, 0f, 10f);
             thrustTime_slider.ValueChanged += (value) => { changedPropertise(); };
 
-            DragForce_slider = AddSlider("阻力大小", "DRAG", 0.5f, 0.2f, 3f);
+            DragForce_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.drag, "DRAG", 0.5f, 0.2f, 3f);
             DragForce_slider.ValueChanged += (value) => { changedPropertise(); };
 
-            thrustDelay_slider = AddSlider("延迟发射 0.1s", "Thrust Delay", 0, 0f, 10f);
+            thrustDelay_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.thrustDelay, "Thrust Delay", 0, 0f, 10f);
             thrustDelay_slider.ValueChanged += (value) => { changedPropertise(); };
 
             //colliderDelay_slider = AddSlider("碰撞开启 0.05s", "Collider Enable", 0f, 0f, 0.5f);
