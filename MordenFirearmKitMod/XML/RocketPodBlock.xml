@@ -12,7 +12,7 @@
 		 In debug mode, colliders and adding points are shown visually
 		 to assist in positioning them correctly.
 		 (Capsule colliders are shown as cubes, imagine their edges were rounded off.) -->
-  <Debug>true</Debug>
+  <Debug>false</Debug>
 
   <!-- ID of your block. See "Note on IDs" in Mod.xml.
 		 The ID must be unique among blocks in your mod.
