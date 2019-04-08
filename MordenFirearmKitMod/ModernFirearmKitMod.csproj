@@ -106,6 +106,7 @@
     <None Include="Resources\Rocket\Rocket.obj" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\icon.png" />
     <Content Include="Resources\MachineGun\Bullet.png" />
     <Content Include="Resources\MachineGun\MachineGun-e.png" />
     <Content Include="Resources\MachineGun\MachineGun.png" />
