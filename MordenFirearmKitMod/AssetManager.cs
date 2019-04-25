@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ModernFirearmKitMod
 {
@@ -15,14 +16,16 @@ namespace ModernFirearmKitMod
         public Asset_Rocket Rocket { get; private set; }
         public Asset_Explosion Explosion { get; private set; }
         public Asset_MachineGun MachineGun { get; private set; }
-              
+
         private void Awake()
-        {          
-            StartCoroutine(LoadAssetBundle());        
-        }
-        private IEnumerator LoadAssetBundle()
         {
             ModResource.CreateAssetBundleResource("Effect", @"Resources/bundle_mfk");
+            StartCoroutine(LoadAssetBundle());
+            SceneManager.sceneLoaded += (s, a) => { StartCoroutine(LoadAssetBundle()); };
+        }
+
+        private IEnumerator LoadAssetBundle()
+        {         
             ModAssetBundle modAssetBundle = ModResource.GetAssetBundle("Effect");
             yield return new WaitUntil(() => modAssetBundle.Available);
             Rocket = new Asset_Rocket(modAssetBundle);

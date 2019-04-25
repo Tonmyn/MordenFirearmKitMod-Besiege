@@ -112,7 +112,7 @@ namespace ModernFirearmKitMod
             Reload();
             if (LaunchKey.IsDown && BulletCurrentNumber > 0)
             {
-                RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 20 * Time.timeScale * Time.deltaTime);
+                RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 45f * Time.timeScale * Time.deltaTime);
                 if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
                 {
                     LaunchEnable = true;

@@ -52,22 +52,19 @@ namespace ModernFirearmKitMod
 
         public override void SafeAwake()
         {
-
-            LaunchKey = AddKey(LanguageManager.Instance.CurrentLanguage.launch, "Launch", KeyCode.L);
-
-            KnockBack = 0f;
-            SpawnPoint = new Vector3(0, 0, 3.5f);
-            BulletObject = AssetManager.Instance.Rocket.rocketTemp;
-            
-            BulletCurrentNumber = BulletMaxNumber = 18;
             Rate = 2f;
+            KnockBack = 0f;
             LaunchEnable = false;
-
             LaunchEvent += delayLaunch;
+            SpawnPoint = new Vector3(0, 0, 3.5f);         
+            BulletCurrentNumber = BulletMaxNumber =18;
+            BulletObject = BulletObject ?? AssetManager.Instance.Rocket.rocketTemp;
 
             relativePositions = GetRelativePositions();
 
             #region 基本功能参数初始化
+
+            LaunchKey = AddKey(LanguageManager.Instance.CurrentLanguage.launch, "Launch", KeyCode.L);
 
             //添加 滑条 参数
             number_slider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletNumber, "Number", BulletMaxNumber, 1, 18);
@@ -118,11 +115,10 @@ namespace ModernFirearmKitMod
 
         public override void OnSimulateStart()
         {
-
-            rocketPool = new BulletPool(transform, MordenFirearmKitBlockMod.RocketPool_Idle, 18);
-
-            BulletMaxNumber = Mathf.Clamp(BulletMaxNumber, 1, 18);
-
+           
+            BulletCurrentNumber = BulletMaxNumber = Mathf.Clamp(BulletMaxNumber, 1, 18);
+            rocketPool = new BulletPool(transform, MordenFirearmKitBlockMod.RocketPool_Idle, BulletMaxNumber);
+         
             Reload(true);
         }
 
@@ -194,6 +190,7 @@ namespace ModernFirearmKitMod
 
             //火箭弹实例化
             GameObject rocket = (GameObject)Instantiate(BulletObject, pos, transform.rotation,rocketPool.Work);
+            rocket.transform.localScale = Vector3.Scale(rocket.transform.localScale, transform.localScale);
             rocket.name = "Rocket " + index;
             rocket.SetActive(true);
             Rockets[index] = rocket;
@@ -209,7 +206,7 @@ namespace ModernFirearmKitMod
             rocketScript.ThrustForce = thrustForce_slider.Value;
             rocketScript.ThrustTime = thrustTime_slider.Value*10f;
             rocketScript.DelayLaunchTime = 0f;
-            rocketScript.DelayEnableCollisionTime = 0.02f;
+            rocketScript.DelayEnableCollisionTime = 0.04f;
             rocketScript.ExplodePower = 1f;
             rocketScript.ExplodeRadius = 10f;
             rocketScript.DragClamp = DragForce_slider.Value;
@@ -243,13 +240,14 @@ namespace ModernFirearmKitMod
 
         private void delayLaunch(GameObject gameObject)
         {                  
-            gameObject.transform.localPosition += Vector3.right * 3.25f;
+            gameObject.transform.localPosition += Vector3.right * 3.25f * transform.localScale.x;
             gameObject.transform.SetParent(transform.parent);
             gameObject.SetActive(true);
      
             Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();      
             rigidbody.isKinematic = false;
-            rigidbody.AddRelativeForce(Vector3.right * 20f, ForceMode.Impulse);
+            rigidbody.velocity = Rigidbody.velocity;
+            rigidbody.AddRelativeForce(Vector3.right * 25f, ForceMode.Impulse);
             RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
             rocketScript.LaunchEnabled = true;
 

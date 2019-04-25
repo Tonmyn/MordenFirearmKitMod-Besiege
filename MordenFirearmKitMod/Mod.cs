@@ -5,6 +5,7 @@ using UnityEngine;
 using Modding.Common;
 using Modding.Blocks;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 namespace ModernFirearmKitMod
 {
@@ -39,6 +40,8 @@ namespace ModernFirearmKitMod
             MachineGunBulletPool_Idle.transform.SetParent(Mod.transform);
 
             AssetManager.Instance.transform.SetParent(Mod.transform);
+
+            //SceneManager.sceneLoaded += (s, a) => { Debug.Log("loaded"); };
 
             //增加灯光渲染数量
             //QualitySettings.pixelLightCount += 10;
