@@ -23,9 +23,9 @@ namespace ModernFirearmKitMod
 
         public Rigidbody rigidbody;
 
-        public Action OnExplode;
-        public Action OnExploded;
-        public Action OnExplodeFinal;
+        public event Action OnExplode;
+        public event Action OnExploded;
+        public event Action OnExplodeFinal;
 
         //爆炸类型
         public enum explosionType

@@ -112,7 +112,7 @@ namespace ModernFirearmKitMod
             Reload();
             if (LaunchKey.IsDown && BulletCurrentNumber > 0)
             {
-                RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 45f * Time.timeScale * Time.deltaTime);
+                RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 105f * Time.timeScale * Time.deltaTime);
                 if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
                 {
                     LaunchEnable = true;
@@ -127,7 +127,7 @@ namespace ModernFirearmKitMod
                 LaunchEnable = false;
                 heat = Mathf.Clamp01(heat - 0.05f * Time.deltaTime);
                 EffectsObject.GetComponent<Reactivator>().Switch = false;
-                RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 10);
+                RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 20);
             }
 
             GunVis.transform.Rotate(new Vector3(0, RotationRate, 0) * Time.timeScale);
