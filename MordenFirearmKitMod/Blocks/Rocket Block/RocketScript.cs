@@ -58,7 +58,8 @@ namespace ModernFirearmKitMod
             if (StatMaster.levelSimulating)
             {
                 initParticle();
-            }    
+            }
+
         }
 
         void initPhysical()
@@ -109,33 +110,33 @@ namespace ModernFirearmKitMod
 
         void Update()
         {
-            if (LaunchEnabled)
-            {
-                StartCoroutine(Launch());
-                if (isLaunched && !effect.activeSelf)
-                {
-                    effect.SetActive(true);
-                }
-            }
-            else
-            {
-                StopCoroutine(Launch());
-            }
+            //if (LaunchEnabled)
+            //{
+            //    StartCoroutine(Launch());
+            //    if (isLaunched && !effect.activeSelf)
+            //    {
+            //        effect.SetActive(true);
+            //    }
+            //}
+            //else
+            //{
+            //    StopCoroutine(Launch());
+            //}
         }
 
 
         void OnCollisionEnter(Collision collision)
         {
-            if (EnableCollision)
-            {
-                rigidbody.isKinematic = true;
+            //if (EnableCollision)
+            //{
+            //    rigidbody.isKinematic = true;
 
-                exploder.Position = transform.position;
-                exploder.Explodey();
+            //    exploder.Position = transform.position;
+            //    exploder.Explodey();
 
-                gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = true;
-                gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
-            }
+            //    gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = true;
+            //    gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
+            //}
         }
 
         private IEnumerator Launch()

@@ -22,6 +22,7 @@ namespace ModernFirearmKitMod
             ModResource.CreateAssetBundleResource("Effect", @"Resources/bundle_mfk");
             StartCoroutine(LoadAssetBundle());
             SceneManager.sceneLoaded += (s, a) => { StartCoroutine(LoadAssetBundle()); };
+
         }
 
         private IEnumerator LoadAssetBundle()
@@ -31,6 +32,7 @@ namespace ModernFirearmKitMod
             Rocket = new Asset_Rocket(modAssetBundle);
             Explosion = new Asset_Explosion(modAssetBundle);
             MachineGun = new Asset_MachineGun(modAssetBundle);
+
         }     
     }
 

@@ -15,10 +15,10 @@ namespace ModernFirearmKitMod
 
     public enum BlockList
     {
-        火箭弹模块 = 650,
-        火箭巢模块 = 651,
-        机枪模块 = 652,
-        指向模块 = 653
+        RocketBlock = 650,
+        RocketPodBlock = 651,
+        MachineGunBlock = 652,
+        DirectionBlock = 653
     }
 
     public class MordenFirearmKitBlockMod : ModEntryPoint
@@ -34,13 +34,13 @@ namespace ModernFirearmKitMod
 
             Mod = new GameObject("Morden Firearm Kit Mod");
             UnityEngine.Object.DontDestroyOnLoad(Mod);
-            RocketPool_Idle = new GameObject("Rocket Pool Idle");
-            RocketPool_Idle.transform.SetParent(Mod.transform);
-            MachineGunBulletPool_Idle = new GameObject("MachineGunBullet Pool Idle");
-            MachineGunBulletPool_Idle.transform.SetParent(Mod.transform);
+            //RocketPool_Idle = new GameObject("Rocket Pool Idle");
+            //RocketPool_Idle.transform.SetParent(Mod.transform);
+            //MachineGunBulletPool_Idle = new GameObject("MachineGunBullet Pool Idle");
+            //MachineGunBulletPool_Idle.transform.SetParent(Mod.transform);
 
-            AssetManager.Instance.transform.SetParent(Mod.transform);
-
+            //AssetManager.Instance.transform.SetParent(Mod.transform);
+            LanguageManager.Instance.transform.SetParent(Mod.transform);
             //SceneManager.sceneLoaded += (s, a) => { Debug.Log("loaded"); };
 
             //增加灯光渲染数量
