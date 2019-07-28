@@ -18,7 +18,7 @@
 		 The ID must be unique among blocks in your mod.
 		 It may conflict with blocks of other mods, the mod loader handles this.
 		 The easiest way of assigning IDs is to use 1, 2, 3, etc.-->
-	<ID>1</ID>
+	<ID>650</ID>
 	
 	<!-- Name of the block, shown in the user interface. -->
 	<Name>Rocket Block</Name>

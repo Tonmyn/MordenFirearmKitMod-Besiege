@@ -34,12 +34,12 @@ namespace ModernFirearmKitMod
 
             Mod = new GameObject("Morden Firearm Kit Mod");
             UnityEngine.Object.DontDestroyOnLoad(Mod);
-            //RocketPool_Idle = new GameObject("Rocket Pool Idle");
-            //RocketPool_Idle.transform.SetParent(Mod.transform);
-            //MachineGunBulletPool_Idle = new GameObject("MachineGunBullet Pool Idle");
-            //MachineGunBulletPool_Idle.transform.SetParent(Mod.transform);
+            RocketPool_Idle = new GameObject("Rocket Pool Idle");
+            RocketPool_Idle.transform.SetParent(Mod.transform);
+            MachineGunBulletPool_Idle = new GameObject("MachineGunBullet Pool Idle");
+            MachineGunBulletPool_Idle.transform.SetParent(Mod.transform);
 
-            //AssetManager.Instance.transform.SetParent(Mod.transform);
+            AssetManager.Instance.transform.SetParent(Mod.transform);
             LanguageManager.Instance.transform.SetParent(Mod.transform);
             //SceneManager.sceneLoaded += (s, a) => { Debug.Log("loaded"); };
 
