@@ -51,7 +51,7 @@
 
   <!-- Include to make block take damage. -->
   <!-- <Health>20</Health> -->
-  <Health>20</Health>
+  <!--<Health>20</Health>-->
 
   <!-- Optional.
 		 The game generates "stripped" versions of the prefab,
