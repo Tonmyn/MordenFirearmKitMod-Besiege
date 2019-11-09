@@ -18,7 +18,7 @@
 		 The ID must be unique among blocks in your mod.
 		 It may conflict with blocks of other mods, the mod loader handles this.
 		 The easiest way of assigning IDs is to use 1, 2, 3, etc.-->
-	<ID>652</ID>
+	<ID>653</ID>
 	
 	<!-- Name of the block, shown in the user interface. -->
 	<Name>Machine Gun Block</Name>
@@ -80,17 +80,17 @@
 	<!-- <DamageType>Blunt</DamageType> -->
 	
 	<Mesh name="MachineGun Mesh">
-		<Position x="0.0" y="0.0" z="1.65" />
+		<Position x="0.0" y="0.0" z="0.275" />
 		<Rotation x="0.0" y="90.0" z="90.0" />
-		<Scale x="0.75" y="0.65" z="0.75" />
+		<Scale x="0.25" y="0.25" z="0.25" />
   </Mesh>
 	
 	<Texture name="MachineGun Texture" /> <!-- Insert texture resource name here. Must be defined as a resource in the manifest. -->
 	
 	<Icon>
 		<Position x="0.0" y="0.0" z="-1" />
-		<Rotation x="30" y="0" z="-40" />
-		<Scale x="0.18" y="0.18" z="0.18" />
+		<Rotation x="-30" y="60" z="0.0" />
+		<Scale x="0.10" y="0.10" z="0.10" />
   </Icon>
 	
 	<!-- Include to override default icon for block list and machine info list.
@@ -132,11 +132,11 @@
 	<Colliders>
 		<!-- Insert Collider definitions here.
 			 Example: -->
-		<CapsuleCollider>
-			<Position x="0.0" y="0.0" z="1.75" />
-			<Rotation x="0.0" y="0.0" z="0.0" />
-			<Capsule direction="Z" radius="0.25" height="3" />
-		</CapsuleCollider>
+    <BoxCollider>
+      <Position x="-0.34" y="0.0" z="0.3" />
+      <Rotation x="0.0" y="0.0" z="0.0" />
+      <Scale x="3.5" y="0.25" z="0.55" />
+    </BoxCollider>
 	</Colliders>
 	
 	<BasePoint hasAddingPoint="false">

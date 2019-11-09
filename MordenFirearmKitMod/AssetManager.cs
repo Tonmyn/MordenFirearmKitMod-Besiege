@@ -16,6 +16,8 @@ namespace ModernFirearmKitMod
         public Asset_Rocket Rocket { get; private set; }
         public Asset_Explosion Explosion { get; private set; }
         public Asset_MachineGun MachineGun { get; private set; }
+        public Asset_GatlingGun GatlingGun { get; private set; }
+        public Asset_Bullet Bullet { get; private set; }
 
         private void Awake()
         {
@@ -32,7 +34,8 @@ namespace ModernFirearmKitMod
             Rocket = new Asset_Rocket(modAssetBundle);
             Explosion = new Asset_Explosion(modAssetBundle);
             MachineGun = new Asset_MachineGun(modAssetBundle);
-
+            GatlingGun = new Asset_GatlingGun(modAssetBundle);
+            Bullet = new Asset_Bullet(modAssetBundle);
         }     
     }
 
@@ -86,6 +89,99 @@ namespace ModernFirearmKitMod
         {
             explosionEffect = modAssetBundle.LoadAsset<GameObject>("BigExplosion");
             explosionEffect.AddComponent<DestroyIfEditMode>();
+        }
+    }
+
+    public class Asset_GatlingGun
+    {
+        //开火特效
+        public GameObject fireEffect;
+        //机枪过热材质
+        public Material material;
+        //子弹模板
+        public GameObject bulletTemp;
+
+        public Asset_GatlingGun(ModAssetBundle modAssetBundle)
+        {
+            material = modAssetBundle.LoadAsset<Material>("GatlingGunMat.mat");
+            fireEffect = modAssetBundle.LoadAsset<GameObject>("MachineGunFireEffect");
+
+            #region init fire effect
+            fireEffect.AddComponent<DestroyIfEditMode>();
+
+            Reactivator fPSDemo = fireEffect.AddComponent<Reactivator>();
+            for (int i = 0; i < fireEffect.transform.childCount; i++)
+            {
+                var go = fireEffect.transform.GetChild(i).gameObject;
+                if (go.name == "Point light")
+                {
+                    FPSLightCurves fPSLight = go.AddComponent<FPSLightCurves>();
+                    fPSLight.GraphTimeMultiplier = 0.15f;
+                    fPSLight.GraphIntensityMultiplier = 1;
+                    Vector3 vector3 = go.transform.localPosition;
+                    vector3.z = -0.5f;
+                    go.transform.localPosition = vector3;
+                }
+                else if (go.name == "MuzzleFlash0")
+                {
+                    go.AddComponent<FPSRandomRotateAngle>().RotateZ = true;
+                    go.transform.localScale = new Vector3(0.6f, 0.6f, 0f);
+                }
+                else if (go.name == "MuzzleFlash")
+                {
+                    go.transform.localPosition = new Vector3(0, 0, -0.2f);
+                    go.transform.localScale = new Vector3(0.1f, 0.1f, 0.065f);
+                }
+                else if (go.name == "Distortion")
+                {
+                    go.transform.localPosition = new Vector3(0, 0, -0.5f);
+                }
+            }
+            #endregion
+
+            bulletTemp = CreateBulletTemp();
+        }
+
+        private GameObject CreateBulletTemp()
+        {
+            GameObject temp = new GameObject("Bullet Temp");
+
+            temp.AddComponent<DestroyIfEditMode>();
+
+            GameObject vis = new GameObject("Vis");
+            vis.transform.SetParent(temp.transform);
+            vis.transform.position = temp.transform.position;
+            vis.transform.rotation = temp.transform.rotation;
+            vis.transform.localScale *= 0.025f;
+
+            vis.AddComponent<MeshFilter>().mesh = ModResource.GetMesh("Bullet Mesh");
+            MeshRenderer meshRenderer = vis.AddComponent<MeshRenderer>();
+            meshRenderer.material.mainTexture = ModResource.GetTexture("Bullet Texture");
+
+            Rigidbody rigidbody = temp.AddComponent<Rigidbody>();
+            rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            rigidbody.mass = 0.5f;
+            rigidbody.drag = 0.25f;
+
+            TrailRenderer trailRenderer = temp.AddComponent<TrailRenderer>();
+            trailRenderer.startWidth = 0.08f;
+            trailRenderer.endWidth = 0f;
+            trailRenderer.time = 0.05f;
+            trailRenderer.material.shader = Shader.Find("Particles/Additive");
+            trailRenderer.material.SetColor("_TintColor", Color.yellow);
+
+            BoxCollider boxCollider = temp.AddComponent<BoxCollider>();
+            boxCollider.size = new Vector3(0.1f, 0.1f, 0.25f);
+            boxCollider.material.bounciness = 0f;
+
+            BulletScript bulletScript = temp.AddComponent<BulletScript>();
+            bulletScript.Direction = Vector3.forward;
+            bulletScript.CollisionEnableTime = 1f;
+
+            TimedSelfDestruct tsd = temp.AddComponent<TimedSelfDestruct>();
+
+            temp.SetActive(false);
+            return temp;
         }
     }
     public class Asset_MachineGun
@@ -179,5 +275,26 @@ namespace ModernFirearmKitMod
             temp.SetActive(false);
             return temp;
         }
+    }
+
+    public class Asset_Bullet
+    {
+        public GameObject impactWoodEffect;
+        public GameObject impactStoneEffect;
+        public GameObject impactMetalEffect;
+
+
+        public Asset_Bullet(ModAssetBundle modAssetBundle)
+        {
+            impactWoodEffect = modAssetBundle.LoadAsset<GameObject>("BulletImpactWoodEffect");
+            impactStoneEffect = modAssetBundle.LoadAsset<GameObject>("BulletImpactStoneEffect");
+            impactMetalEffect = modAssetBundle.LoadAsset<GameObject>("BulletImpactMetalEffect");
+
+            //impactWoodEffect.AddComponent<TimedSelfDestruct>().lifeTime = 50f;
+            //impactStoneEffect.AddComponent<TimedSelfDestruct>().lifeTime = 50f;
+            //impactMetalEffect.AddComponent<TimedSelfDestruct>().lifeTime = 50f;
+
+        }
+
     }
 }

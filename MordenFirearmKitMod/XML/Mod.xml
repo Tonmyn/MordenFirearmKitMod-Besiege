@@ -84,6 +84,7 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
     <Block path="RocketBlock.xml"/>
     <Block path="RocketPodBlock.xml"/>
     <!--Block path="MissileBlock.xml"/-->
+    <Block path="GatlingGunBlock.xml"/>
     <Block path="MachineGunBlock.xml"/>
 	</Blocks>
 	
@@ -129,11 +130,16 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
     <Mesh name="RocketPod Mesh" path="RocketPod\RocketPod.obj"/>
     <Texture name="RocketPod_r Texture" path="RocketPod\Rocket.png"/>
     <Texture name="RocketPod Texture" path="RocketPod\RocketPod.png"/>
-    
+
+    <Mesh name ="GatlingGun Mesh" path="GatlingGun\GatlingGun.obj"/>
+    <Texture name="GatlingGun Texture" path="GatlingGun\GatlingGun.png"/>
+    <Texture name="GatlingGun-e Texture" path="GatlingGun\GatlingGun-e.png"/>
+    <AudioClip name="GatlingGun AudioClip" path ="GatlingGun\GatlingGun.ogg"/>
+
     <Mesh name ="MachineGun Mesh" path="MachineGun\MachineGun.obj"/>
     <Texture name="MachineGun Texture" path="MachineGun\MachineGun.png"/>
     <Texture name="MachineGun-e Texture" path="MachineGun\MachineGun-e.png"/>
-    <AudioClip name="MachineGun AudioClip" path ="MachineGun\MachineGun.ogg"/>
+    <AudioClip name="MachineGun AudioClip" path ="MachineGun\Fire.ogg"/>
   
   <Mesh name ="Bullet Mesh" path="MachineGun\Bullet.obj"/>
     <Texture name="Bullet Texture" path="MachineGun\Bullet.png"/>

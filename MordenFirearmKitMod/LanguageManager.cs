@@ -65,9 +65,13 @@ namespace ModernFirearmKitMod
         string bulletNumber { get; }
         string rate { get; }
         //MachineGun
-      string fire { get; }
+        string fire { get; }
         string strength { get; }
         string knockBack { get; }
+
+        string bulletMass { get; }
+        string bulletDrag { get; }
+        string bulletTrailColor { get; }
     }
 
     public class Chinese : ILanguage
@@ -85,6 +89,10 @@ namespace ModernFirearmKitMod
         public string fire { get; } = "开火";
         public string strength { get; } = "炮力";
         public string knockBack { get; } = "后坐力";
+
+        public string bulletMass { get; } = "子弹质量";
+        public string bulletDrag { get; } = "子弹阻力";
+        public string bulletTrailColor { get; } = "子弹尾迹颜色";
     }
 
     public class English : ILanguage
@@ -102,6 +110,10 @@ namespace ModernFirearmKitMod
         public string fire { get; } = "Fire";
         public string strength { get; } = "Force";
         public string knockBack { get; } = "Knock Back";
+
+        public string bulletMass { get; } = "Bullet Mass";
+        public string bulletDrag { get; } = "Bullet Drag";
+        public string bulletTrailColor { get; } = "Bullet TrailColor";
     }
 
 

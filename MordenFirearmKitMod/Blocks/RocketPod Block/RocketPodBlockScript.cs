@@ -19,6 +19,7 @@ namespace ModernFirearmKitMod
         public override int BulletMaxNumber { get; set; }
         public override GameObject BulletObject { get; set; }
         public override Vector3 SpawnPoint { get; set; }
+        public override Vector3 Direction { get; set; }
         public override bool LaunchEnable { get; set; }
 
         #endregion
@@ -56,7 +57,8 @@ namespace ModernFirearmKitMod
             KnockBack = 0f;
             LaunchEnable = false;
             LaunchEvent += delayLaunch;
-            SpawnPoint = new Vector3(0, 0, 3.5f);         
+            SpawnPoint = new Vector3(0, 0, 3.5f);
+            Direction = transform.right;
             BulletCurrentNumber = BulletMaxNumber =18;
             BulletObject = BulletObject ?? AssetManager.Instance.Rocket.rocketTemp;
 
@@ -126,7 +128,7 @@ namespace ModernFirearmKitMod
         {
             Reload();
 
-            if (LaunchKey.IsDown )
+            if (LaunchKey.IsHeld )
             {
                 if (!LaunchEnable && BulletCurrentNumber > 0)
                 {

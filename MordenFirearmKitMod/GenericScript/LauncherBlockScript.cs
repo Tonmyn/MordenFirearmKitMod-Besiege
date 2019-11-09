@@ -23,6 +23,8 @@ namespace ModernFirearmKitMod
         public abstract GameObject BulletObject { get; set; }
         /// <summary>枪口位置</summary>
         public abstract Vector3 SpawnPoint { get; set; }
+        /// <summary>枪口方向</summary>
+        public abstract Vector3 Direction { get; set; }
         /// <summary>最大弹药数</summary>
         public abstract int BulletMaxNumber { get; set; }
         /// <summary>当前弹药数</summary>
@@ -43,9 +45,9 @@ namespace ModernFirearmKitMod
         {
             if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
 
-            if (BulletCurrentNumber < 0||!LaunchEnable) yield break;        
+            if (BulletCurrentNumber < 0||!LaunchEnable) yield break;
 
-            Rigidbody.AddForce(-transform.forward * KnockBack /** 4000f*/, ForceMode.Impulse);
+            Rigidbody.AddForce(-transform.TransformDirection(Direction) * KnockBack /** 4000f*/, ForceMode.Impulse);
 
             GameObject bullet = (GameObject)Instantiate(BulletObject, transform.TransformPoint(SpawnPoint), transform.rotation, transform.root);
 
@@ -68,9 +70,24 @@ namespace ModernFirearmKitMod
 
             if (BulletCurrentNumber < 0 || !LaunchEnable) yield break;
             //bullet.SetActive(true);
-            Rigidbody.AddForce(-transform.forward * KnockBack, ForceMode.Impulse);
+            Rigidbody.AddForce(-transform.TransformDirection(Direction) * KnockBack, ForceMode.Impulse);
 
             LaunchEvent?.Invoke(bullet);
+
+            yield return new WaitForSeconds(Rate);
+            LaunchEnable = false;
+            yield break;
+        }
+
+        public IEnumerator Launch(Action action)
+        {
+            if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
+
+            if (BulletCurrentNumber < 0 || !LaunchEnable) yield break;
+
+            Rigidbody.AddForce(-transform.TransformDirection(Direction) * KnockBack, ForceMode.Impulse);
+
+            action?.Invoke();
 
             yield return new WaitForSeconds(Rate);
             LaunchEnable = false;

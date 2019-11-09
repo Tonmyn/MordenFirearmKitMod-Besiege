@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 132638846
+CRC: 1583573064
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: f198f1d6c181049cdfb80bc8733b6c91
+    Hash: e96d4c6277962fae46e5912588dcf97c
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 51aa6a82c65b068721ecd3705dc924df
+    Hash: 4140f6970f71a1bade3c9d48dff19f04
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -15,7 +15,11 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 21
   Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
 - Class: 28
+  Script: {instanceID: 0}
+- Class: 33
   Script: {instanceID: 0}
 - Class: 43
   Script: {instanceID: 0}
@@ -36,5 +40,9 @@ Assets:
 - Assets/MFK-Effects/Rocket/RocketTrailEffect.prefab
 - Assets/MFK-Effects/MachineGun/Materials/MachineGunMat.mat
 - Assets/MFK-Effects/BigExplosion/BigExplosion.prefab
+- Assets/MFK-Effects/MachineGun/Materials/GatlingGunMat.mat
+- Assets/MFK-Effects/MachineGun/BulletEffect/BulletImpactStoneEffect.prefab
+- Assets/MFK-Effects/MachineGun/BulletEffect/BulletImpactWoodEffect.prefab
 - Assets/MFK-Effects/MachineGun/MachineGunFireEffect.prefab
+- Assets/MFK-Effects/MachineGun/BulletEffect/BulletImpactMetalEffect.prefab
 Dependencies: []
