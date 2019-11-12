@@ -17,9 +17,10 @@ namespace ModernFirearmKitMod
     {
         RocketBlock = 650,
         RocketPodBlock = 651,
-        GatlingGunBlock = 652,
-        MachineGunBlock = 653,
-        DirectionBlock = 654
+        GatlingGunBlock = 655,
+        MachineGunBlock = 656,
+        GunBarrelBlock = 657,
+        DirectionBlock = 660,
     }
 
     public class MordenFirearmKitBlockMod : ModEntryPoint

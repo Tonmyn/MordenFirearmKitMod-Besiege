@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Blocks\DirectionBlock.cs" />
     <Compile Include="Blocks\MachineGunBlock\GatlingGunBlockScript.cs" />
+    <Compile Include="Blocks\MachineGunBlock\GunBarrelBlockScript.cs" />
     <Compile Include="Blocks\MachineGunBlock\MachineGunBlockScript.cs" />
     <Compile Include="Blocks\MachineGunBlock\VFX\Scripts\FPSDemoReactivator.cs" />
     <Compile Include="Blocks\MachineGunBlock\VFX\Scripts\FPSLightCurves.cs" />
@@ -97,6 +98,8 @@
     <None Include="Resources\GatlingGun\Bullet.obj" />
     <None Include="Resources\GatlingGun\GatlingGun.obj" />
     <None Include="Resources\GatlingGun\GatlingGun.ps" />
+    <None Include="Resources\GunBarrel\GunBarrel.obj" />
+    <None Include="Resources\GunBarrel\GunBarrel._U1_V1.ps" />
     <None Include="Resources\MachineGun\Bullet.obj" />
     <None Include="Resources\MachineGun\MachineGun.ps" />
     <None Include="Resources\MachineGun\MachineGun.obj" />
@@ -109,6 +112,8 @@
     <Content Include="Resources\GatlingGun\GatlingGun-e.png" />
     <None Include="Resources\GatlingGun\GatlingGun.ogg" />
     <Content Include="Resources\GatlingGun\GatlingGun.png" />
+    <Content Include="Resources\GunBarrel\Fire.ogg" />
+    <Content Include="Resources\GunBarrel\GunBarrel.png" />
     <Content Include="Resources\icon.png" />
     <Content Include="Resources\MachineGun\Bullet.png" />
     <Content Include="Resources\MachineGun\Fire.ogg" />
@@ -120,6 +125,7 @@
     <Content Include="XML\GatlingGunBlock.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="XML\GunBarrelBlock.xml" />
     <Content Include="XML\MachineGunBlock.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -142,6 +148,7 @@ copy /Y "$(ProjectDir)Resources\Rocket\*" "%25BESIEGE_LOCATION%25\Besiege_Data\M
 copy /Y "$(ProjectDir)Resources\RocketPod\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\RocketPod\"
 copy /Y "$(ProjectDir)Resources\GatlingGun\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\GatlingGun\"
 copy /Y "$(ProjectDir)Resources\MachineGun\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\MachineGun\"
+copy /Y "$(ProjectDir)Resources\GunBarrel\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\Resources\GunBarrel\"
 copy /Y "$(ProjectDir)XML\*" "%25BESIEGE_LOCATION%25\Besiege_Data\Mods\$(TargetName)\"
 
 if $(ConfigurationName) == Release "$(ProjectDir)PackageRelease.bat" "$(ProjectDir)" "$(TargetPath)" "$(ProjectDir)Release\$(TargetName)\"</PostBuildEvent>

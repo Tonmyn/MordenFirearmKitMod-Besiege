@@ -9,7 +9,7 @@
 	<Name>Modern Firearm Kit Mod</Name>
 	<Author>XultimateX</Author> <!-- FIX: Insert your name here. -->
 	<!-- Major.Minor.Build -->
-	<Version>0.1.0</Version>
+	<Version>0.1.1</Version>
 	
 	<Description>
 Some excited modern firearms. <!-- FIX: Insert a short description here. -->
@@ -86,6 +86,7 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
     <!--Block path="MissileBlock.xml"/-->
     <Block path="GatlingGunBlock.xml"/>
     <Block path="MachineGunBlock.xml"/>
+    <Block path="GunBarrelBlock.xml"/>
 	</Blocks>
 	
 	<!-- Any entities (level objects) your mod adds to the game.
@@ -140,6 +141,10 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
     <Texture name="MachineGun Texture" path="MachineGun\MachineGun.png"/>
     <Texture name="MachineGun-e Texture" path="MachineGun\MachineGun-e.png"/>
     <AudioClip name="MachineGun AudioClip" path ="MachineGun\Fire.ogg"/>
+
+    <Mesh name ="GunBarrel Mesh" path="GunBarrel\GunBarrel.obj"/>
+    <Texture name="GunBarrel Texture" path="GunBarrel\GunBarrel.png"/>
+    <AudioClip name="GunBarrel AudioClip" path ="GunBarrel\Fire.ogg"/>
   
   <Mesh name ="Bullet Mesh" path="MachineGun\Bullet.obj"/>
     <Texture name="Bullet Texture" path="MachineGun\Bullet.png"/>

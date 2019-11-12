@@ -72,6 +72,9 @@ namespace ModernFirearmKitMod
         string bulletMass { get; }
         string bulletDrag { get; }
         string bulletTrailColor { get; }
+        string distance { get; }
+        string damper { get; }
+        string hold { get; }
     }
 
     public class Chinese : ILanguage
@@ -93,6 +96,9 @@ namespace ModernFirearmKitMod
         public string bulletMass { get; } = "子弹质量";
         public string bulletDrag { get; } = "子弹阻力";
         public string bulletTrailColor { get; } = "子弹尾迹颜色";
+        public string distance { get; } = "枪口距离";
+        public string damper { get; } = "阻尼";
+        public string hold { get; } = "按住发射";
     }
 
     public class English : ILanguage
@@ -114,6 +120,9 @@ namespace ModernFirearmKitMod
         public string bulletMass { get; } = "Bullet Mass";
         public string bulletDrag { get; } = "Bullet Drag";
         public string bulletTrailColor { get; } = "Bullet TrailColor";
+        public string distance { get; } = "Spawn Distance";
+        public string damper { get; } = "Damper";
+        public string hold { get; } = "Hold Fire";
     }
 
 
