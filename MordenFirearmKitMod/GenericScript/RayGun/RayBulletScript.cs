@@ -156,9 +156,13 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                             if (hitInfo.rigidbody.gameObject.GetComponent<KillingHandler>() != null)
                             {
                                 var kh = hitInfo.rigidbody.gameObject.GetComponent<KillingHandler>();
-                                //kh.SendMessage("OnCollisionEnter", hitInfo.rigidbody.GetComponentInChildren<Collision>());
                                 kh.KillUnit(true, InjuryType.Blunt);
-                                Debug.Log("kill");
+                            }
+
+                            if (hitInfo.rigidbody.gameObject.GetComponent<ExplodeOnCollide>() != null)
+                            {
+                                var eoc = hitInfo.rigidbody.gameObject.GetComponent<ExplodeOnCollide>();
+                                eoc.Explodey();
                             }
 
 
@@ -186,7 +190,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                             var dote = hitInfo.rigidbody.gameObject.GetComponent<DestroyOnTriggerEnter>();
                             dote.SendMessage("OnTriggerEnter", hitInfo.collider);
                         }
-
+                        
                         if (hitInfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>() != null)
                         {
                             var poc = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>();
