@@ -84,7 +84,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                     //lr.SetWidth(0.2f, 0.2f);
                     //lr.SetPosition(0, hitInfo.point);
                     //lr.SetPosition(1, direction + hitInfo.point);
-
+                   
                     try
                     {
                         createImpactEffect();
@@ -133,21 +133,84 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
         private void onCollision(RaycastHit hitInfo)
         {
-            if (hitInfo.rigidbody != null)
+            try
             {
-                //MV = mv ;v = MV/m; I=Ft; F = I/t;
-                var v = (Velocity * Mass) / (hitInfo.rigidbody.mass);
-                var f = v / _time;
-
-                if (isWoodenBlock((BlockType)hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>().BlockID))
+                if (hitInfo.rigidbody != null)
                 {
-                    hitInfo.rigidbody.AddForceAtPosition(f * 10f, hitInfo.point);
+                    //MV = mv ;v = MV/m; I=Ft; F = I/t;
+                    var v = (Velocity * Mass) / (hitInfo.rigidbody.mass);
+                    var f = v / _time;
+                    if (hitInfo.rigidbody.isKinematic == false)
+                    {
+
+
+                        if (hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>() != null 
+                            && isWoodenBlock((BlockType)hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>().BlockID) 
+                            || hitInfo.transform.name.ToLower().Contains("tree"))
+                        {
+                            hitInfo.rigidbody.AddForceAtPosition(f * 10f, hitInfo.point);
+                            hitInfo.rigidbody.AddRelativeTorque(f * 10f, ForceMode.Impulse);
+                        }        
+                        else
+                        {
+                            if (hitInfo.rigidbody.gameObject.GetComponent<KillingHandler>() != null)
+                            {
+                                var kh = hitInfo.rigidbody.gameObject.GetComponent<KillingHandler>();
+                                //kh.SendMessage("OnCollisionEnter", hitInfo.rigidbody.GetComponentInChildren<Collision>());
+                                kh.KillUnit(true, InjuryType.Blunt);
+                                Debug.Log("kill");
+                            }
+
+
+                            hitInfo.rigidbody.AddForceAtPosition(f, hitInfo.point);
+                            hitInfo.rigidbody.AddRelativeTorque(f, ForceMode.Impulse);
+
+                            if (hitInfo.rigidbody.gameObject.GetComponent<ConfigurableJoint>() != null)
+                            {
+                                var cj = hitInfo.rigidbody.gameObject.GetComponent<ConfigurableJoint>();
+                                cj.breakForce -= f.magnitude;
+                                cj.breakTorque -= f.magnitude;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (hitInfo.rigidbody.gameObject.GetComponent<BreakOnForce>() != null)
+                        {
+                            var bof = hitInfo.rigidbody.gameObject.GetComponent<BreakOnForce>();
+                            bof.BreakExplosion(f.magnitude, hitInfo.point, bof.breakForceRadius, 0f);
+                        }
+
+                        if (hitInfo.rigidbody.gameObject.GetComponent<DestroyOnTriggerEnter>() != null)
+                        {
+                            var dote = hitInfo.rigidbody.gameObject.GetComponent<DestroyOnTriggerEnter>();
+                            dote.SendMessage("OnTriggerEnter", hitInfo.collider);
+                        }
+
+                        if (hitInfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>() != null)
+                        {
+                            var poc = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>();
+                            poc.SendMessage("OnCollisionEnter", hitInfo.collider.GetComponentInChildren<Collision>());
+                        }
+
+                        if (hitInfo.rigidbody.gameObject.GetComponent<ParticleOnTrigger>() != null)
+                        {
+                            var pot = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnTrigger>();
+                            pot.SendMessage("OnTriggerEnter", hitInfo.collider);                      
+                        }
+                    }
                 }
                 else
                 {
-                    hitInfo.rigidbody.AddForceAtPosition(f, hitInfo.point);
+                    
                 }
             }
+            catch(Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+
+          
         }
 
 
@@ -185,7 +248,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         private bool isWoodenBlock(Transform transform)
         {
             var value = false;
-            if (transform.gameObject.GetComponent<BlockBehaviour>() != null)
+            if (transform.gameObject.GetComponent<BlockBehaviour>() != null || transform.name.ToLower().Contains("tree"))
             {
                 if (transform.gameObject.GetComponent<BlockBehaviour>().fireTag != null)
                 {
