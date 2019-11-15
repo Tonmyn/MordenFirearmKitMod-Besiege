@@ -7,9 +7,6 @@ using UnityEngine;
 namespace ModernFirearmKitMod.GenericScript.RayGun
 {
 
-
-
-
     public class RayBulletScript : MonoBehaviour
     {
         public float Strength { get; set; }
@@ -44,6 +41,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             lineRenderer.SetPosition(0, sPoint);
             lineRenderer.SetPosition(1, ePoint);
             lineRenderer.SetWidth(0.15f, 0.2f);
+            lineRenderer.useWorldSpace = true;
             lineRenderer.enabled = true;
 
             gameObject.AddComponent<DestroyIfEditMode>();
@@ -84,12 +82,12 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                     //lr.SetWidth(0.2f, 0.2f);
                     //lr.SetPosition(0, hitInfo.point);
                     //lr.SetPosition(1, direction + hitInfo.point);
-                   
+
                     try
                     {
                         createImpactEffect();
                     }
-                    catch { }                 
+                    catch { }
                 }
                 else
                 {
@@ -108,21 +106,21 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 GameObject impact;
                 if (isWoodenBlock(hitInfo.transform))
                 {
-                    impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactWoodEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));                  
+                    impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactWoodEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
                 }
                 else if (isMetalBlock(hitInfo.transform))
                 {
-                    impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactMetalEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));                 
+                    impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactMetalEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
                 }
-                else 
+                else
                 {
                     impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactStoneEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
                 }
 
                 if (hitInfo.rigidbody != null)
-                {               
+                {
                     impact.transform.parent = hitInfo.transform;
-                } 
+                }
 
                 var tsd = impact.AddComponent<TimedSelfDestruct>();
                 tsd.OnDestruct += () => { Destroy(impact); };
@@ -131,6 +129,23 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             }
         }
 
+        private delegate void ActionIfHaveComponent(RaycastHit raycastHit, Vector3 vector3);
+
+        private Dictionary<Type, ActionIfHaveComponent> action_Kinematic = new Dictionary<Type, ActionIfHaveComponent>()
+        {
+            {typeof(ConfigurableJoint),(hitInfo,f)=>{var cj = hitInfo.rigidbody.gameObject.GetComponent<ConfigurableJoint>();cj.breakForce -= f.magnitude;cj.breakTorque -= f.magnitude; } },
+            {typeof(KillingHandler),(hitInfo,f)=>{var kh = hitInfo.rigidbody.gameObject.GetComponent<KillingHandler>();kh.KillUnit(true, InjuryType.Sharp);} },
+            {typeof(ExplodeOnCollide),(hitInfo,f)=>{var eoc = hitInfo.rigidbody.gameObject.GetComponent<ExplodeOnCollide>(); eoc.Explodey(); } },
+            {typeof(GibOnImpact),(hitInfo,f)=>{var goi = hitInfo.rigidbody.gameObject.GetComponent<GibOnImpact>(); goi.Gib(); } },
+
+        };
+        private Dictionary<Type, ActionIfHaveComponent> action_Unkinematic = new Dictionary<Type,ActionIfHaveComponent>()
+        {
+             {typeof(BreakOnForce),(hitInfo,f)=>{ var bof = hitInfo.rigidbody.gameObject.GetComponent<BreakOnForce>();bof.BreakExplosion(f.magnitude, hitInfo.point, bof.breakForceRadius, 0f); } },
+             {typeof(DestroyOnTriggerEnter),(hitInfo,f)=>{var dote = hitInfo.rigidbody.gameObject.GetComponent<DestroyOnTriggerEnter>();dote.SendMessage("OnTriggerEnter", hitInfo.collider); } },
+             {typeof(ParticleOnCollide),(hitInfo,f)=>{ var poc = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>();poc.SendMessage("OnCollisionEnter", hitInfo.collider.GetComponentInChildren<Collision>());} },
+             {typeof(ParticleOnTrigger),(hitInfo,f)=>{ var pot = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnTrigger>();pot.SendMessage("OnTriggerEnter", hitInfo.collider); } },
+        };
         private void onCollision(RaycastHit hitInfo)
         {
             try
@@ -140,103 +155,76 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                     //MV = mv ;v = MV/m; I=Ft; F = I/t;
                     var v = (Velocity * Mass) / (hitInfo.rigidbody.mass);
                     var f = v / _time;
+
                     if (hitInfo.rigidbody.isKinematic == false)
                     {
-
-
-                        if (hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>() != null 
-                            && isWoodenBlock((BlockType)hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>().BlockID) 
+                        if (hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>() != null
+                            && isWoodenBlock((BlockType)hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>().BlockID)
                             || hitInfo.transform.name.ToLower().Contains("tree"))
                         {
                             hitInfo.rigidbody.AddForceAtPosition(f * 10f, hitInfo.point);
-                            hitInfo.rigidbody.AddRelativeTorque(f * 10f, ForceMode.Impulse);
-                        }        
+                        }
                         else
                         {
-                            if (hitInfo.rigidbody.gameObject.GetComponent<KillingHandler>() != null)
-                            {
-                                var kh = hitInfo.rigidbody.gameObject.GetComponent<KillingHandler>();
-                                kh.KillUnit(true, InjuryType.Blunt);
-                            }
-
-                            if (hitInfo.rigidbody.gameObject.GetComponent<ExplodeOnCollide>() != null)
-                            {
-                                var eoc = hitInfo.rigidbody.gameObject.GetComponent<ExplodeOnCollide>();
-                                eoc.Explodey();
-                            }
-
-
-                            hitInfo.rigidbody.AddForceAtPosition(f, hitInfo.point);
-                            hitInfo.rigidbody.AddRelativeTorque(f, ForceMode.Impulse);
-
-                            if (hitInfo.rigidbody.gameObject.GetComponent<ConfigurableJoint>() != null)
-                            {
-                                var cj = hitInfo.rigidbody.gameObject.GetComponent<ConfigurableJoint>();
-                                cj.breakForce -= f.magnitude;
-                                cj.breakTorque -= f.magnitude;
-                            }
+                            specialComponentsAction(action_Kinematic);
+                            hitInfo.rigidbody.AddForceAtPosition(f , hitInfo.point);
                         }
+                        Vector3 com = hitInfo.transform.TransformPoint(hitInfo.rigidbody.centerOfMass);
+                        Vector3 vector3 = hitInfo.point - com;
+                        Vector3 vector31 = f.normalized + hitInfo.point;
+                        Vector3 normal = Vector3.Cross(vector3, vector31);
+                        hitInfo.rigidbody.AddTorque(com + normal * f.magnitude * 0.008f);
                     }
                     else
                     {
-                        if (hitInfo.rigidbody.gameObject.GetComponent<BreakOnForce>() != null)
-                        {
-                            var bof = hitInfo.rigidbody.gameObject.GetComponent<BreakOnForce>();
-                            bof.BreakExplosion(f.magnitude, hitInfo.point, bof.breakForceRadius, 0f);
-                        }
+                        specialComponentsAction(action_Unkinematic);
+                    }
 
-                        if (hitInfo.rigidbody.gameObject.GetComponent<DestroyOnTriggerEnter>() != null)
+                    void specialComponentsAction(Dictionary<Type, ActionIfHaveComponent> dic)
+                    {
+                        foreach (var com in dic.Keys)
                         {
-                            var dote = hitInfo.rigidbody.gameObject.GetComponent<DestroyOnTriggerEnter>();
-                            dote.SendMessage("OnTriggerEnter", hitInfo.collider);
-                        }
-                        
-                        if (hitInfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>() != null)
-                        {
-                            var poc = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>();
-                            poc.SendMessage("OnCollisionEnter", hitInfo.collider.GetComponentInChildren<Collision>());
-                        }
-
-                        if (hitInfo.rigidbody.gameObject.GetComponent<ParticleOnTrigger>() != null)
-                        {
-                            var pot = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnTrigger>();
-                            pot.SendMessage("OnTriggerEnter", hitInfo.collider);                      
+                            if (hitInfo.rigidbody.gameObject.GetComponent(com) != null)
+                            {
+                                dic[com](hitInfo, f);
+                                break;
+                            }
                         }
                     }
                 }
                 else
                 {
-                    
+
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.Log(e.Message);
             }
 
-          
+
         }
 
 
-        private bool isWoodenBlock(BlockType blockType) 
+        private bool isWoodenBlock(BlockType blockType)
         {
             bool value = false;
 
             if (blockType == BlockType.Log ||
-                blockType == BlockType.WoodenPole || 
-                blockType == BlockType.WoodenPanel || 
-                blockType == BlockType.SingleWoodenBlock || 
-                blockType == BlockType.DoubleWoodenBlock ||               
-                blockType == BlockType.Wheel||
-                blockType == BlockType.SmallWheel||
-                blockType == BlockType.LargeWheel||
-                blockType == BlockType.WheelUnpowered||
-                blockType == BlockType.LargeWheelUnpowered||
-                blockType == BlockType.Slider||
-                blockType == BlockType.Propeller||
-                blockType == BlockType.SmallPropeller||
-                blockType == BlockType.Unused3||
-                blockType == BlockType.Wing||
+                blockType == BlockType.WoodenPole ||
+                blockType == BlockType.WoodenPanel ||
+                blockType == BlockType.SingleWoodenBlock ||
+                blockType == BlockType.DoubleWoodenBlock ||
+                blockType == BlockType.Wheel ||
+                blockType == BlockType.SmallWheel ||
+                blockType == BlockType.LargeWheel ||
+                blockType == BlockType.WheelUnpowered ||
+                blockType == BlockType.LargeWheelUnpowered ||
+                blockType == BlockType.Slider ||
+                blockType == BlockType.Propeller ||
+                blockType == BlockType.SmallPropeller ||
+                blockType == BlockType.Unused3 ||
+                blockType == BlockType.Wing ||
                 blockType == BlockType.WingPanel
 
                 )
@@ -264,7 +252,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         private bool isMetalBlock(Transform transform)
         {
             var value = false;
-            if (transform.GetComponent<BlockBehaviour>()!= null && transform.GetComponent<BlockBehaviour>().fireTag == null)
+            if (transform.GetComponent<BlockBehaviour>() != null && transform.GetComponent<BlockBehaviour>().fireTag == null)
             {
                 value = true;
             }
