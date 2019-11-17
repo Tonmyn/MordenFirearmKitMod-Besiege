@@ -152,9 +152,9 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             {
                 if (hitInfo.rigidbody != null)
                 {
-                    //MV = mv ;v = MV/m; I=Ft; F = I/t;
-                    var v = (Velocity * Mass) / (hitInfo.rigidbody.mass);
-                    var f = v / _time;
+                    //∵MV = mv; v = MV/m; I=Ft; F = I/t; I=Δp; Δp = mv
+                    //∴F=mv/t
+                    var f = (Velocity * Mass) / _time;
 
                     if (hitInfo.rigidbody.isKinematic == false)
                     {
