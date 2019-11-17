@@ -134,16 +134,18 @@ namespace ModernFirearmKitMod
 
             void fireEvent()
             {
-                var bullet = new GameObject("Bullet");
+                //var bullet = new GameObject("Bullet");
 
-                var bs = bullet.AddComponent<RayBulletScript>();
-                bs.Strength = Strength;
-                bs.orginPosition = transform.TransformPoint(SpawnPoint);
-                bs.direction = -transform.right;
-                bs.Velocity = Rigidbody.velocity;
-                bs.Mass = bulletMassSlider.Value;
-                bs.Drag = bulletDragSlider.Value;
-                bs.color = bulletColorSlider.Value;
+                //var bs = bullet.AddComponent<RayBulletScript>();
+                //bs.Strength = Strength;
+                //bs.orginPosition = transform.TransformPoint(SpawnPoint);
+                //bs.direction = -transform.right;
+                //bs.Velocity = Rigidbody.velocity;
+                //bs.Mass = bulletMassSlider.Value;
+                //bs.Drag = bulletDragSlider.Value;
+                //bs.color = bulletColorSlider.Value;
+
+                var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), -transform.right, Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value,transform);
 
                 fireAudioSource.PlayOneShot(fireAudioSource.clip);
             }

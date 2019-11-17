@@ -154,16 +154,18 @@ namespace ModernFirearmKitMod
 
         private GameObject InstanstiateBullet()
         {
-            var bullet = new GameObject("Bullet");
-           
-            var bs = bullet.AddComponent<RayBulletScript>();
-            bs.Strength = Strength;
-            bs.orginPosition = transform.TransformPoint(SpawnPoint);
-            bs.direction = transform.forward;
-            bs.Velocity = Rigidbody.velocity;
-            bs.Mass = bulletMassSlider.Value;
-            bs.Drag = bulletDragSlider.Value;
-            bs.color = bulletColorSlider.Value;
+            //var bullet = new GameObject("Bullet");
+
+            //var bs = bullet.AddComponent<RayBulletScript>();
+            //bs.Strength = Strength;
+            //bs.orginPosition = transform.TransformPoint(SpawnPoint);
+            //bs.direction = transform.forward;
+            //bs.Velocity = Rigidbody.velocity;
+            //bs.Mass = bulletMassSlider.Value;
+            //bs.Drag = bulletDragSlider.Value;
+            //bs.color = bulletColorSlider.Value;
+
+            var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
 
             return bullet;
 

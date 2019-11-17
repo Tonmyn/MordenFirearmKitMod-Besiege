@@ -27,7 +27,6 @@ namespace ModernFirearmKitMod
 
         ConfigurableJoint CJ;
         GameObject EffectsObject;
-        GameObject GunVis;
 
         MSlider StrengthSlider;
         MSlider bulletMassSlider;
@@ -37,6 +36,7 @@ namespace ModernFirearmKitMod
         MToggle holdToggle;
         MSlider spawnDistanceSlider;
         MSlider damperSlider;
+
 
         public override void SafeAwake()
         {
@@ -74,6 +74,7 @@ namespace ModernFirearmKitMod
             yd.positionDamper = 750f * damperSlider.Value;
             yd.positionSpring = 1000f;
             CJ.yDrive = yd;
+
         }
 
         public override void OnSimulateStart()
@@ -101,7 +102,7 @@ namespace ModernFirearmKitMod
             }
         }
 
-        public override void SimulateUpdateHost()
+        public override void SimulateUpdateAlways()
         {
             Reload();
             if ( BulletCurrentNumber > 0)
@@ -141,16 +142,17 @@ namespace ModernFirearmKitMod
 
                 void fireEvent()
                 {
-                    var bullet = new GameObject("Bullet");
+                    //var bullet = new GameObject("Bullet");
 
-                    var bs = bullet.AddComponent<RayBulletScript>();
-                    bs.Strength = Strength;
-                    bs.orginPosition = transform.TransformPoint(SpawnPoint);
-                    bs.direction = transform.TransformDirection(Direction);
-                    bs.Velocity = Rigidbody.velocity;
-                    bs.Mass = bulletMassSlider.Value;
-                    bs.Drag = bulletDragSlider.Value;
-                    bs.color = bulletColorSlider.Value;
+                    //var bs = bullet.AddComponent<RayBulletScript>();
+                    //bs.Strength = Strength;
+                    //bs.orginPosition = transform.TransformPoint(SpawnPoint);
+                    //bs.direction = transform.TransformDirection(Direction);
+                    //bs.Velocity = Rigidbody.velocity;
+                    //bs.Mass = bulletMassSlider.Value;
+                    //bs.Drag = bulletDragSlider.Value;
+                    //bs.color = bulletColorSlider.Value;
+                    var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
 
                     fireAudioSource.PlayOneShot(fireAudioSource.clip);
                 }

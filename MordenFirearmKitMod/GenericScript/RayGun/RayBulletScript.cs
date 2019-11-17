@@ -9,19 +9,34 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
     public class RayBulletScript : MonoBehaviour
     {
-        public float Strength { get; set; }
-        public Vector3 Velocity { get; set; }
-        public float Drag { get; set; } = 0.1f;
-        public float Mass { get; set; } = 0.1f;
-        public Vector3 GravityAcceleration { get; } = new Vector3(0, -23f, 0);
+        //public float Strength { get; set; }
+        //public Vector3 Velocity { get; set; }
+        //public float Drag { get; set; } = 0.1f;
+        //public float Mass { get; set; } = 0.1f;
+        //public Vector3 GravityAcceleration { get; } = new Vector3(0, -23f, 0);
+
+        public BulletPropertise bulletPropertise = new BulletPropertise();
+        public Transform gunbodyTransform; 
+
+        public class BulletPropertise
+        {
+            public float Strength { get; set; } = 0f;
+            public Vector3 Velocity { get; set; } = Vector3.zero;
+            public float Drag { get; set; } = 0.1f;
+            public float Mass { get; set; } = 0.1f;
+            public Vector3 GravityAcceleration { get; } = new Vector3(0, -23f, 0);
+            public Vector3 orginPosition { get; set; } = Vector3.zero;
+            public Vector3 direction { get; set; } = Vector3.forward;
+            public Color color { get; set; } = Color.yellow;
+        }
 
         public bool isCollision { get; private set; } = false;
 
         public event Action<RaycastHit> OnCollisionEvent;
 
-        public Vector3 orginPosition;
-        public Vector3 direction;
-        public Color color = Color.yellow;
+        //public Vector3 orginPosition;
+        //public Vector3 direction;
+        //public Color color = Color.yellow;
 
         private Vector3 sPoint;
         private Vector3 ePoint;
@@ -31,22 +46,23 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
         private void Start()
         {
-            Velocity = transform.InverseTransformDirection(direction) * Strength * Mass * 600f + Velocity;
+            sPoint = ePoint = bulletPropertise.orginPosition + bulletPropertise.Velocity.magnitude * bulletPropertise.direction * Time.deltaTime * 3f;
 
-            sPoint = ePoint = orginPosition;
+            bulletPropertise.Velocity = transform.InverseTransformDirection(bulletPropertise.direction) * bulletPropertise.Strength * bulletPropertise.Mass * (600f + bulletPropertise.Velocity.magnitude);
 
-            lineRenderer = gameObject.AddComponent<LineRenderer>();
+            lineRenderer = GetComponent<LineRenderer>() ?? gameObject.AddComponent<LineRenderer>();
             lineRenderer.material.shader = Shader.Find("Particles/Additive");
-            lineRenderer.material.SetColor("_TintColor", color);
+            lineRenderer.material.SetColor("_TintColor", bulletPropertise.color);
             lineRenderer.SetPosition(0, sPoint);
             lineRenderer.SetPosition(1, ePoint);
             lineRenderer.SetWidth(0.15f, 0.2f);
             lineRenderer.useWorldSpace = true;
             lineRenderer.enabled = true;
 
-            gameObject.AddComponent<DestroyIfEditMode>();
+            var diem = gameObject.GetComponent<DestroyIfEditMode>() ?? gameObject.AddComponent<DestroyIfEditMode>();
             OnCollisionEvent += onCollision;
         }
+
         private void Update()
         {
             if (!isCollision)
@@ -54,46 +70,56 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 if (Time.timeScale == 0f) return;
 
                 _time = Time.smoothDeltaTime / Time.timeScale;
-                Vector3 gravityVelocity = (!StatMaster.GodTools.GravityDisabled) ? (GravityAcceleration * _time) : Vector3.zero;
-                Vector3 dragVelocity = (-(direction * Drag) / Mass) * _time;
-                Velocity = Velocity + gravityVelocity + dragVelocity;
-                ePoint = sPoint + Velocity * _time;
-                direction = -(sPoint - ePoint).normalized;
+                Vector3 gravityVelocity = (!StatMaster.GodTools.GravityDisabled) ? (bulletPropertise.GravityAcceleration * _time) : Vector3.zero;
+                Vector3 dragVelocity = (-(bulletPropertise.direction * bulletPropertise.Drag) / bulletPropertise.Mass) * _time;
+                bulletPropertise.Velocity = bulletPropertise.Velocity + gravityVelocity + dragVelocity;
+                ePoint = sPoint + bulletPropertise.Velocity * _time;
+                bulletPropertise.direction = -(sPoint - ePoint).normalized;
                 lineRenderer.SetPosition(0, sPoint);
 
-                if (Physics.Raycast(sPoint, direction, out hitInfo, (sPoint - ePoint).magnitude))
+                if (Physics.Raycast(sPoint, bulletPropertise.direction, out hitInfo, (sPoint - ePoint).magnitude) )
                 {
-                    lineRenderer.SetPosition(1, hitInfo.point);
-                    OnCollisionEvent?.Invoke(hitInfo);
-                    isCollision = true;
-
-                    //var go = new GameObject("test");
-                    //go.AddComponent<DestroyIfEditMode>();
-                    //var lr =go.AddComponent<LineRenderer>();
-                    //lr.material.color = Color.red;
-                    //lr.SetWidth(0.2f, 0.2f);
-                    //lr.SetPosition(0, hitInfo.point);
-                    //lr.SetPosition(1, hitInfo.normal + hitInfo.point);
-
-                    //go = new GameObject("test");
-                    //go.AddComponent<DestroyIfEditMode>();
-                    //lr = go.AddComponent<LineRenderer>();
-                    //lr.material.color = Color.red;
-                    //lr.SetWidth(0.2f, 0.2f);
-                    //lr.SetPosition(0, hitInfo.point);
-                    //lr.SetPosition(1, direction + hitInfo.point);
-
-                    try
+                    if (hitInfo.transform == gunbodyTransform && gunbodyTransform != null)
                     {
-                        createImpactEffect();
+                        lineRenderer.SetPosition(1, ePoint);
+                        sPoint = ePoint;
                     }
-                    catch { }
+                    else
+                    {
+                        lineRenderer.SetPosition(1, hitInfo.point);
+
+                        OnCollisionEvent?.Invoke(hitInfo);
+                        isCollision = true;
+
+                        //var go = new GameObject("test");
+                        //go.AddComponent<DestroyIfEditMode>();
+                        //var lr =go.AddComponent<LineRenderer>();
+                        //lr.material.color = Color.red;
+                        //lr.SetWidth(0.2f, 0.2f);
+                        //lr.SetPosition(0, hitInfo.point);
+                        //lr.SetPosition(1, hitInfo.normal + hitInfo.point);
+
+                        //go = new GameObject("test");
+                        //go.AddComponent<DestroyIfEditMode>();
+                        //lr = go.AddComponent<LineRenderer>();
+                        //lr.material.color = Color.red;
+                        //lr.SetWidth(0.2f, 0.2f);
+                        //lr.SetPosition(0, hitInfo.point);
+                        //lr.SetPosition(1, direction + hitInfo.point);
+
+                        try
+                        {
+                            createImpactEffect();
+                        }
+                        catch { }
+                    }               
                 }
                 else
                 {
                     lineRenderer.SetPosition(1, ePoint);
                     sPoint = ePoint;
                 }
+
             }
             else
             {
@@ -154,7 +180,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 {
                     //∵MV = mv; I=Ft; F = I/t; I=Δp; Δp = mv
                     //∴F=mv/t
-                    var f = (Velocity * Mass) / _time;
+                    var f = (bulletPropertise.Velocity * bulletPropertise.Mass) / _time;
 
                     if (hitInfo.rigidbody.isKinematic == false)
                     {
@@ -265,6 +291,33 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             return value;
         }
 
+        public static GameObject CreateBullet(float strength,Vector3 spawnPoint,Vector3 direction,Vector3 velocity,float mass,float drag ,Color color, Transform gunbody = null, Action action = null)
+        {
+            var bullet = new GameObject("Bullet");
+            //var mct = GameObject.Find("Main Camera").transform;
+            //bullet.transform.SetParent(mct);
+            //bullet.transform.position = mct.position + mct.forward * 3f;
+            //bullet.transform.localScale = Vector3.one * 0.001f;
+
+            var bs = bullet.AddComponent<RayBulletScript>();
+            bs.bulletPropertise.Strength = strength;
+            bs.bulletPropertise.orginPosition = spawnPoint;
+            bs.bulletPropertise.direction = direction;
+            bs.bulletPropertise.Velocity = velocity;
+            bs.bulletPropertise.Mass = mass;
+            bs.bulletPropertise.Drag = drag;
+            bs.bulletPropertise.color = color;
+
+            bs.gunbodyTransform = gunbody;
+
+            action?.Invoke();
+
+            return bullet;
+        }
+        public static GameObject CreateBullet(BulletPropertise bulletPropertise, Transform gunbody = null, Action action = null)
+        {
+            return CreateBullet(bulletPropertise.Strength, bulletPropertise.orginPosition, bulletPropertise.direction, bulletPropertise.Velocity, bulletPropertise.Mass, bulletPropertise.Drag, bulletPropertise.color, gunbody, action);
+        }
     }
 
 }
