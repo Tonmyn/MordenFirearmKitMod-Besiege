@@ -12,7 +12,7 @@
 		 In debug mode, colliders and adding points are shown visually
 		 to assist in positioning them correctly.
 		 (Capsule colliders are shown as cubes, imagine their edges were rounded off.) -->
-	<Debug>false</Debug>
+	<Debug>true</Debug>
 	
 	<!-- ID of your block. See "Note on IDs" in Mod.xml.
 		 The ID must be unique among blocks in your mod.
@@ -51,7 +51,7 @@
 	
 	<!-- Include to make block take damage. -->
 	<!-- <Health>20</Health> -->
-  <!--<Health>0.1</Health>-->
+  <Health>1</Health>
 	
 	<!-- Optional.
 		 The game generates "stripped" versions of the prefab,
@@ -77,7 +77,7 @@
 	
 	<!-- Optionally specify type of damage done to entities.
 		 Can be one of "Blunt", "Sharp", "Fire" -->
-	<!-- <DamageType>Blunt</DamageType> -->
+	<!--<DamageType>Fire</DamageType>-->
 	
 	<Mesh name="Rocket Mesh">
 		<Position x="-1.25" y="0.0" z="0.5" />

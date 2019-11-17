@@ -24,7 +24,7 @@ namespace ModernFirearmKitMod
         public Rigidbody rigidbody;
 
         public event Action OnExplode;
-        public event Action OnExploded;
+        public event Action<Collider[]> OnExploded;
         public event Action OnExplodeFinal;
 
         //爆炸类型
@@ -44,9 +44,6 @@ namespace ModernFirearmKitMod
             fireEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
             fireEffect.transform.localScale *= 5f;
             fireEffect.SetActive(false);
-            //fireEffect.AddComponent<TimedSelfDestruct>().lifeTime = 30f;
-
-            //fireEffect.GetComponent<TimedSelfDestruct>().OnDestruct += OnExplodeFinal;
         }
 
         public void Explodey()
@@ -87,10 +84,16 @@ namespace ModernFirearmKitMod
                     float force = UnityEngine.Random.Range(30000f, 50000f) * power * (Vector3.Distance(hit.transform.position, explosionPos) / (radius + 0.25f));
                     hit.attachedRigidbody.AddExplosionForce(force, explosionPos, radius);
                     hit.attachedRigidbody.AddTorque(force * Vector3.Cross((hit.transform.position - explosionPos), Vector3.up));
+
+                    var bhb = hit.attachedRigidbody.gameObject.GetComponent<BlockHealthBar>();
+                    if (bhb != null)
+                    {
+                        bhb.DamageBlock(1);
+                    }
                 }
             }
 
-            OnExploded?.Invoke();
+            OnExploded?.Invoke(colliders);
             yield return new WaitForSeconds(3f);
             fireEffect.SetActive(false);
             OnExplodeFinal?.Invoke();

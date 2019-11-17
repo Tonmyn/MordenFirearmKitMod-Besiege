@@ -119,7 +119,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
                 if (hitInfo.rigidbody != null)
                 {
-                    impact.transform.parent = hitInfo.transform;
+                    impact.transform.SetParent(hitInfo.transform);
                 }
 
                 var tsd = impact.AddComponent<TimedSelfDestruct>();
@@ -178,6 +178,12 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                     else
                     {
                         specialComponentsAction(action_Unkinematic);
+                    }
+
+                    var bhb = hitInfo.rigidbody.gameObject.GetComponent<BlockHealthBar>();
+                    if (bhb != null)
+                    {
+                        bhb.DamageBlock(f.magnitude * 0.001f);
                     }
 
                     void specialComponentsAction(Dictionary<Type, ActionIfHaveComponent> dic)

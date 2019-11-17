@@ -11,10 +11,9 @@ namespace ModernFirearmKitMod
     public class RocketScript : MonoBehaviour
     {
         private DragScript drager;
-
         private ExplodeScript exploder;
-
         private Rigidbody rigidbody;
+        private BlockHealthBar healthBar;
 
         public float DragClamp; 
         public float ThrustForce;
@@ -31,27 +30,19 @@ namespace ModernFirearmKitMod
         public bool isExplode { get { return exploder.isExplodey; } }
         public float ExplodePower;
         public float ExplodeRadius;
-        public Action OnExplode,OnExploded,OnExplodeFinal;
-
-
-        //public GameObject fire_ParticleObject;
-
-        //public RocketFireScript fireScripter;
-
-        //public GameObject smoke_ParticleObject;
-
-        //public RocketSmokeScript smokeScripter;
+        public event Action OnExplode,OnExploded,OnExplodeFinal;
 
         public GameObject effect;
         public Vector3 effectOffset;
 
         private bool EnableCollision = false;
-
         void Start()
         {
             rigidbody = GetComponent<Rigidbody>();
             rigidbody.drag = rigidbody.angularDrag = 0;
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+            healthBar = GetComponent<BlockHealthBar>();
 
             initPhysical();
 
@@ -59,14 +50,10 @@ namespace ModernFirearmKitMod
             {
                 initParticle();
             }
-
         }
 
         void initPhysical()
         {
-            //ThrustDirection = transform.TransformDirection(ThrustDirection);
-            //ThrustPoint = transform.TransformPoint(ThrustPoint);
-
             drager = GetComponent<DragScript>() ?? gameObject.AddComponent<DragScript>();
             drager.DragAxis = new Vector3(0, -1, -1);
             drager.DragPoint = rigidbody.centerOfMass - transform.InverseTransformDirection(transform.right * 0.5f);
@@ -79,33 +66,17 @@ namespace ModernFirearmKitMod
             exploder.ExplosionType = ExplodeScript.explosionType.炸弹;
             exploder.OnExplode += Explode;
             exploder.OnExploded += Exploded;
-            exploder.OnExplodeFinal += ExplodeFinal;
-
-           
+            exploder.OnExplodeFinal += ExplodeFinal;           
         }
 
         void initParticle()
         {
-            //fire_ParticleObject = fire_ParticleObject ?? new GameObject("Rocket Fire Object");
-            //fire_ParticleObject.transform.SetParent(transform);
-            //fire_ParticleObject.transform.localPosition = new Vector3(-1.35f, 0, 0.5f);
-            //fire_ParticleObject.transform.localRotation = Quaternion.AngleAxis(-90f, Vector3.up);
-            //fireScripter = fire_ParticleObject.GetComponent<RocketFireScript>() ?? fire_ParticleObject.AddComponent<RocketFireScript>();
-
-            //smoke_ParticleObject = smoke_ParticleObject ?? new GameObject("Rocket Smoke Object");
-            //smoke_ParticleObject.transform.SetParent(transform);
-            //smoke_ParticleObject.transform.localPosition = new Vector3(-1.35f, 0, 0.5f);
-            //smoke_ParticleObject.transform.localRotation = Quaternion.AngleAxis(-90f, Vector3.up);
-            //smokeScripter = smoke_ParticleObject.GetComponent<RocketSmokeScript>() ?? smoke_ParticleObject.AddComponent<RocketSmokeScript>();
-
             effect = (GameObject)Instantiate(AssetManager.Instance.Rocket.rocketTrailEffect);
             effect.transform.SetParent(transform);
             effect.transform.position = transform.position;
             effect.transform.rotation = transform.rotation;
             effect.transform.localPosition = effectOffset;
-            effect.SetActive(false);
-            //effect.GetComponent<ParticleSystem>().Stop();
-          
+            effect.SetActive(false);   
         }
 
         void Update()
@@ -122,20 +93,26 @@ namespace ModernFirearmKitMod
             {
                 StopCoroutine(Launch());
             }
+
+            if (healthBar.health <= 0 && isExplode == false)
+            {
+                Explody();
+            }
         }
 
+        void FixedUpdate()
+        {
+            if (LaunchEnabled)
+            {              
+                rigidbody.AddForce(transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f);
+            }         
+        }
 
         void OnCollisionEnter(Collision collision)
         {
             if (EnableCollision)
             {
-                rigidbody.isKinematic = true;
-
-                exploder.Position = transform.position;
-                exploder.Explodey();
-
-                gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = true;
-                gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
+                Explody();
             }
         }
 
@@ -148,22 +125,18 @@ namespace ModernFirearmKitMod
             
             yield return new WaitForSeconds(DelayLaunchTime);
 
-                if (GetComponent<ConfigurableJoint>() != null)
-                {
-                    ConfigurableJoint configurableJoint = GetComponent<ConfigurableJoint>();
-                    configurableJoint.breakForce = configurableJoint.breakTorque = 0;
-                    rigidbody.WakeUp();
-                }
+            if (GetComponent<ConfigurableJoint>() != null)
+            {
+                ConfigurableJoint configurableJoint = GetComponent<ConfigurableJoint>();
+                configurableJoint.breakForce = configurableJoint.breakTorque = 0;
+                rigidbody.WakeUp();
+            }
+            isLaunched = drager.enabled = !exploder.isExplodey;
 
-                //smokeScripter.EmitSwitch = !exploder.isExplodey;
-                //fireScripter.EmitSwitch = !exploder.isExplodey;
-                isLaunched = drager.enabled = !exploder.isExplodey;
-
-            rigidbody.AddForceAtPosition(transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f, transform.TransformPoint(ThrustPoint));
+            //rigidbody.AddForceAtPosition(transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f, transform.TransformPoint(ThrustPoint));
             yield return new WaitForSeconds(ThrustTime);
-            //smokeScripter.EmitSwitch = false;
-            //fireScripter.EmitSwitch = false;
             LaunchEnabled = false;
+            effect.SetActive(false);
 
             IEnumerator CollisionTimer(float time)
             {
@@ -172,7 +145,19 @@ namespace ModernFirearmKitMod
                 StopCoroutine("CollisionTimer");
             }
         }
-       
+
+        public void Explody()
+        {
+            rigidbody.isKinematic = true;
+
+            exploder.Position = transform.position;
+            exploder.Explodey();
+
+            healthBar.health = 0;
+
+            gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = true;
+            gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
+        }
 
         void Explode()
         {           
@@ -180,14 +165,14 @@ namespace ModernFirearmKitMod
             effect.GetComponentInChildren<ParticleSystem>().Stop();
             OnExplode?.Invoke();
         }
-        void Exploded() { OnExploded?.Invoke(); }
+        void Exploded(Collider[] colliders) { OnExploded?.Invoke(); }
         void ExplodeFinal()
         {
             gameObject.SetActive(false);
             OnExplodeFinal?.Invoke();
         }
 
-
+     
         public void Reusing(float thrustForce,float thrustTime,float dragClamp)
         {
             gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = false;

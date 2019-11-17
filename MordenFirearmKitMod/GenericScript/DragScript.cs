@@ -18,9 +18,7 @@ namespace ModernFirearmKitMod
         public float DragClamp { get; set; }
 
         Vector3 dragPoint;
-
         Vector3 dragAxis;
-
         Vector3 dragDirection;
 
         float dragForce;

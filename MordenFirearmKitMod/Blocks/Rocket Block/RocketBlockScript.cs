@@ -18,11 +18,8 @@ namespace ModernFirearmKitMod
         public MKey launch_key;
 
         MSlider thrustForce_slider;
-
         MSlider thrustTime_slider;
-
         MSlider thrustDelay_slider;
-
         MSlider DragForce_slider;
 
         //MSlider colliderDelay_slider;
@@ -63,7 +60,6 @@ namespace ModernFirearmKitMod
 
         }
 
-
         void initRocketScript()
         {
             Rigidbody rigidbody = Rigidbody;
@@ -88,11 +84,15 @@ namespace ModernFirearmKitMod
 
         public override void SimulateUpdateHost()
         {
-            if (launch_key.IsPressed)
+            if (launch_key.IsPressed && !rocketScript.Launched)
             {
                 rocketScript.LaunchEnabled = true;
             }
         }
 
+        public override void OnStartBurning()
+        {
+            rocketScript.Explody();
+        }
     }
 }
