@@ -1,0 +1,22 @@
+﻿using Modding;
+using ModernFirearmKitMod.GenericScript.RayGun;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+
+namespace ModernFirearmKitMod
+{
+    public class NetworkMessageManager:SingleInstance<NetworkMessageManager>
+    {
+        //public static Dictionary<int, string> keyValuePairs = new Dictionary<int, string>();
+
+        public override string Name { get; } = "Network Message Manager";
+        void Awake()
+        {
+            ModNetworking.Callbacks[GunBarrelBlockScript.FireMessage] += GunBarrelBlockScript.FireNetworkingEvent;
+            ModNetworking.Callbacks[RayBulletScript.ImpactMessage] += RayBulletScript.ImpactNetworkingEvent;
+        }     
+    }
+}

@@ -1,4 +1,5 @@
 ﻿using Modding;
+using Modding.Blocks;
 using ModernFirearmKitMod.GenericScript.RayGun;
 using System;
 using System.Collections.Generic;
@@ -21,13 +22,14 @@ namespace ModernFirearmKitMod
 
         public float Strength { get; set; }
 
+        public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block,DataType.Vector3,DataType.String);
 
         //机枪开火音效
         AudioSource fireAudioSource;
 
         ConfigurableJoint CJ;
         GameObject EffectsObject;
-
+       
         MSlider StrengthSlider;
         MSlider bulletMassSlider;
         MSlider bulletDragSlider;
@@ -36,7 +38,6 @@ namespace ModernFirearmKitMod
         MToggle holdToggle;
         MSlider spawnDistanceSlider;
         MSlider damperSlider;
-
 
         public override void SafeAwake()
         {
@@ -56,7 +57,7 @@ namespace ModernFirearmKitMod
             spawnDistanceSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.distance, "Distance", 2f, 0f, 4f);
             spawnDistanceSlider.ValueChanged += (value) => { SpawnPoint = new Vector3(0f, 0f, value); };
             damperSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.damper, "Damper", 1f, 0f, 5f);
-
+           
             SpawnPoint = new Vector3(0.0f, 0.0f, spawnDistanceSlider.Value);
             Direction = Vector3.forward;
             LaunchEnable = false;
@@ -75,6 +76,7 @@ namespace ModernFirearmKitMod
             yd.positionSpring = 1000f;
             CJ.yDrive = yd;
 
+     
         }
 
         public override void OnSimulateStart()
@@ -102,7 +104,7 @@ namespace ModernFirearmKitMod
             }
         }
 
-        public override void SimulateUpdateAlways()
+        public override void SimulateUpdateHost()
         {
             Reload();
             if ( BulletCurrentNumber > 0)
@@ -111,7 +113,7 @@ namespace ModernFirearmKitMod
                 {
                     if (LaunchKey.IsHeld)
                     {
-                        fire();
+                        fire();       
                     }         
                 }
                 else
@@ -121,42 +123,47 @@ namespace ModernFirearmKitMod
                         fire();
                     }
                 }
+               
             }
             else
             {
                 LaunchEnable = false;
                 EffectsObject.GetComponent<Reactivator>().Switch = false;
+            }     
+        }
+
+        public void fire()
+        {
+   
+            if (!LaunchEnable && Time.timeScale != 0)
+            {
+                LaunchEnable = true;                
+                StartCoroutine(Launch(ParticleEffectEvent));
             }
 
-            void fire()
+            void ParticleEffectEvent()
             {
-                if (!LaunchEnable && Time.timeScale != 0)
-                {
-                    LaunchEnable = true;
+                var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
 
-                    StartCoroutine(Launch(fireEvent));
+                var message = FireMessage.CreateMessage(BlockBehaviour, Rigidbody.velocity, bullet.GetComponent<RayBulletScript>().Guid.ToString());
+                ModNetworking.SendToAll(message);
 
-                    EffectsObject.SetActive(true);
-                    EffectsObject.GetComponent<Reactivator>().Switch = true;
-                }
+                fireAudioSource.PlayOneShot(fireAudioSource.clip);
 
-                void fireEvent()
-                {
-                    //var bullet = new GameObject("Bullet");
+                EffectsObject.SetActive(true);
+                EffectsObject.GetComponent<Reactivator>().Switch = true;
+            }
+        }
 
-                    //var bs = bullet.AddComponent<RayBulletScript>();
-                    //bs.Strength = Strength;
-                    //bs.orginPosition = transform.TransformPoint(SpawnPoint);
-                    //bs.direction = transform.TransformDirection(Direction);
-                    //bs.Velocity = Rigidbody.velocity;
-                    //bs.Mass = bulletMassSlider.Value;
-                    //bs.Drag = bulletDragSlider.Value;
-                    //bs.color = bulletColorSlider.Value;
-                    var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
+        void fire_Networking(Vector3 velocity,Guid guid)
+        {
+            var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction),velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value);
+            bullet.GetComponent<RayBulletScript>().Guid = guid;
 
-                    fireAudioSource.PlayOneShot(fireAudioSource.clip);
-                }
-            }    
+            fireAudioSource.PlayOneShot(fireAudioSource.clip);
+
+            EffectsObject.SetActive(true);
+            EffectsObject.GetComponent<Reactivator>().Switch = true;
         }
 
         public override void Reload(bool constraint = false)
@@ -164,6 +171,20 @@ namespace ModernFirearmKitMod
             if (StatMaster.GodTools.InfiniteAmmoMode)
             {
                 BulletCurrentNumber = BulletMaxNumber;
+            }
+        }
+
+        public static void FireNetworkingEvent(Message message)
+        {
+            if (StatMaster.isClient)
+            {
+                var block = ((Block)message.GetData(0));
+                var velocity = (Vector3)message.GetData(1);
+                var guid = new Guid(((string)message.GetData(2)));
+                GameObject gameObject = block.GameObject;
+
+                var gbbs = gameObject.GetComponent<GunBarrelBlockScript>();
+                gbbs.fire_Networking(velocity, guid);
             }
         }
     }

@@ -6,6 +6,7 @@ using Modding.Common;
 using Modding.Blocks;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using Modding;
 
 namespace ModernFirearmKitMod
 {
@@ -43,6 +44,7 @@ namespace ModernFirearmKitMod
 
             AssetManager.Instance.transform.SetParent(Mod.transform);
             LanguageManager.Instance.transform.SetParent(Mod.transform);
+            NetworkMessageManager.Instance.transform.SetParent(Mod.transform);
             //SceneManager.sceneLoaded += (s, a) => { Debug.Log("loaded"); };
 
             //增加灯光渲染数量

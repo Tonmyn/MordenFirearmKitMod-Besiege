@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Modding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,8 +17,8 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         //public Vector3 GravityAcceleration { get; } = new Vector3(0, -23f, 0);
 
         public BulletPropertise bulletPropertise = new BulletPropertise();
-        public Transform gunbodyTransform; 
-
+        public Transform gunbodyTransform;
+        public Guid Guid  = Guid.NewGuid();
         public class BulletPropertise
         {
             public float Strength { get; set; } = 0f;
@@ -33,6 +34,8 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         public bool isCollision { get; private set; } = false;
 
         public event Action<RaycastHit> OnCollisionEvent;
+
+        public static MessageType ImpactMessage = ModNetworking.CreateMessageType(DataType.String,DataType.String,DataType.Vector3,DataType.Vector3);    
 
         //public Vector3 orginPosition;
         //public Vector3 direction;
@@ -86,11 +89,27 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                     }
                     else
                     {
-                        lineRenderer.SetPosition(1, hitInfo.point);
+                        var targetType = "stone";
 
-                        OnCollisionEvent?.Invoke(hitInfo);
+                        lineRenderer.SetPosition(1, hitInfo.point);
                         isCollision = true;
 
+                        if (!StatMaster.isClient)
+                        {
+                            try
+                            {
+                                OnCollisionEvent?.Invoke(hitInfo);
+                                targetType = createImpactEffect();
+                            }
+                            catch { }
+
+                            var message = ImpactMessage.CreateMessage(Guid.ToString(), targetType, hitInfo.point, hitInfo.normal);
+                            ModNetworking.SendToAll(message);
+                        }
+                        //else
+                        //{
+                        //    Debug.Log("client "+ Guid);
+                        //}
                         //var go = new GameObject("test");
                         //go.AddComponent<DestroyIfEditMode>();
                         //var lr =go.AddComponent<LineRenderer>();
@@ -106,12 +125,6 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                         //lr.SetWidth(0.2f, 0.2f);
                         //lr.SetPosition(0, hitInfo.point);
                         //lr.SetPosition(1, direction + hitInfo.point);
-
-                        try
-                        {
-                            createImpactEffect();
-                        }
-                        catch { }
                     }               
                 }
                 else
@@ -127,32 +140,67 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 Destroy(gameObject);
             }
 
-            void createImpactEffect()
+           
+        }
+
+        string createImpactEffect()
+        {
+            string targetType = "stone";
+            GameObject impact;
+            if (isWoodenBlock(hitInfo.transform))
             {
-                GameObject impact;
-                if (isWoodenBlock(hitInfo.transform))
-                {
-                    impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactWoodEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
-                }
-                else if (isMetalBlock(hitInfo.transform))
-                {
-                    impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactMetalEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
-                }
-                else
-                {
-                    impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactStoneEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
-                }
-
-                if (hitInfo.rigidbody != null)
-                {
-                    impact.transform.SetParent(hitInfo.transform);
-                }
-
-                var tsd = impact.AddComponent<TimedSelfDestruct>();
-                tsd.OnDestruct += () => { Destroy(impact); };
-                tsd.lifeTime = 50f;
-                tsd.Switch = true;
+                impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactWoodEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
+                targetType = "wooden";
             }
+            else if (isMetalBlock(hitInfo.transform))
+            {
+                impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactMetalEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
+                targetType = "metal";
+            }
+            else
+            {
+                impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactStoneEffect, hitInfo.point, Quaternion.LookRotation(hitInfo.normal));
+                targetType = "stone";
+            }
+
+            if (hitInfo.rigidbody != null)
+            {
+                impact.transform.SetParent(hitInfo.transform);
+            }
+
+            var tsd = impact.AddComponent<TimedSelfDestruct>();
+            tsd.OnDestruct += () => { Destroy(impact); };
+            tsd.lifeTime = 50f;
+            tsd.Switch = true;
+
+            return targetType;
+        }
+
+       void createImpactEffect_Networking(string targetType,Vector3 point,Vector3 normal)
+        {
+            GameObject impact;
+            if (targetType == "wooden")
+            {
+                impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactWoodEffect, point, Quaternion.LookRotation(normal));
+            }
+            else if (targetType == "metal")
+            {
+                impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactMetalEffect, point, Quaternion.LookRotation(normal));
+            }
+            else
+            {
+                impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactStoneEffect, point, Quaternion.LookRotation(normal));
+            }
+
+            //if (hitInfo.rigidbody != null)
+            //{
+            //    impact.transform.SetParent(hitInfo.transform);
+            //}
+
+            var tsd = impact.AddComponent<TimedSelfDestruct>();
+            tsd.OnDestruct += () => { Destroy(impact); };
+            tsd.lifeTime = 50f;
+            tsd.Switch = true;
         }
 
         private delegate void ActionIfHaveComponent(RaycastHit raycastHit, Vector3 vector3);
@@ -298,6 +346,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             //bullet.transform.SetParent(mct);
             //bullet.transform.position = mct.position + mct.forward * 3f;
             //bullet.transform.localScale = Vector3.one * 0.001f;
+            bullet.transform.SetParent(gunbody);
 
             var bs = bullet.AddComponent<RayBulletScript>();
             bs.bulletPropertise.Strength = strength;
@@ -317,6 +366,26 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         public static GameObject CreateBullet(BulletPropertise bulletPropertise, Transform gunbody = null, Action action = null)
         {
             return CreateBullet(bulletPropertise.Strength, bulletPropertise.orginPosition, bulletPropertise.direction, bulletPropertise.Velocity, bulletPropertise.Mass, bulletPropertise.Drag, bulletPropertise.color, gunbody, action);
+        }
+
+        public static void ImpactNetworkingEvent(Message message)
+        {
+            if (StatMaster.isClient)
+            {
+                var guid = new Guid((string)message.GetData(0));
+                var targetType = ((string)message.GetData(1));
+                var point = (Vector3)message.GetData(2);
+                var normal = (Vector3)message.GetData(3);
+
+                Debug.Log(targetType);
+
+                RayBulletScript rbs = GameObject.FindObjectsOfType<RayBulletScript>().ToList().Find(match => match.Guid == guid);
+                rbs.lineRenderer.enabled = false;
+                rbs.createImpactEffect_Networking(targetType, point, normal);
+
+
+                //Debug.Log("host " + guid);
+            }
         }
     }
 

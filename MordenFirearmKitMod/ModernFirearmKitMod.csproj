@@ -74,6 +74,7 @@
     <Compile Include="GenericScript\RayGun\RayBulletScript.cs" />
     <Compile Include="GenericScript\TimedSelfDestruct.cs" />
     <Compile Include="LanguageManager.cs" />
+    <Compile Include="NetworkingMessageManager.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolBase.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolListComponent.cs" />
     <Compile Include="ObjectPoolManager\ObjectPoolComponent.cs" />

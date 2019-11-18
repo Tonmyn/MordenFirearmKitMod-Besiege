@@ -79,7 +79,7 @@ namespace ModernFirearmKitMod
             yield break;
         }
 
-        public IEnumerator Launch(Action action)
+        public IEnumerator Launch(Action launchAction = null,Action launchEndAction = null)
         {
             if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
 
@@ -87,10 +87,11 @@ namespace ModernFirearmKitMod
 
             Rigidbody.AddForce(-transform.TransformDirection(Direction) * KnockBack, ForceMode.Impulse);
 
-            action?.Invoke();
+            launchAction?.Invoke();
 
             yield return new WaitForSeconds(Rate);
             LaunchEnable = false;
+            launchEndAction?.Invoke();
             yield break;
         }
     }
