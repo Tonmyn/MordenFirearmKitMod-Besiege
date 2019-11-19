@@ -4,6 +4,7 @@ using Modding;
 using System.Collections.Generic;
 using System;
 using ModernFirearmKitMod.GenericScript.RayGun;
+using Modding.Blocks;
 
 namespace ModernFirearmKitMod
 {
@@ -40,6 +41,11 @@ namespace ModernFirearmKitMod
         MSlider bulletMassSlider;
         MSlider bulletDragSlider;
         MColourSlider bulletColorSlider;
+
+        #region Network
+        /// <summary>Block, GunbodyVelocity, BulletGuid,</summary>
+        public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Vector3, DataType.String);
+        #endregion
 
         public override void SafeAwake()
         {
@@ -99,32 +105,105 @@ namespace ModernFirearmKitMod
             }     
         }
 
-        public override void SimulateUpdateHost()
-        {
+        //public override void SimulateUpdateHost()
+        //{
 
-            if (CJ == null)
+        //    if (CJ == null)
+        //    {
+        //        return;
+        //    }
+        //    Reload();
+        //    if (LaunchKey.IsHeld && BulletCurrentNumber > 0)
+        //    {
+        //        //RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 105f * Time.timeScale * Time.deltaTime);
+        //        //if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
+        //        //{
+        //        //    LaunchEnable = true;
+
+        //        //    //StartCoroutine(Launch(bulletPool.Work.gameObject));
+        //        //    StartCoroutine(Launch(InstanstiateBullet()));
+
+        //        //    heat = Mathf.Clamp01(heat + 0.01f);
+        //        //    EffectsObject.SetActive(true);
+        //        //    EffectsObject.GetComponent<Reactivator>().Switch = true;
+        //        //}
+        //        fire();
+        //    }
+        //    else
+        //    {
+        //        LaunchEnable = false;
+        //        heat = Mathf.Clamp01(heat - 0.05f * Time.deltaTime);
+        //        EffectsObject.GetComponent<Reactivator>().Switch = false;
+        //        RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 20);
+        //    }
+
+        //    GunVis.transform.Rotate(new Vector3(0, RotationRate, 0) * Time.timeScale);
+        //    material.SetColor("_EmissionColor", new Color(heat, 0f, 0f, 0f));
+
+        //    if (RotationRate != 0)
+        //    {
+        //        RotationAudioSource.pitch = RotationRate / RotationRateLimit;
+        //        if (!RotationAudioSource.isPlaying) RotationAudioSource.Play();
+        //    }
+        //    else
+        //    {
+        //        RotationAudioSource.Stop();
+        //    }
+        //}
+
+        //public override void SimulateUpdateClient()
+        //{
+        //    Debug.Log(RotationRate + " " + heat + " "+BulletCurrentNumber);
+        //    Reload();
+        //    if (LaunchKey.IsHeld && BulletCurrentNumber > 0)
+        //    {
+        //        RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 105f * Time.timeScale * Time.deltaTime);
+        //    }
+        //    else
+        //    {
+        //        heat = Mathf.Clamp01(heat - 0.05f * Time.deltaTime);
+        //        EffectsObject.GetComponent<Reactivator>().Switch = false;
+        //        RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 20);
+        //    }
+
+        //    GunVis.transform.Rotate(new Vector3(0, RotationRate, 0) * Time.timeScale);
+        //    material.SetColor("_EmissionColor", new Color(heat, 0f, 0f, 0f));
+
+        //    if (RotationRate != 0)
+        //    {
+        //        RotationAudioSource.pitch = RotationRate / RotationRateLimit;
+        //        if (!RotationAudioSource.isPlaying) RotationAudioSource.Play();
+        //    }
+        //    else
+        //    {
+        //        RotationAudioSource.Stop();
+        //    }
+        //}
+
+        public override void SimulateUpdateAlways()
+        {
+            if (!StatMaster.isClient)
             {
-                return;
+                if (CJ == null)
+                {
+                    return;
+                }
             }
             Reload();
             if (LaunchKey.IsHeld && BulletCurrentNumber > 0)
             {
                 RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 105f * Time.timeScale * Time.deltaTime);
-                if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
+                if (!StatMaster.isClient)
                 {
-                    LaunchEnable = true;
-
-                    //StartCoroutine(Launch(bulletPool.Work.gameObject));
-                    StartCoroutine(Launch(InstanstiateBullet()));
-
-                    heat = Mathf.Clamp01(heat + 0.01f);
-                    EffectsObject.SetActive(true);
-                    EffectsObject.GetComponent<Reactivator>().Switch = true;
+                    fire();
                 }
             }
             else
             {
-                LaunchEnable = false;
+                if (!StatMaster.isClient)
+                {
+                    LaunchEnable = false;
+                }
                 heat = Mathf.Clamp01(heat - 0.05f * Time.deltaTime);
                 EffectsObject.GetComponent<Reactivator>().Switch = false;
                 RotationRate = Mathf.MoveTowards(RotationRate, 0, Time.timeScale * Time.deltaTime * 20);
@@ -152,23 +231,65 @@ namespace ModernFirearmKitMod
             }
         }
 
-        private GameObject InstanstiateBullet()
+        private void fire()
         {
-            //var bullet = new GameObject("Bullet");
+           
+            if (RotationRate >= RotationRateLimit && !LaunchEnable && Time.timeScale != 0)
+            {
+                LaunchEnable = true;
 
-            //var bs = bullet.AddComponent<RayBulletScript>();
-            //bs.Strength = Strength;
-            //bs.orginPosition = transform.TransformPoint(SpawnPoint);
-            //bs.direction = transform.forward;
-            //bs.Velocity = Rigidbody.velocity;
-            //bs.Mass = bulletMassSlider.Value;
-            //bs.Drag = bulletDragSlider.Value;
-            //bs.color = bulletColorSlider.Value;
+                //StartCoroutine(Launch(bulletPool.Work.gameObject));
+                StartCoroutine(Launch(BulletParticleEffectEvent));
+            }
 
-            var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
+             void BulletParticleEffectEvent()
+            {
+                var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
 
-            return bullet;
+                var message = FireMessage.CreateMessage(BlockBehaviour, Rigidbody.velocity, bullet.GetComponent<RayBulletScript>().Guid.ToString());
+                ModNetworking.SendToAll(message);
 
+                heat = Mathf.Clamp01(heat + 0.01f);
+                EffectsObject.SetActive(true);
+                EffectsObject.GetComponent<Reactivator>().Switch = true;
+            }
+        }
+        //private void fire_Network(Vector3 velocity, Guid guid)
+        //{
+        //    BulletCurrentNumber--;
+
+        //    var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
+        //    bullet.GetComponent<RayBulletScript>().Guid = guid;
+
+        //    heat = Mathf.Clamp01(heat + 0.01f);
+        //    EffectsObject.SetActive(true);
+        //    EffectsObject.GetComponent<Reactivator>().Switch = true;
+        //}
+
+        void fire_Network(Vector3 velocity, Guid guid)
+        {
+            BulletCurrentNumber--;
+
+            var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
+            bullet.GetComponent<RayBulletScript>().Guid = guid;
+
+            heat = Mathf.Clamp01(heat + 0.01f);
+            EffectsObject.SetActive(true);
+            EffectsObject.GetComponent<Reactivator>().Switch = true;
+        }
+
+        public static void FireNetworkingEvent(Message message)
+        {
+            if (StatMaster.isClient)
+            {
+                var block = ((Block)message.GetData(0));
+                var velocity = (Vector3)message.GetData(1);
+                var guid = new Guid(((string)message.GetData(2)));
+                GameObject gameObject = block.GameObject;
+
+                var ggbs = gameObject.GetComponent<GatlingGunBlockScript>();
+                ggbs.fire_Network(velocity, guid);
+            }
         }
     }
 }

@@ -15,7 +15,9 @@ namespace ModernFirearmKitMod
         public override string Name { get; } = "Network Message Manager";
         void Awake()
         {
+            ModNetworking.Callbacks[GatlingGunBlockScript.FireMessage] += GatlingGunBlockScript.FireNetworkingEvent;
             ModNetworking.Callbacks[GunBarrelBlockScript.FireMessage] += GunBarrelBlockScript.FireNetworkingEvent;
+            ModNetworking.Callbacks[MachineGunBlockScript.FireMessage] += MachineGunBlockScript.FireNetworkingEvent;
             ModNetworking.Callbacks[RayBulletScript.ImpactMessage] += RayBulletScript.ImpactNetworkingEvent;
         }     
     }

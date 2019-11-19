@@ -18,11 +18,11 @@ namespace ModernFirearmKitMod
         public override GameObject BulletObject { get; set; }
         public override Vector3 SpawnPoint { get; set; }
         public override Vector3 Direction { get; set; }
-        public override bool LaunchEnable { get; set; }
+        public override bool LaunchEnable { get; set; }     
 
         public float Strength { get; set; }
 
-        public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block,DataType.Vector3,DataType.String);
+
 
         //机枪开火音效
         AudioSource fireAudioSource;
@@ -38,6 +38,11 @@ namespace ModernFirearmKitMod
         MToggle holdToggle;
         MSlider spawnDistanceSlider;
         MSlider damperSlider;
+
+        #region Network
+        /// <summary>Block, GunbodyVelocity, BulletGuid</summary>
+        public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Vector3, DataType.String);
+        #endregion
 
         public override void SafeAwake()
         {
@@ -104,44 +109,39 @@ namespace ModernFirearmKitMod
             }
         }
 
-        public override void SimulateUpdateHost()
+        public override void SimulateUpdateAlways()
         {
             Reload();
             if ( BulletCurrentNumber > 0)
             {
-                if (holdToggle.IsActive)
+                if ((holdToggle.IsActive && LaunchKey.IsHeld)|| (!holdToggle.IsActive&& LaunchKey.IsPressed))
                 {
-                    if (LaunchKey.IsHeld)
+                    if (!StatMaster.isClient)
                     {
                         fire();       
                     }         
-                }
-                else
-                {
-                    if (LaunchKey.IsPressed)
-                    {
-                        fire();
-                    }
-                }
-               
+                }         
             }
             else
             {
-                LaunchEnable = false;
+                if (!StatMaster.isClient)
+                {
+                    LaunchEnable = false;
+                }
                 EffectsObject.GetComponent<Reactivator>().Switch = false;
             }     
         }
 
-        public void fire()
+        void fire()
         {
    
             if (!LaunchEnable && Time.timeScale != 0)
             {
                 LaunchEnable = true;                
-                StartCoroutine(Launch(ParticleEffectEvent));
+                StartCoroutine(Launch(BulletParticleEffectEvent));
             }
 
-            void ParticleEffectEvent()
+            void BulletParticleEffectEvent()
             {
                 var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
 
@@ -154,10 +154,9 @@ namespace ModernFirearmKitMod
                 EffectsObject.GetComponent<Reactivator>().Switch = true;
             }
         }
-
-        void fire_Networking(Vector3 velocity,Guid guid)
+        void fire_Network(Vector3 velocity, Guid guid)
         {
-            var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction),velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value);
+            var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value);
             bullet.GetComponent<RayBulletScript>().Guid = guid;
 
             fireAudioSource.PlayOneShot(fireAudioSource.clip);
@@ -184,8 +183,9 @@ namespace ModernFirearmKitMod
                 GameObject gameObject = block.GameObject;
 
                 var gbbs = gameObject.GetComponent<GunBarrelBlockScript>();
-                gbbs.fire_Networking(velocity, guid);
+                gbbs.fire_Network(velocity, guid);
             }
         }
+
     }
 }

@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Modding;
+using Modding.Blocks;
 using UnityEngine;
 
 namespace ModernFirearmKitMod
@@ -40,7 +42,6 @@ namespace ModernFirearmKitMod
 
         public abstract void Reload(bool constraint = false);
 
-
         public IEnumerator Launch()
         {
             if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
@@ -61,8 +62,6 @@ namespace ModernFirearmKitMod
             LaunchEnable = false;
             yield break;
         }
-
-
 
         public IEnumerator Launch(GameObject bullet)
         {

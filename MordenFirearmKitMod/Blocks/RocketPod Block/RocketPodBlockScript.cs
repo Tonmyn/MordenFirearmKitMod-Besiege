@@ -300,6 +300,11 @@ namespace ModernFirearmKitMod
 
 
         }
-     
+
+        void fire_Network(Vector3 velocity, Guid guid)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

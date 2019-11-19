@@ -16,7 +16,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         //public float Mass { get; set; } = 0.1f;
         //public Vector3 GravityAcceleration { get; } = new Vector3(0, -23f, 0);
 
-        public BulletPropertise bulletPropertise = new BulletPropertise();
+        public BulletPropertise bulletPropertise { get; set; } = new BulletPropertise();
         public Transform gunbodyTransform;
         public Guid Guid  = Guid.NewGuid();
         public class BulletPropertise
@@ -376,15 +376,16 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 var targetType = ((string)message.GetData(1));
                 var point = (Vector3)message.GetData(2);
                 var normal = (Vector3)message.GetData(3);
-
-                Debug.Log(targetType);
-
-                RayBulletScript rbs = GameObject.FindObjectsOfType<RayBulletScript>().ToList().Find(match => match.Guid == guid);
-                rbs.lineRenderer.enabled = false;
-                rbs.createImpactEffect_Networking(targetType, point, normal);
-
-
-                //Debug.Log("host " + guid);
+                try
+                {
+                    RayBulletScript rbs = GameObject.FindObjectsOfType<RayBulletScript>().ToList().Find(match => match.Guid == guid);
+                    rbs.lineRenderer.enabled = false;
+                    rbs.createImpactEffect_Networking(targetType, point, normal);
+                }
+                catch
+                {
+                    
+                }
             }
         }
     }
