@@ -19,6 +19,10 @@ namespace ModernFirearmKitMod
             ModNetworking.Callbacks[GunBarrelBlockScript.FireMessage] += GunBarrelBlockScript.FireNetworkingEvent;
             ModNetworking.Callbacks[MachineGunBlockScript.FireMessage] += MachineGunBlockScript.FireNetworkingEvent;
             ModNetworking.Callbacks[RayBulletScript.ImpactMessage] += RayBulletScript.ImpactNetworkingEvent;
+
+            ModNetworking.Callbacks[RocketScript.ExplodeMessage] += RocketScript.ExplodeNetworkingEvent;
+            ModNetworking.Callbacks[RocketBlockScript.LaunchMessage] += RocketBlockScript.LaunchNetworkEvent;
+            ModNetworking.Callbacks[ExplodeScript.ExplodyMessage] += ExplodeScript.Explody_Network;
         }     
     }
 }

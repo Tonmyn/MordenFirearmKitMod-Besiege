@@ -34,8 +34,18 @@ namespace ModernFirearmKitMod
             yield return new WaitForSeconds(t / 10f);
             if (gameObject)
             {
+                
                 OnDestruct?.Invoke();
+                Destroy(gameObject);
             }
+        }
+        /// <summary>
+        /// 开始销毁倒计时
+        /// </summary>
+        /// <param name="liftTime">单位0.1s</param>
+        public void Begin(float lifeTime)
+        {
+            StartCoroutine(Timer(lifeTime));
         }
     }
 }

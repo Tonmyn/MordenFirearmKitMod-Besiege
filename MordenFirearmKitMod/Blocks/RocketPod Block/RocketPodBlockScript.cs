@@ -124,7 +124,7 @@ namespace ModernFirearmKitMod
             Reload(true);
         }
 
-        public override void SimulateUpdateHost()
+        public override void SimulateUpdateAlways()
         {
             Reload();
 

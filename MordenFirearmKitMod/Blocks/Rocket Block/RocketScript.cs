@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using Modding;
 using System.Collections;
+using Modding.Blocks;
 
 namespace ModernFirearmKitMod
 {
@@ -23,6 +24,7 @@ namespace ModernFirearmKitMod
         public Vector3 ThrustDirection;
         public Vector3 ThrustPoint;
 
+        public  Guid Guid = Guid.NewGuid();
         public bool LaunchEnabled { get; set; } = false;
         public bool Launched { get { return isLaunched; } }
         private bool isLaunched = false;
@@ -34,6 +36,11 @@ namespace ModernFirearmKitMod
 
         public GameObject effect;
         public Vector3 effectOffset;
+
+        #region Network
+        /// <summary>RocketScriptGuid,</summary>
+        public static MessageType ExplodeMessage = ModNetworking.CreateMessageType(DataType.String);
+        #endregion
 
         private bool EnableCollision = false;
         void Start()
@@ -50,6 +57,8 @@ namespace ModernFirearmKitMod
             {
                 initParticle();
             }
+
+            Debug.Log(Guid);
         }
 
         void initPhysical()
@@ -84,10 +93,6 @@ namespace ModernFirearmKitMod
             if (LaunchEnabled)
             {
                 StartCoroutine(Launch());
-                if (isLaunched && !effect.activeSelf)
-                {
-                    effect.SetActive(true);
-                }
             }
             else
             {
@@ -97,33 +102,46 @@ namespace ModernFirearmKitMod
             if (healthBar.health <= 0 && isExplode == false)
             {
                 Explody();
-            }
+            }                                 
         }
 
         void FixedUpdate()
         {
-            if (LaunchEnabled)
-            {              
-                rigidbody.AddForce(transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f);
-            }         
+            if (!StatMaster.isClient)
+            {
+                if (LaunchEnabled)
+                {
+                    rigidbody.AddForce(transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f);
+                }
+            }     
         }
 
         void OnCollisionEnter(Collision collision)
         {
-            if (EnableCollision)
+            if (!StatMaster.isClient)
             {
-                Explody();
+                if (EnableCollision)
+                {
+                    Explody();
+                }
             }
         }
 
         private IEnumerator Launch()
         {
+            if (isLaunched && !effect.activeSelf)
+            {
+                effect.SetActive(true);
+            }
+
+
             if (!EnableCollision)
             {
                 StartCoroutine(CollisionTimer(DelayEnableCollisionTime));
             }
-            
+
             yield return new WaitForSeconds(DelayLaunchTime);
+
 
             if (GetComponent<ConfigurableJoint>() != null)
             {
@@ -133,7 +151,7 @@ namespace ModernFirearmKitMod
             }
             isLaunched = drager.enabled = !exploder.isExplodey;
 
-            //rigidbody.AddForceAtPosition(transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f, transform.TransformPoint(ThrustPoint));
+
             yield return new WaitForSeconds(ThrustTime);
             LaunchEnabled = false;
             effect.SetActive(false);
@@ -145,28 +163,55 @@ namespace ModernFirearmKitMod
                 StopCoroutine("CollisionTimer");
             }
         }
+        private void Explode_Network()
+        {
+            Debug.Log("Explode network");
+        }
 
         public void Explody()
         {
-            rigidbody.isKinematic = true;
+            if (StatMaster.isClient)
+            {
+                Debug.Log("explody");
+            }
 
-            exploder.Position = transform.position;
-            exploder.Explodey();
+            if (!StatMaster.isClient)
+            {
+                //var message = ExplodeMessage.CreateMessage(Guid.ToString());
+                var message = ExplodeMessage.CreateMessage(GetComponent<RocketBlockScript>().Guid.ToString());
+                ModNetworking.SendToAll(message);
 
-            healthBar.health = 0;
+                rigidbody.isKinematic = true;
 
-            gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = true;
-            gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
+                exploder.Position = transform.position;
+                exploder.Explodey();
+
+                healthBar.health = 0;
+
+                gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = true;
+                gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;
+            }   
         }
 
-        void Explode()
-        {           
+        private void Explode()
+        {
             //effect.GetComponent<Light>().enabled = false;
             effect.GetComponentInChildren<ParticleSystem>().Stop();
             OnExplode?.Invoke();
+
+            //if (!StatMaster.isClient)
+            //{
+            //    var message = ExplodeMessage.CreateMessage(Guid.ToString());
+            //    ModNetworking.SendToAll(message);
+
+
+            //}
         }
-        void Exploded(Collider[] colliders) { OnExploded?.Invoke(); }
-        void ExplodeFinal()
+        private void Exploded(Collider[] colliders)
+        {
+            OnExploded?.Invoke();
+        }
+        private void ExplodeFinal()
         {
             gameObject.SetActive(false);
             OnExplodeFinal?.Invoke();
@@ -190,6 +235,39 @@ namespace ModernFirearmKitMod
             effect.SetActive(false);
 
             exploder.isExplodey = false;
+        }
+
+        public static void ExplodeNetworkingEvent(Message message)
+        {
+            if (StatMaster.isClient)
+            {
+                var guid = new Guid(((string)message.GetData(0)));
+                Debug.Log("RocketScript " + guid);
+                try
+                {
+                    foreach (var rs in GameObject.FindObjectsOfType<RocketScript>().ToList())
+                    {
+                        Debug.Log(rs.Guid);
+                    }
+                 
+                    RocketScript rocketScript = GameObject.FindObjectsOfType<RocketScript>().ToList().Find(match => match.Guid == guid);
+
+                    rocketScript.Explode_Network();
+                }
+                catch { }
+
+                try
+                {
+                    foreach (var rs in GameObject.FindObjectsOfType<RocketBlockScript>().ToList())
+                    {
+                        Debug.Log(rs.Guid);
+                    }
+                    RocketScript rocketScript = GameObject.FindObjectsOfType<RocketBlockScript>().ToList().Find(match => match.rocketScript.Guid == guid).rocketScript;
+
+                    rocketScript.Explode_Network();
+                }
+                catch { }
+            }
         }
     }
 }

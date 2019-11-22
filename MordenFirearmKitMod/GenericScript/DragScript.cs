@@ -27,20 +27,25 @@ namespace ModernFirearmKitMod
 
         void Awake()
         {
-            myRigidbody = GetComponent<Rigidbody>();
+            if (!StatMaster.isClient)
+            {
+                myRigidbody = GetComponent<Rigidbody>();
+            }
         }
 
         void FixedUpdate()
         {
-            dragPoint = transform.TransformPoint(DragPoint);
-            dragAxis = DragAxis;
+            if (!StatMaster.isClient)
+            {
+                dragPoint = transform.TransformPoint(DragPoint);
+                dragAxis = DragAxis;
 
-            dragDirection = Vector3.Scale(transform.InverseTransformDirection(myRigidbody.velocity), dragAxis);
-            dragForce = Mathf.Clamp(myRigidbody.velocity.sqrMagnitude, 0, DragClamp);
-            DragForce = transform.TransformDirection(dragDirection) * dragForce;
+                dragDirection = Vector3.Scale(transform.InverseTransformDirection(myRigidbody.velocity), dragAxis);
+                dragForce = Mathf.Clamp(myRigidbody.velocity.sqrMagnitude, 0, DragClamp);
+                DragForce = transform.TransformDirection(dragDirection) * dragForce;
 
-            myRigidbody.AddForceAtPosition(DragForce, dragPoint);
-
+                myRigidbody.AddForceAtPosition(DragForce, dragPoint);
+            }
         }
     }
 }

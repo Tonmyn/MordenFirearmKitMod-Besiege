@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using Modding;
 using System.ComponentModel;
+using Modding.Blocks;
 
 namespace ModernFirearmKitMod
 {
@@ -12,7 +13,7 @@ namespace ModernFirearmKitMod
     {
 
         public RocketScript rocketScript;
-
+        public Guid Guid { get; private set; } = Guid.NewGuid();
         #region 基本功能变量声明
 
         public MKey launch_key;
@@ -26,6 +27,13 @@ namespace ModernFirearmKitMod
 
         #endregion
 
+        #region Network
+        /// <summary>block</summary>
+        public static MessageType LaunchMessage = ModNetworking.CreateMessageType(DataType.Block);
+        #endregion
+
+
+        private bool isExploded = false;
         public override void SafeAwake()
         {
 
@@ -82,17 +90,36 @@ namespace ModernFirearmKitMod
             rocketScript.DragClamp = DragForce_slider.Value;
         }
 
-        public override void SimulateUpdateHost()
+        public override void SimulateUpdateAlways()
         {
             if (launch_key.IsPressed && !rocketScript.Launched)
             {
                 rocketScript.LaunchEnabled = true;
             }
+
+            if (rocketScript.isExplode && !isExploded)
+            {
+                isExploded = true; 
+           
+                var message = LaunchMessage.CreateMessage(BlockBehaviour);
+                ModNetworking.SendToAll(message);
+            }
         }
+
 
         public override void OnStartBurning()
         {
             rocketScript.Explody();
+        }
+
+        public static void LaunchNetworkEvent(Message message)
+        {
+            if (StatMaster.isClient)
+            {
+                var block = (Block)message.GetData(0);
+
+                block.GameObject.SetActive(false);
+            }
         }
     }
 }

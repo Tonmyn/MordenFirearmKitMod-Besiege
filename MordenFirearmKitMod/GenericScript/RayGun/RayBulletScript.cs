@@ -169,7 +169,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             }
 
             var tsd = impact.AddComponent<TimedSelfDestruct>();
-            tsd.OnDestruct += () => { Destroy(impact); };
+            //tsd.OnDestruct += () => { Destroy(impact); };
             tsd.lifeTime = 50f;
             tsd.Switch = true;
 
@@ -198,7 +198,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             //}
 
             var tsd = impact.AddComponent<TimedSelfDestruct>();
-            tsd.OnDestruct += () => { Destroy(impact); };
+            //tsd.OnDestruct += () => { Destroy(impact); };
             tsd.lifeTime = 50f;
             tsd.Switch = true;
         }
