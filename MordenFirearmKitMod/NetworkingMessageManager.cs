@@ -22,6 +22,7 @@ namespace ModernFirearmKitMod
 
             ModNetworking.Callbacks[RocketScript.ExplodeMessage] += RocketScript.ExplodeNetworkingEvent;
             ModNetworking.Callbacks[RocketBlockScript.LaunchMessage] += RocketBlockScript.LaunchNetworkEvent;
+            ModNetworking.Callbacks[RocketPodBlockScript.LaunchMessage] += RocketPodBlockScript.Launch_Network;
             ModNetworking.Callbacks[ExplodeScript.ExplodyMessage] += ExplodeScript.Explody_Network;
         }     
     }

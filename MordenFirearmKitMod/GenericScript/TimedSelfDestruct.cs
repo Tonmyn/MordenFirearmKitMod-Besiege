@@ -14,7 +14,7 @@ namespace ModernFirearmKitMod
         public bool Switch { get; set; } = false;
 
         public Action OnDestruct;
-
+        
         void Awake()
         {
             lifeTime = 300;

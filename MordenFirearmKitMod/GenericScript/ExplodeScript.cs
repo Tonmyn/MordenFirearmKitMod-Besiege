@@ -32,7 +32,6 @@ namespace ModernFirearmKitMod
         public static MessageType ExplodyMessage = ModNetworking.CreateMessageType(DataType.Vector3);
         #endregion
 
-        //爆炸类型
         public enum explosionType
         {
             炸弹 = 0,
@@ -53,14 +52,13 @@ namespace ModernFirearmKitMod
 
         public void Explodey()
         {
-            if (!StatMaster.isClient)
-            {
-                StartCoroutine(Explodey(Position, Power, Radius, ExplosionType));
-            } 
+            StartCoroutine(Explodey(Position, Power, Radius, ExplosionType));
         }
         public void Explody_Network(Vector3 position)
         {
+            fireEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
             fireEffect.transform.position = position;
+
             StartCoroutine(ParticleEffectEvent());
 
             IEnumerator ParticleEffectEvent()
@@ -70,60 +68,64 @@ namespace ModernFirearmKitMod
                 fireEffect.SetActive(false);
             }        
         }
-        //爆炸事件
         public IEnumerator Explodey(Vector3 position, float power,float radius,explosionType explosiontype)
         {
-            if (!StatMaster.isClient)
+            if (StatMaster.isClient) yield break;
+
+            if (isExplodey)
             {
-                if (isExplodey)
-                {
-                    yield break;
-                }
-                else
-                {
-                    fireEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
-                    fireEffect.transform.position = position;
-
-                    if (!StatMaster.isClient)
-                    {
-                        var message = ExplodyMessage.CreateMessage(position);
-                        ModNetworking.SendToAll(message);
-                    }
-                }
-
-                yield return new WaitForFixedUpdate();
-
-                isExplodey = true;
-                fireEffect.SetActive(true);
-                OnExplode?.Invoke();
-
-                //定义爆炸位置为炸弹位置
-                Vector3 explosionPos = position;
-                //这个方法用来反回球型半径之内（包括半径）的所有碰撞体collider[]
-                Collider[] colliders = Physics.OverlapSphere(explosionPos, radius);
-
-                //遍历返回的碰撞体，如果是刚体，则给刚体添加力
-                foreach (Collider hit in colliders)
-                {
-                    if (hit.attachedRigidbody != null)
-                    {
-                        float force = UnityEngine.Random.Range(30000f, 50000f) * power * (Vector3.Distance(hit.transform.position, explosionPos) / (radius + 0.25f));
-                        hit.attachedRigidbody.AddExplosionForce(force, explosionPos, radius);
-                        hit.attachedRigidbody.AddTorque(force * Vector3.Cross((hit.transform.position - explosionPos), Vector3.up));
-
-                        var bhb = hit.attachedRigidbody.gameObject.GetComponent<BlockHealthBar>();
-                        if (bhb != null)
-                        {
-                            bhb.DamageBlock(1);
-                        }
-                    }
-                }
-
-                OnExploded?.Invoke(colliders);
-                yield return new WaitForSeconds(3f);
-                fireEffect.SetActive(false);
-                OnExplodeFinal?.Invoke();
+                yield break;
             }
+            else
+            {
+                fireEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
+                fireEffect.transform.position = position;
+
+                if (!StatMaster.isClient)
+                {
+                    var message = ExplodyMessage.CreateMessage(position);
+                    ModNetworking.SendToAll(message);
+                }
+            }
+
+            yield return new WaitForFixedUpdate();
+
+            isExplodey = true;
+            fireEffect.SetActive(true);
+            OnExplode?.Invoke();
+
+            //定义爆炸位置为炸弹位置
+            Vector3 explosionPos = position;
+            //这个方法用来返回球型半径之内（包括半径）的所有碰撞体collider[]
+            Collider[] colliders = Physics.OverlapSphere(explosionPos, radius);
+
+            //遍历返回的碰撞体，如果是刚体，则给刚体添加力
+            foreach (Collider hit in colliders)
+            {
+                if (hit.attachedRigidbody != null)
+                {
+                    float force = UnityEngine.Random.Range(30000f, 50000f) * power * (Vector3.Distance(hit.transform.position, explosionPos) / (radius + 0.25f));
+                    hit.attachedRigidbody.AddExplosionForce(force, explosionPos, radius);
+                    hit.attachedRigidbody.AddTorque(force * Vector3.Cross((hit.transform.position - explosionPos), Vector3.up));
+
+                    reduceBlockHealth(hit.attachedRigidbody.gameObject);
+                }
+            }
+
+            OnExploded?.Invoke(colliders);
+            yield return new WaitForSeconds(3f);
+            fireEffect.SetActive(false);
+            OnExplodeFinal?.Invoke();
+            //-------------------------------------------------------------
+            void reduceBlockHealth(GameObject gameObject)
+            {
+                var bhb = gameObject.GetComponent<BlockHealthBar>();
+                if (bhb != null)
+                {
+                    bhb.DamageBlock(1);
+                }
+            }
+            //---------------------------------------------------------------
         }
 
         public static void Explody_Network(Message message)

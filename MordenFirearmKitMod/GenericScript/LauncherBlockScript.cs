@@ -63,20 +63,21 @@ namespace ModernFirearmKitMod
             yield break;
         }
 
-        public IEnumerator Launch(GameObject bullet)
-        {
-            if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
+        //public IEnumerator Launch(GameObject bullet, Action launchAction = null, Action launchEndAction = null)
+        //{
+        //    if (!StatMaster.GodTools.InfiniteAmmoMode) { BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, 0, 1); }
 
-            if (BulletCurrentNumber < 0 || !LaunchEnable) yield break;
-            //bullet.SetActive(true);
-            Rigidbody.AddForce(-transform.TransformDirection(Direction) * KnockBack, ForceMode.Impulse);
+        //    if (BulletCurrentNumber < 0 || !LaunchEnable) yield break;
+        //    //bullet.SetActive(true);
+        //    Rigidbody.AddForce(-transform.TransformDirection(Direction) * KnockBack, ForceMode.Impulse);
 
-            LaunchEvent?.Invoke(bullet);
+        //    LaunchEvent?.Invoke(bullet);
+        //    launchAction?.Invoke();
 
-            yield return new WaitForSeconds(Rate);
-            LaunchEnable = false;
-            yield break;
-        }
+        //    yield return new WaitForSeconds(Rate);
+        //    LaunchEnable = false;
+        //    yield break;
+        //}
 
         public IEnumerator Launch(Action launchAction = null,Action launchEndAction = null)
         {

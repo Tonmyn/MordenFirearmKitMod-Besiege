@@ -28,11 +28,11 @@ namespace ModernFirearmKitMod
         #endregion
 
         #region Network
-        /// <summary>block</summary>
-        public static MessageType LaunchMessage = ModNetworking.CreateMessageType(DataType.Block);
+        /// <summary>block,rocket guid</summary>
+        public static MessageType LaunchMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.String);
         #endregion
 
-
+        private BlockHealthBar healthBar;
         private bool isExploded = false;
         public override void SafeAwake()
         {
@@ -60,6 +60,8 @@ namespace ModernFirearmKitMod
 
             #endregion
 
+            healthBar = GetComponent<BlockHealthBar>();
+
             initRocketScript();
 
             changedPropertise();
@@ -80,6 +82,7 @@ namespace ModernFirearmKitMod
             rocketScript.ExplodeRadius = 10f;
             rocketScript.effectOffset = new Vector3(-1.4f, 0, 0.5f);
             rocketScript.OnExplodeFinal += () => { Destroy(rocketScript.transform.gameObject); };
+            rocketScript.OnExplode += () => { isExploded = true; healthBar.health = 0; };
         }
 
         void changedPropertise()
@@ -95,14 +98,16 @@ namespace ModernFirearmKitMod
             if (launch_key.IsPressed && !rocketScript.Launched)
             {
                 rocketScript.LaunchEnabled = true;
+                if (StatMaster.isHosting)
+                {
+                    var message = LaunchMessage.CreateMessage(BlockBehaviour, rocketScript.Guid.ToString());
+                    ModNetworking.SendToAll(message);
+                }
             }
 
-            if (rocketScript.isExplode && !isExploded)
+            if (healthBar.health <= 0 && isExploded == false)
             {
-                isExploded = true; 
-           
-                var message = LaunchMessage.CreateMessage(BlockBehaviour);
-                ModNetworking.SendToAll(message);
+                rocketScript.Explody();
             }
         }
 
@@ -117,8 +122,10 @@ namespace ModernFirearmKitMod
             if (StatMaster.isClient)
             {
                 var block = (Block)message.GetData(0);
+                var guid = new Guid(message.GetData(1).ToString());
 
-                block.GameObject.SetActive(false);
+                var rs = block.GameObject.GetComponent<RocketScript>();
+                rs.Guid = guid;
             }
         }
     }

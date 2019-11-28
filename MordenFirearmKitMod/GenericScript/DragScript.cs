@@ -10,42 +10,35 @@ namespace ModernFirearmKitMod
     public class DragScript : MonoBehaviour
     {
         public Vector3 DragPoint { get; set; }
-
         public Vector3 DragAxis { get; set; }
-
         public Vector3 DragForce { get; private set; }
 
         public float DragClamp { get; set; }
+        public Rigidbody myRigidbody;
 
         Vector3 dragPoint;
         Vector3 dragAxis;
         Vector3 dragDirection;
-
         float dragForce;
-
-        public Rigidbody myRigidbody;
 
         void Awake()
         {
-            if (!StatMaster.isClient)
-            {
-                myRigidbody = GetComponent<Rigidbody>();
-            }
-        }
+            if (StatMaster.isClient) return;
 
+            myRigidbody = GetComponent<Rigidbody>();
+        }
         void FixedUpdate()
         {
-            if (!StatMaster.isClient)
-            {
-                dragPoint = transform.TransformPoint(DragPoint);
-                dragAxis = DragAxis;
+            if (StatMaster.isClient) return;
 
-                dragDirection = Vector3.Scale(transform.InverseTransformDirection(myRigidbody.velocity), dragAxis);
-                dragForce = Mathf.Clamp(myRigidbody.velocity.sqrMagnitude, 0, DragClamp);
-                DragForce = transform.TransformDirection(dragDirection) * dragForce;
+            dragPoint = transform.TransformPoint(DragPoint);
+            dragAxis = DragAxis;
 
-                myRigidbody.AddForceAtPosition(DragForce, dragPoint);
-            }
+            dragDirection = Vector3.Scale(transform.InverseTransformDirection(myRigidbody.velocity), dragAxis);
+            dragForce = Mathf.Clamp(myRigidbody.velocity.sqrMagnitude, 0, DragClamp);
+            DragForce = transform.TransformDirection(dragDirection) * dragForce;
+
+            myRigidbody.AddForceAtPosition(DragForce, dragPoint);
         }
     }
 }

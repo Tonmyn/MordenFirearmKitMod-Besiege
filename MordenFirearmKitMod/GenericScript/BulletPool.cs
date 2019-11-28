@@ -26,6 +26,5 @@ namespace ModernFirearmKitMod
             Idle = bulletPool_Idle.transform;
             Volume = volume;
         }
-
     }
 }

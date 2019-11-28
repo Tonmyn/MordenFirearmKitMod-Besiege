@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using Modding;
 using System.Collections;
+using Modding.Blocks;
 
 namespace ModernFirearmKitMod
 {
@@ -25,18 +26,18 @@ namespace ModernFirearmKitMod
         #endregion
 
         //声明 滑条 载弹数量
-        private MSlider number_slider;
+        MSlider number_slider;
         //声明 滑条 连发间隔
-        private MSlider rate_slider;
-
+        MSlider rate_slider;
         MSlider thrustForce_slider;
-
         MSlider thrustTime_slider;
-
         //MSlider thrustDelay_slider;
-
         MSlider DragForce_slider;
 
+        #region Network
+        /// <summary>Block, bulletnumber Rocket's Guid, Rocket Position</summary>
+        public static MessageType LaunchMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Integer, DataType.String, DataType.Vector3);
+        #endregion
 
         #region 内部变量声明
 
@@ -56,7 +57,7 @@ namespace ModernFirearmKitMod
             Rate = 2f;
             KnockBack = 0f;
             LaunchEnable = false;
-            LaunchEvent += delayLaunch;
+            //LaunchEvent += delayLaunch;
             SpawnPoint = new Vector3(0, 0, 3.5f);
             Direction = transform.right;
             BulletCurrentNumber = BulletMaxNumber =18;
@@ -127,15 +128,18 @@ namespace ModernFirearmKitMod
         public override void SimulateUpdateAlways()
         {
             Reload();
-
-            if (LaunchKey.IsHeld )
+            if (!StatMaster.isClient)
             {
-                if (!LaunchEnable && BulletCurrentNumber > 0)
+                if (LaunchKey.IsHeld)
                 {
-                    LaunchEnable = true;
-                    StartCoroutine(Launch(rocketPool.Work.GetChild(0).gameObject));
+                    if (!LaunchEnable && BulletCurrentNumber > 0)
+                    {
+                        LaunchEnable = true;
+                        Fire();
+                    }
                 }
             }
+
         }
 
         //火箭弹实例化位置计算
@@ -179,7 +183,7 @@ namespace ModernFirearmKitMod
         //火箭弹发射世界位置
         private Vector3 getRealPosition(int label,Vector3 offset)
         {
-            return transform.TransformVector(transform.InverseTransformVector(Rigidbody.position) + relativePositions[label] + offset);
+            return transform.TransformVector(transform.InverseTransformVector(/*Rigidbody.position*/transform.position) + relativePositions[label] + offset);
         }
 
         //火箭弹实例化
@@ -221,6 +225,7 @@ namespace ModernFirearmKitMod
                 Rockets[int.Parse(i)] = null;
                 rocketScript.gameObject.transform.SetParent(rocketPool.Idle);
             };
+            
         }
 
         private void Rocket_Reusing(int index)
@@ -240,28 +245,49 @@ namespace ModernFirearmKitMod
             rocketScript.Reusing(thrustForce_slider.Value, thrustTime_slider.Value * 10f, DragForce_slider.Value);
         }
 
-        private void delayLaunch(GameObject gameObject)
-        {                  
-            gameObject.transform.localPosition += Vector3.right * 3.25f * transform.localScale.x;
-            gameObject.transform.SetParent(transform.parent);
-            gameObject.SetActive(true);
-     
-            Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();      
-            rigidbody.isKinematic = false;
-            rigidbody.velocity = Rigidbody.velocity;
-            rigidbody.AddRelativeForce(Vector3.right * 25f, ForceMode.Impulse);
-            RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
-            rocketScript.LaunchEnabled = true;
+        public void Fire()
+        {
+            if (StatMaster.isClient) return;
+            StartCoroutine(Launch(fireEvent));
 
-            StartCoroutine(delay());
-            IEnumerator delay()
+            void fireEvent()
             {
-                yield return new WaitForSeconds(rocketScript.DelayEnableCollisionTime);
-                rigidbody.detectCollisions = true;
-                gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = false;
-                yield break;
+                GameObject gameObject = rocketPool.Work.GetChild(0).gameObject;
+
+                Vector3 position = Vector3.right * Vector3.Project(Rigidbody.velocity, transform.right).magnitude * transform.localScale.x * Time.fixedDeltaTime * 3f;
+                gameObject.transform.localPosition += position;
+                gameObject.transform.SetParent(transform.parent);
+                gameObject.SetActive(true);
+
+                Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
+                rigidbody.isKinematic = false;
+                rigidbody.velocity = Rigidbody.velocity;
+                rigidbody.AddRelativeForce(Vector3.right * 25f, ForceMode.Impulse);
+                RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
+                rocketScript.LaunchEnabled = true;
+
+                if (StatMaster.isHosting)
+                {
+                    var message = LaunchMessage.CreateMessage(BlockBehaviour, BulletCurrentNumber, rocketScript.Guid.ToString(), position);
+                    ModNetworking.SendToAll(message);
+                }
+
+                StartCoroutine(delay());
+                IEnumerator delay()
+                {
+                    yield return new WaitForSeconds(rocketScript.DelayEnableCollisionTime);
+                    rigidbody.detectCollisions = true;
+                    gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = false;
+                    yield break;
+                }
             }
-        }   
+        }
+
+        public void Fire_Network()
+        {
+
+        }
+
         //火箭弹重装
         public override void Reload(bool constraint = false)
         {
@@ -301,9 +327,29 @@ namespace ModernFirearmKitMod
 
         }
 
-        void fire_Network(Vector3 velocity, Guid guid)
+        public static void Launch_Network(Message message)
         {
-            throw new NotImplementedException();
+            if (StatMaster.isClient)
+            {
+                var block = (Block)message.GetData(0);
+                var bulletNumber = (int)message.GetData(1);
+                var guid = new Guid(message.GetData(2).ToString());
+                var position = (Vector3)message.GetData(3);
+
+                RocketPodBlockScript rocketPodBlockScript = block.GameObject.GetComponent<RocketPodBlockScript>();
+                rocketPodBlockScript.BulletCurrentNumber = bulletNumber;
+
+                var rocketPool = rocketPodBlockScript.rocketPool;
+
+                GameObject gameObject = rocketPool.Work.GetChild(0).gameObject;
+                RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
+                rocketScript.Guid = guid;
+                rocketScript.LaunchEnabled = true;
+                gameObject.transform.localPosition += position;
+                gameObject.transform.SetParent(block.GameObject.transform.parent);
+                gameObject.SetActive(true);
+                //block.GameObject.SetActive(false);
+            }
         }
 
     }
