@@ -178,7 +178,7 @@ namespace ModernFirearmKitMod
 
         public override void Reload(bool constraint = false)
         {
-            if (StatMaster.GodTools.InfiniteAmmoMode)
+            if (/*StatMaster.GodTools.InfiniteAmmoMode*/ Machine.InfiniteAmmo)
             {
                 BulletCurrentNumber = BulletMaxNumber;
             }

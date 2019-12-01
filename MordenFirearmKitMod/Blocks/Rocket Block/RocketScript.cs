@@ -103,21 +103,21 @@ namespace ModernFirearmKitMod
             }
             catch { }
         }
-
+        
         void FixedUpdate()
         {
             try
             {
-                if (LaunchEnabled)
+                if (LaunchEnabled && gameObject.activeSelf)
                 {
-                    if (!StatMaster.isClient)
+                    if (StatMaster.isHosting)
                     {
                         rigidbody.AddForce(transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f);
                     }
-                    //else
-                    //{
-                    //    gameObject.transform.position += transform.TransformDirection(ThrustDirection).normalized * ThrustForce * 300f * Time.deltaTime;
-                    //}
+                    else
+                    {
+                        gameObject.transform.position += (transform.TransformDirection(ThrustDirection).normalized) * ThrustForce * 300f * Time.fixedDeltaTime + Physics.gravity * 0.2f * Time.fixedDeltaTime;
+                    }
                 }
             }
             catch { }
@@ -219,9 +219,12 @@ namespace ModernFirearmKitMod
             gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = false;
             gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = true;
 
-            Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
-            rigidbody.detectCollisions = false;
-            rigidbody.isKinematic = true;
+            if (!StatMaster.isClient)
+            {
+                Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
+                rigidbody.detectCollisions = false;
+                rigidbody.isKinematic = true;
+            }
 
             LaunchEnabled = false;
 
@@ -231,6 +234,7 @@ namespace ModernFirearmKitMod
             effect.SetActive(false);
 
             exploder.isExplodey = false;
+            enabled = true;
         }
 
         public static void ExplodeNetworkingEvent(Message message)

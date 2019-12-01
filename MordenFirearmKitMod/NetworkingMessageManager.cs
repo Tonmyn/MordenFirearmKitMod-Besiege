@@ -13,6 +13,7 @@ namespace ModernFirearmKitMod
         //public static Dictionary<int, string> keyValuePairs = new Dictionary<int, string>();
 
         public override string Name { get; } = "Network Message Manager";
+
         void Awake()
         {
             ModNetworking.Callbacks[GatlingGunBlockScript.FireMessage] += GatlingGunBlockScript.FireNetworkingEvent;

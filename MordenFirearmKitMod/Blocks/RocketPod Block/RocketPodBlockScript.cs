@@ -22,7 +22,6 @@ namespace ModernFirearmKitMod
         public override Vector3 SpawnPoint { get; set; }
         public override Vector3 Direction { get; set; }
         public override bool LaunchEnable { get; set; }
-
         #endregion
 
         //声明 滑条 载弹数量
@@ -37,6 +36,8 @@ namespace ModernFirearmKitMod
         #region Network
         /// <summary>Block, bulletnumber Rocket's Guid, Rocket Position</summary>
         public static MessageType LaunchMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Integer, DataType.String, DataType.Vector3);
+        /// <summary>Block, InfiniteAmmoMode</summary>
+        public static MessageType ReloadMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Boolean);
         #endregion
 
         #region 内部变量声明
@@ -48,8 +49,6 @@ namespace ModernFirearmKitMod
 
         //声明 火箭弹实例化位置
         private Vector3[] relativePositions;
-
-
         #endregion
 
         public override void SafeAwake()
@@ -256,7 +255,7 @@ namespace ModernFirearmKitMod
 
                 Vector3 position = Vector3.right * Vector3.Project(Rigidbody.velocity, transform.right).magnitude * transform.localScale.x * Time.fixedDeltaTime * 3f;
                 gameObject.transform.localPosition += position;
-                gameObject.transform.SetParent(transform.parent);
+                gameObject.transform.SetParent(/*transform.parent*/Machine.InternalObject.transform);
                 gameObject.SetActive(true);
 
                 Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
@@ -291,7 +290,7 @@ namespace ModernFirearmKitMod
         //火箭弹重装
         public override void Reload(bool constraint = false)
         {
-            if (StatMaster.GodTools.InfiniteAmmoMode)
+            if (Machine.InfiniteAmmo)
             {
                 BulletCurrentNumber = BulletMaxNumber;
             }
@@ -318,13 +317,11 @@ namespace ModernFirearmKitMod
                         {
                             Rocket_Instantiate(i);
                         }
-                        //BulletCurrentNumber = (int)Mathf.MoveTowards(BulletCurrentNumber, BulletMaxNumber, 1);
+
+                        break;
                     }
                 }
-            }
-
-
-
+            }        
         }
 
         public static void Launch_Network(Message message)
@@ -338,19 +335,21 @@ namespace ModernFirearmKitMod
 
                 RocketPodBlockScript rocketPodBlockScript = block.GameObject.GetComponent<RocketPodBlockScript>();
                 rocketPodBlockScript.BulletCurrentNumber = bulletNumber;
+                rocketPodBlockScript.Fire_Network();
 
                 var rocketPool = rocketPodBlockScript.rocketPool;
 
                 GameObject gameObject = rocketPool.Work.GetChild(0).gameObject;
+                gameObject.transform.localPosition += position;
+                gameObject.transform.SetParent(/*transform.parent*/block.Machine.InternalObject.transform);
+                gameObject.SetActive(true);
+
                 RocketScript rocketScript = gameObject.GetComponent<RocketScript>();
                 rocketScript.Guid = guid;
                 rocketScript.LaunchEnabled = true;
-                gameObject.transform.localPosition += position;
-                gameObject.transform.SetParent(block.GameObject.transform.parent);
-                gameObject.SetActive(true);
+
                 //block.GameObject.SetActive(false);
             }
         }
-
     }
 }
