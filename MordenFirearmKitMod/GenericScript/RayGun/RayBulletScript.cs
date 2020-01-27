@@ -25,7 +25,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             public Vector3 Velocity { get; set; } = Vector3.zero;
             public float Drag { get; set; } = 0.1f;
             public float Mass { get; set; } = 0.1f;
-            public Vector3 GravityAcceleration { get; } = new Vector3(0, -23f, 0);
+            public Vector3 GravityAcceleration { get; } = new Vector3(0, -0.23f, 0);
             public Vector3 orginPosition { get; set; } = Vector3.zero;
             public Vector3 direction { get; set; } = Vector3.forward;
             public Color color { get; set; } = Color.yellow;
@@ -47,11 +47,16 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         private LineRenderer lineRenderer;
         private float _time;
 
+        private LineRenderer lr;
+
         private void Start()
         {
-            sPoint = ePoint = bulletPropertise.orginPosition + bulletPropertise.Velocity.magnitude * bulletPropertise.direction * Time.deltaTime * 3f;
+            bulletPropertise.direction = transform.InverseTransformDirection(bulletPropertise.direction);
+            bulletPropertise.Velocity = Vector3.Project(bulletPropertise.Velocity, bulletPropertise.direction).magnitude * bulletPropertise.direction;
 
-            bulletPropertise.Velocity = transform.InverseTransformDirection(bulletPropertise.direction) * bulletPropertise.Strength * bulletPropertise.Mass * (600f + bulletPropertise.Velocity.magnitude);
+            sPoint = ePoint = bulletPropertise.orginPosition + bulletPropertise.Velocity * Time.deltaTime * 1.5f;
+
+            bulletPropertise.Velocity += bulletPropertise.direction * bulletPropertise.Strength * bulletPropertise.Mass * 600f;
 
             lineRenderer = GetComponent<LineRenderer>() ?? gameObject.AddComponent<LineRenderer>();
             lineRenderer.material.shader = Shader.Find("Particles/Additive");
@@ -64,6 +69,14 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
             var diem = gameObject.GetComponent<DestroyIfEditMode>() ?? gameObject.AddComponent<DestroyIfEditMode>();
             OnCollisionEvent += onCollision;
+
+            var go = new GameObject("test");
+            lr = go.AddComponent<LineRenderer>();
+            go.AddComponent<DestroyIfEditMode>();
+
+            lr.material.color = Color.blue;
+            lr.SetPosition(0, sPoint);
+            lr.SetPosition(1, ePoint);
         }
 
         private void Update()
@@ -73,14 +86,14 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 if (Time.timeScale == 0f) return;
 
                 _time = Time.smoothDeltaTime / Time.timeScale;
-                Vector3 gravityVelocity = (!StatMaster.GodTools.GravityDisabled) ? (bulletPropertise.GravityAcceleration * _time) : Vector3.zero;
-                Vector3 dragVelocity = (-(bulletPropertise.direction * bulletPropertise.Drag) / bulletPropertise.Mass) * _time;
-                bulletPropertise.Velocity = bulletPropertise.Velocity + gravityVelocity + dragVelocity;
+                Vector3 gravityVelocity = (!StatMaster.GodTools.GravityDisabled) ? (bulletPropertise.GravityAcceleration) : Vector3.zero;
+                Vector3 dragVelocity = -(bulletPropertise.Velocity.normalized * bulletPropertise.Drag);
+                bulletPropertise.Velocity += gravityVelocity + dragVelocity;
                 ePoint = sPoint + bulletPropertise.Velocity * _time;
-                bulletPropertise.direction = -(sPoint - ePoint).normalized;
+
                 lineRenderer.SetPosition(0, sPoint);
 
-                if (Physics.Raycast(sPoint, bulletPropertise.direction, out hitInfo, (sPoint - ePoint).magnitude) )
+                if (Physics.Raycast(sPoint, bulletPropertise.Velocity, out hitInfo, (sPoint - ePoint).magnitude) )
                 {
                     if (hitInfo.transform == gunbodyTransform && gunbodyTransform != null)
                     {
@@ -108,11 +121,11 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                         }
                         //else
                         //{
-                        //    Debug.Log("client "+ Guid);
+                        //    Debug.Log("client " + Guid);
                         //}
                         //var go = new GameObject("test");
                         //go.AddComponent<DestroyIfEditMode>();
-                        //var lr =go.AddComponent<LineRenderer>();
+                        //var lr = go.AddComponent<LineRenderer>();
                         //lr.material.color = Color.red;
                         //lr.SetWidth(0.2f, 0.2f);
                         //lr.SetPosition(0, hitInfo.point);
@@ -124,15 +137,17 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                         //lr.material.color = Color.red;
                         //lr.SetWidth(0.2f, 0.2f);
                         //lr.SetPosition(0, hitInfo.point);
-                        //lr.SetPosition(1, direction + hitInfo.point);
+                        //lr.SetPosition(1, bulletPropertise.direction + hitInfo.point);
                     }               
                 }
                 else
                 {
-                    lineRenderer.SetPosition(1, ePoint);
+
+                    lineRenderer.SetPosition(1, ePoint /*+ Vector3.Project(bulletPropertise.Velocity, bulletPropertise.direction).magnitude * bulletPropertise.direction * _time * 0.5f*/);
                     sPoint = ePoint;
                 }
 
+                //bulletPropertise.direction = -(sPoint - ePoint).normalized;
             }
             else
             {

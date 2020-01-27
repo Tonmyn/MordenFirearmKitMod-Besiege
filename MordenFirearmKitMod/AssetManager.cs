@@ -36,7 +36,22 @@ namespace ModernFirearmKitMod
             MachineGun = new Asset_MachineGun(modAssetBundle);
             GatlingGun = new Asset_GatlingGun(modAssetBundle);
             Bullet = new Asset_Bullet(modAssetBundle);
-        }     
+        }
+
+        public static void SetObjectScale(GameObject gameObject,Vector3 scale)
+        {
+            gameObject.transform.localScale = Vector3.Scale(gameObject.transform.localScale, scale);
+            for (int i = 0; i < gameObject.transform.childCount; i++)
+            {
+                var go = gameObject.transform.GetChild(i);
+                go.localScale = Vector3.Scale(go.localScale, scale);
+                //if (go.GetComponent<ParticleSystem>() != null)
+                //{
+                //    var ps = go.GetComponent<ParticleSystem>();
+                //    ps.startSize *= scale.magnitude;
+                //}
+            }
+        }
     }
 
     public class Asset_Rocket
@@ -47,6 +62,8 @@ namespace ModernFirearmKitMod
         public Asset_Rocket(ModAssetBundle modAssetBundle)
         {
             rocketTrailEffect = modAssetBundle.LoadAsset<GameObject>("RocketTrailEffect");
+            //rocketTrailEffect.transform.localScale = MordenFirearmKitBlockMod.Configuration.RocketTrailEffectScale;
+            AssetManager.SetObjectScale(rocketTrailEffect, MordenFirearmKitBlockMod.Configuration.RocketTrailEffectScale);
             rocketTemp = CreateRocketBlockTemp();
         }
 
@@ -88,7 +105,10 @@ namespace ModernFirearmKitMod
         public Asset_Explosion(ModAssetBundle modAssetBundle)
         {
             explosionEffect = modAssetBundle.LoadAsset<GameObject>("BigExplosion");
+            //explosionEffect.transform.localScale = MordenFirearmKitBlockMod.Configuration.ExplosionEffectScale;
+            AssetManager.SetObjectScale(explosionEffect, MordenFirearmKitBlockMod.Configuration.ExplosionEffectScale);
             explosionEffect.AddComponent<DestroyIfEditMode>();
+            
         }
     }
 
@@ -104,7 +124,7 @@ namespace ModernFirearmKitMod
         public Asset_GatlingGun(ModAssetBundle modAssetBundle)
         {
             material = modAssetBundle.LoadAsset<Material>("GatlingGunMat.mat");
-            fireEffect = modAssetBundle.LoadAsset<GameObject>("MachineGunFireEffect");
+            fireEffect = modAssetBundle.LoadAsset<GameObject>("MachineGunFireEffect");       
 
             #region init fire effect
             fireEffect.AddComponent<DestroyIfEditMode>();
@@ -138,6 +158,8 @@ namespace ModernFirearmKitMod
                 }
             }
             #endregion
+            
+            AssetManager.SetObjectScale(fireEffect, MordenFirearmKitBlockMod.Configuration.GatlingFireEffectScale);
 
             bulletTemp = CreateBulletTemp();
         }
@@ -230,6 +252,7 @@ namespace ModernFirearmKitMod
                 }
             }
             #endregion
+            AssetManager.SetObjectScale(fireEffect, MordenFirearmKitBlockMod.Configuration.MachineGunFireEffectScale);
 
             bulletTemp = CreateBulletTemp();
         }
@@ -293,6 +316,10 @@ namespace ModernFirearmKitMod
             //impactWoodEffect.AddComponent<TimedSelfDestruct>().lifeTime = 50f;
             //impactStoneEffect.AddComponent<TimedSelfDestruct>().lifeTime = 50f;
             //impactMetalEffect.AddComponent<TimedSelfDestruct>().lifeTime = 50f;
+
+            AssetManager.SetObjectScale(impactWoodEffect, MordenFirearmKitBlockMod.Configuration.ImpactWoodEffectScale);
+            AssetManager.SetObjectScale(impactStoneEffect, MordenFirearmKitBlockMod.Configuration.ImpactStoneEffectScale);
+            AssetManager.SetObjectScale( impactMetalEffect, MordenFirearmKitBlockMod.Configuration.ImpactMetalEffectScale);
 
         }
 

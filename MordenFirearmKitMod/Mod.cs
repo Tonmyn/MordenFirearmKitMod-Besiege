@@ -1,12 +1,5 @@
 ﻿using Modding;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using Modding.Common;
-using Modding.Blocks;
-using System.Collections;
-using UnityEngine.SceneManagement;
-using Modding;
 
 namespace ModernFirearmKitMod
 {
@@ -30,12 +23,13 @@ namespace ModernFirearmKitMod
         public static GameObject Mod;
         public static GameObject RocketPool_Idle;
         public static GameObject MachineGunBulletPool_Idle;
-
-
+        public static Configuration Configuration;
 
         public override void OnLoad()
         {
             // Your initialization code here
+
+            loadConfiguration();
 
             Mod = new GameObject("Morden Firearm Kit Mod");
             UnityEngine.Object.DontDestroyOnLoad(Mod);
@@ -53,5 +47,69 @@ namespace ModernFirearmKitMod
             //QualitySettings.pixelLightCount += 10;
 
         }
-    } 
+
+        private void loadConfiguration()
+        {
+            Configuration = Configuration.FormatXDataToConfig(Modding.Configuration.GetData());
+        }
+    }
+
+    public class Configuration
+    {
+        [Modding.Serialization.CanBeEmpty]
+        public Vector3 RocketTrailEffectScale = Vector3.one;
+        [Modding.Serialization.CanBeEmpty]
+        public Vector3 ExplosionEffectScale = Vector3.one;
+        [Modding.Serialization.CanBeEmpty]
+        public Vector3 GatlingFireEffectScale = Vector3.one;
+        [Modding.Serialization.CanBeEmpty]
+        public Vector3 MachineGunFireEffectScale = Vector3.one;
+        [Modding.Serialization.CanBeEmpty]
+        public Vector3 ImpactWoodEffectScale = Vector3.one;
+        [Modding.Serialization.CanBeEmpty]
+        public Vector3 ImpactStoneEffectScale = Vector3.one;
+        [Modding.Serialization.CanBeEmpty]
+        public Vector3 ImpactMetalEffectScale = Vector3.one;
+
+        public static Configuration FormatXDataToConfig(XDataHolder xDataHolder)
+        {
+            var config = new Configuration();
+
+            string[] keys = new string[] { "RocketTrail","Explosion", "GaltingFire", "MachineGunFire", "ImpactWood", "ImpactStone", "ImpactMetal" };
+
+            config.RocketTrailEffectScale = getValue(keys[0]);
+            config.ExplosionEffectScale = getValue(keys[1]) ;
+            config.GatlingFireEffectScale = getValue(keys[2]);
+            config.MachineGunFireEffectScale = getValue(keys[3]);
+            config.ImpactWoodEffectScale = getValue(keys[4]);
+            config.ImpactStoneEffectScale = getValue(keys[5]);
+            config.ImpactMetalEffectScale = getValue(keys[6]);
+
+            return config;
+
+            Vector3 getValue(string key)
+            {
+                Vector3 vector3 = Vector3.one;
+                if (xDataHolder.HasKey(key))
+                {
+                   vector3 =  xDataHolder.ReadVector3(key);
+                }
+                else
+                {
+                    xDataHolder.Write(key, Vector3.one);
+                }
+                return vector3;
+            }
+        }
+
+        public Configuration()
+        {
+            ExplosionEffectScale = Vector3.one;
+            GatlingFireEffectScale = Vector3.one;
+            MachineGunFireEffectScale = Vector3.one;
+            ImpactWoodEffectScale = Vector3.one;
+            ImpactStoneEffectScale = Vector3.one;
+            ImpactMetalEffectScale = Vector3.one;
+        }
+    }
 }
