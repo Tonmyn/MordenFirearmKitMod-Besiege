@@ -85,6 +85,7 @@ namespace ModernFirearmKitMod
             config.ImpactStoneEffectScale = getValue(keys[5]);
             config.ImpactMetalEffectScale = getValue(keys[6]);
 
+            Modding.Configuration.Save();
             return config;
 
             Vector3 getValue(string key)
