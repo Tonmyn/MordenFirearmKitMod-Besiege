@@ -1,4 +1,6 @@
 ﻿using Modding;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ModernFirearmKitMod
@@ -50,67 +52,80 @@ namespace ModernFirearmKitMod
 
         private void loadConfiguration()
         {
-            Configuration = Configuration.FormatXDataToConfig(Modding.Configuration.GetData());
+            Configuration = Configuration.FormatXDataToConfig();
         }
     }
 
     public class Configuration
     {
-        [Modding.Serialization.CanBeEmpty]
         public Vector3 RocketTrailEffectScale = Vector3.one;
-        [Modding.Serialization.CanBeEmpty]
         public Vector3 ExplosionEffectScale = Vector3.one;
-        [Modding.Serialization.CanBeEmpty]
         public Vector3 GatlingFireEffectScale = Vector3.one;
-        [Modding.Serialization.CanBeEmpty]
         public Vector3 MachineGunFireEffectScale = Vector3.one;
-        [Modding.Serialization.CanBeEmpty]
         public Vector3 ImpactWoodEffectScale = Vector3.one;
-        [Modding.Serialization.CanBeEmpty]
         public Vector3 ImpactStoneEffectScale = Vector3.one;
-        [Modding.Serialization.CanBeEmpty]
         public Vector3 ImpactMetalEffectScale = Vector3.one;
 
-        public static Configuration FormatXDataToConfig(XDataHolder xDataHolder)
+        public static Configuration FormatXDataToConfig(Configuration config = null)
         {
-            var config = new Configuration();
+            XDataHolder xDataHolder = Modding.Configuration.GetData();
+            bool reWrite = true;
+
+            if (config == null)
+            {
+                reWrite = false;
+                config = new Configuration();
+            }
 
             string[] keys = new string[] { "RocketTrail","Explosion", "GaltingFire", "MachineGunFire", "ImpactWood", "ImpactStone", "ImpactMetal" };
 
-            config.RocketTrailEffectScale = getValue(keys[0]);
-            config.ExplosionEffectScale = getValue(keys[1]) ;
-            config.GatlingFireEffectScale = getValue(keys[2]);
-            config.MachineGunFireEffectScale = getValue(keys[3]);
-            config.ImpactWoodEffectScale = getValue(keys[4]);
-            config.ImpactStoneEffectScale = getValue(keys[5]);
-            config.ImpactMetalEffectScale = getValue(keys[6]);
+            config.RocketTrailEffectScale = getValue(keys[0],config.RocketTrailEffectScale);
+            config.ExplosionEffectScale = getValue(keys[1], config.ExplosionEffectScale) ;
+            config.GatlingFireEffectScale = getValue(keys[2], config.GatlingFireEffectScale);
+            config.MachineGunFireEffectScale = getValue(keys[3], config.MachineGunFireEffectScale);
+            config.ImpactWoodEffectScale = getValue(keys[4], config.ImpactWoodEffectScale);
+            config.ImpactStoneEffectScale = getValue(keys[5], config.ImpactStoneEffectScale);
+            config.ImpactMetalEffectScale = getValue(keys[6], config.ImpactMetalEffectScale);
 
             Modding.Configuration.Save();
             return config;
 
-            Vector3 getValue(string key)
+            T getValue<T>(string key, T defaultValue)
             {
-                Vector3 vector3 = Vector3.one;
-                if (xDataHolder.HasKey(key))
+                foreach (var type in typeSpecialAction.Keys)
                 {
-                   vector3 =  xDataHolder.ReadVector3(key);
+                    if (defaultValue.GetType() == type)
+                    {
+                        if (xDataHolder.HasKey(key) && !reWrite)
+                        {
+                            defaultValue = (T)Convert.ChangeType(typeSpecialAction[type](xDataHolder, key), typeof(T));
+                        }
+                        else
+                        {
+                            xDataHolder.Write(key, defaultValue);
+                        }
+                        break;
+                    }
                 }
-                else
-                {
-                    xDataHolder.Write(key, Vector3.one);
-                }
-                return vector3;
+                return defaultValue;
             }
         }
-
-        public Configuration()
+        private static Dictionary<Type, Func<XDataHolder, string, object>> typeSpecialAction = new Dictionary<Type, Func<XDataHolder, string, object>>
         {
-            ExplosionEffectScale = Vector3.one;
-            GatlingFireEffectScale = Vector3.one;
-            MachineGunFireEffectScale = Vector3.one;
-            ImpactWoodEffectScale = Vector3.one;
-            ImpactStoneEffectScale = Vector3.one;
-            ImpactMetalEffectScale = Vector3.one;
-        }
+            { typeof(int), (xDataHolder,key)=>xDataHolder.ReadInt(key)},
+            { typeof(bool), (xDataHolder,key)=>xDataHolder.ReadBool(key)},
+            { typeof(float), (xDataHolder,key)=>xDataHolder.ReadFloat(key)},
+            { typeof(string), (xDataHolder,key)=>xDataHolder.ReadString(key)},
+            { typeof(Vector3), (xDataHolder,key)=>xDataHolder.ReadVector3(key)},
+        };
+        //public Configuration()
+        //{
+        //    ExplosionEffectScale = Vector3.one;
+        //    GatlingFireEffectScale = Vector3.one;
+        //    MachineGunFireEffectScale = Vector3.one;
+        //    ImpactWoodEffectScale = Vector3.one;
+        //    ImpactStoneEffectScale = Vector3.one;
+        //    ImpactMetalEffectScale = Vector3.one;
+        //}
     }
 }
