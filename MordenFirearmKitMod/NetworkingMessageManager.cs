@@ -16,9 +16,10 @@ namespace ModernFirearmKitMod
 
         void Awake()
         {
-            ModNetworking.Callbacks[GatlingGunBlockScript.FireMessage] += GatlingGunBlockScript.FireNetworkingEvent;
-            ModNetworking.Callbacks[GunBarrelBlockScript.FireMessage] += GunBarrelBlockScript.FireNetworkingEvent;
-            ModNetworking.Callbacks[MachineGunBlockScript.FireMessage] += MachineGunBlockScript.FireNetworkingEvent;
+            //ModNetworking.Callbacks[GatlingGunBlockScript.FireMessage] += GatlingGunBlockScript.FireNetworkingEvent;
+            //ModNetworking.Callbacks[GunBarrelBlockScript.FireMessage] += GunBarrelBlockScript.FireNetworkingEvent;
+            //ModNetworking.Callbacks[MachineGunBlockScript.FireMessage] += MachineGunBlockScript.FireNetworkingEvent;
+            ModNetworking.Callbacks[LauncherBlockScript.FireMessage] += LauncherBlockScript.LaunchNetworkingEvent;
             ModNetworking.Callbacks[RayBulletScript.ImpactMessage] += RayBulletScript.ImpactNetworkingEvent;
 
             ModNetworking.Callbacks[RocketScript.ExplodeMessage] += RocketScript.ExplodeNetworkingEvent;

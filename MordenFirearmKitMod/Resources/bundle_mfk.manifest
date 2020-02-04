@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2309701043
+CRC: 1466806278
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: d4e15fbc7dfee3a77433910906907007
+    Hash: 84d1970b4617e6942e86660338b6c043
   TypeTreeHash:
     serializedVersion: 2
     Hash: 4140f6970f71a1bade3c9d48dff19f04
@@ -37,6 +37,7 @@ ClassTypes:
   Script: {instanceID: 0}
 Assets:
 - Assets/MFK-Effects/MachineGun/MachineGunSmokeEffect.prefab
+- Assets/MFK-Effects/DarkSmoke/DarkSmoke.prefab
 - Assets/MFK-Effects/Rocket/RocketTrailEffect.prefab
 - Assets/MFK-Effects/MachineGun/Materials/MachineGunMat.mat
 - Assets/MFK-Effects/BigExplosion/BigExplosion.prefab

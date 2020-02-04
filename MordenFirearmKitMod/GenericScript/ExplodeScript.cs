@@ -44,7 +44,7 @@ namespace ModernFirearmKitMod
         void Awake()
         {
             rigidbody = GetComponent<Rigidbody>();
-            fireEffect = (GameObject)Instantiate(AssetManager.Instance.Explosion.explosionEffect);
+            fireEffect = (GameObject)Instantiate(AssetManager.Instance.Explosion.bigExplosionEffect);
             fireEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
             fireEffect.transform.localScale *= 5f;
             fireEffect.SetActive(false);
@@ -68,7 +68,7 @@ namespace ModernFirearmKitMod
                 fireEffect.SetActive(false);
             }        
         }
-        public IEnumerator Explodey(Vector3 position, float power,float radius,explosionType explosiontype)
+        private IEnumerator Explodey(Vector3 position, float power,float radius,explosionType explosiontype)
         {
             if (StatMaster.isClient) yield break;
 

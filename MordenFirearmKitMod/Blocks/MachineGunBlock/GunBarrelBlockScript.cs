@@ -39,10 +39,10 @@ namespace ModernFirearmKitMod
         MSlider spawnDistanceSlider;
         MSlider damperSlider;
 
-        #region Network
-        /// <summary>Block, GunbodyVelocity, BulletGuid</summary>
-        public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Vector3, DataType.String);
-        #endregion
+        //#region Network
+        ///// <summary>Block, GunbodyVelocity, BulletGuid</summary>
+        //public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Vector3, DataType.String);
+        //#endregion
 
         public override void SafeAwake()
         {
@@ -97,7 +97,7 @@ namespace ModernFirearmKitMod
             CJ.yDrive = yd;
 
             initVFX();
-
+   
             void initVFX()
             {
                 EffectsObject = EffectsObject ?? (GameObject)Instantiate(AssetManager.Instance.MachineGun.fireEffect, transform);
@@ -154,7 +154,7 @@ namespace ModernFirearmKitMod
                 EffectsObject.GetComponent<Reactivator>().Switch = true;
             }
         }
-        void fire_Network(Vector3 velocity, Guid guid)
+        internal override void Launch_Network(Vector3 velocity, Guid guid)
         {
             var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value);
             bullet.GetComponent<RayBulletScript>().Guid = guid;
@@ -173,19 +173,19 @@ namespace ModernFirearmKitMod
             }
         }
 
-        public static void FireNetworkingEvent(Message message)
-        {
-            if (StatMaster.isClient)
-            {
-                var block = ((Block)message.GetData(0));
-                var velocity = (Vector3)message.GetData(1);
-                var guid = new Guid(((string)message.GetData(2)));
-                GameObject gameObject = block.GameObject;
+        //public static void FireNetworkingEvent(Message message)
+        //{
+        //    if (StatMaster.isClient)
+        //    {
+        //        var block = ((Block)message.GetData(0));
+        //        var velocity = (Vector3)message.GetData(1);
+        //        var guid = new Guid(((string)message.GetData(2)));
+        //        GameObject gameObject = block.GameObject;
 
-                var gbbs = gameObject.GetComponent<GunBarrelBlockScript>();
-                gbbs.fire_Network(velocity, guid);
-            }
-        }
+        //        var gbbs = gameObject.GetComponent<GunBarrelBlockScript>();
+        //        gbbs.fire_Network(velocity, guid);
+        //    }
+        //}
 
     }
 }

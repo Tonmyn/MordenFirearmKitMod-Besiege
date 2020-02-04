@@ -40,6 +40,11 @@ namespace ModernFirearmKitMod
 
         public event Action<GameObject> LaunchEvent;
 
+        #region Network
+        /// <summary>Block, GunbodyVelocity, BulletGuid,</summary>
+        public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Vector3, DataType.String);
+        #endregion
+
         public abstract void Reload(bool constraint = false);
 
         public IEnumerator Launch()
@@ -53,7 +58,7 @@ namespace ModernFirearmKitMod
             GameObject bullet = (GameObject)Instantiate(BulletObject, transform.TransformPoint(SpawnPoint), transform.rotation, transform.root);
 
             bullet.SetActive(true);
-            bullet.GetComponent<BulletScript>().FireEnabled = true;
+            //bullet.GetComponent<BulletScript>().FireEnabled = true;
             //bullet.GetComponent<BulletScript>().OnCollisionEvent += () => { Debug.Log("bullet colli"); };
 
             LaunchEvent?.Invoke(bullet);
@@ -93,6 +98,21 @@ namespace ModernFirearmKitMod
             LaunchEnable = false;
             launchEndAction?.Invoke();
             yield break;
+        }
+
+        internal virtual void Launch_Network(Vector3 velocity, Guid guid) { }
+        public static void LaunchNetworkingEvent(Message message)
+        {
+            if (StatMaster.isClient)
+            {
+                var block = ((Block)message.GetData(0));
+                var velocity = (Vector3)message.GetData(1);
+                var guid = new Guid(((string)message.GetData(2)));
+                GameObject gameObject = block.GameObject;
+
+                var component = (LauncherBlockScript)gameObject.GetComponent(typeof(LauncherBlockScript));
+                component.Launch_Network(velocity, guid);
+            }
         }
     }
 }

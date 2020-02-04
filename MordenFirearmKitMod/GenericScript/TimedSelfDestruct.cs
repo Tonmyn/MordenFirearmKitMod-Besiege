@@ -31,7 +31,7 @@ namespace ModernFirearmKitMod
 
         IEnumerator Timer(float t)
         {
-            yield return new WaitForSeconds(t / 10f);
+            yield return new WaitForSeconds(t * 0.1f);
             if (gameObject)
             {
                 

@@ -1,5 +1,6 @@
 ﻿using Modding;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,6 +17,7 @@ namespace ModernFirearmKitMod
         GatlingGunBlock = 655,
         MachineGunBlock = 656,
         GunBarrelBlock = 657,
+        QuickFireGunBlock = 658,
         DirectionBlock = 660,
     }
 
@@ -58,13 +60,46 @@ namespace ModernFirearmKitMod
 
     public class Configuration
     {
-        public Vector3 RocketTrailEffectScale = Vector3.one;
-        public Vector3 ExplosionEffectScale = Vector3.one;
-        public Vector3 GatlingFireEffectScale = Vector3.one;
-        public Vector3 MachineGunFireEffectScale = Vector3.one;
-        public Vector3 ImpactWoodEffectScale = Vector3.one;
-        public Vector3 ImpactStoneEffectScale = Vector3.one;
-        public Vector3 ImpactMetalEffectScale = Vector3.one;
+        //public /*static*/ Vector3 RocketTrailEffectScale = Vector3.one;
+        //public /*static*/ Vector3 BigExplosionEffectScale = Vector3.one;
+        //public /*static*/ Vector3 SmokeExplosionEffectScale = Vector3.one;
+        //public /*static*/ Vector3 GatlingFireEffectScale = Vector3.one;
+        //public /*static*/ Vector3 MachineGunFireEffectScale = Vector3.one;
+        //public /*static*/ Vector3 ImpactWoodEffectScale = Vector3.one;
+        //public /*static*/ Vector3 ImpactStoneEffectScale = Vector3.one;
+        //public /*static*/ Vector3 ImpactMetalEffectScale = Vector3.one;
+
+        internal static ArrayList Propertises { get; private set; } = new ArrayList()
+        {
+            new Propertise<Vector3>{  Key = "RocketTrail", Value =Vector3.one },
+            new Propertise<Vector3>{  Key = "Explosion", Value =Vector3.one },
+            new Propertise<Vector3>{  Key = "SmokeExplosion", Value =Vector3.one },
+            new Propertise<Vector3>{  Key = "GaltingFire", Value =Vector3.one },
+            new Propertise<Vector3>{  Key = "MachineGunFire", Value =Vector3.one },
+            new Propertise<Vector3>{  Key = "ImpactWood", Value =Vector3.one },
+            new Propertise<Vector3>{  Key = "ImpactStone", Value =Vector3.one },
+            new Propertise<Vector3>{  Key = "ImpactMetal", Value =Vector3.one },
+        };
+
+        public class Propertise<T>
+        {
+            public string Key;
+            public T Value;
+        }
+
+        public T GetValue<T>(string key)
+        {
+            T value = default;
+
+            foreach (Propertise<T> pro in Propertises)
+            {
+                if (pro.Key == key)
+                {
+                    value = pro.Value;
+                }
+            }
+            return value;
+        }
 
         public static Configuration FormatXDataToConfig(Configuration config = null)
         {
@@ -77,37 +112,74 @@ namespace ModernFirearmKitMod
                 config = new Configuration();
             }
 
-            string[] keys = new string[] { "RocketTrail","Explosion", "GaltingFire", "MachineGunFire", "ImpactWood", "ImpactStone", "ImpactMetal" };
+            //string[] keys = new string[] { "RocketTrail", "Explosion","SmokeExplosion", "GaltingFire", "MachineGunFire", "ImpactWood", "ImpactStone", "ImpactMetal" };
 
-            config.RocketTrailEffectScale = getValue(keys[0],config.RocketTrailEffectScale);
-            config.ExplosionEffectScale = getValue(keys[1], config.ExplosionEffectScale) ;
-            config.GatlingFireEffectScale = getValue(keys[2], config.GatlingFireEffectScale);
-            config.MachineGunFireEffectScale = getValue(keys[3], config.MachineGunFireEffectScale);
-            config.ImpactWoodEffectScale = getValue(keys[4], config.ImpactWoodEffectScale);
-            config.ImpactStoneEffectScale = getValue(keys[5], config.ImpactStoneEffectScale);
-            config.ImpactMetalEffectScale = getValue(keys[6], config.ImpactMetalEffectScale);
+            //config.RocketTrailEffectScale = getValue(keys[0], config.RocketTrailEffectScale);
+            //config.BigExplosionEffectScale = getValue(keys[1], config.BigExplosionEffectScale);
+            //config.SmokeExplosionEffectScale = getValue(keys[2], config.SmokeExplosionEffectScale);
+            //config.GatlingFireEffectScale = getValue(keys[3], config.GatlingFireEffectScale);
+            //config.MachineGunFireEffectScale = getValue(keys[4], config.MachineGunFireEffectScale);
+            //config.ImpactWoodEffectScale = getValue(keys[5], config.ImpactWoodEffectScale);
+            //config.ImpactStoneEffectScale = getValue(keys[6], config.ImpactStoneEffectScale);
+            //config.ImpactMetalEffectScale = getValue(keys[7], config.ImpactMetalEffectScale);
+
+            for (int i = 0; i < Propertises.Count; i++)
+            {
+                var value = Propertises[i];
+
+                if (value is Propertise<int>)
+                {
+                    value = getValue(value as Propertise<int>);
+                }
+                else if (value is Propertise<bool>)
+                {
+                    value = getValue(value as Propertise<bool>);
+                }
+                else if (value is Propertise<float>)
+                {
+                    value = getValue(value as Propertise<float>);
+                }
+                else if (value is Propertise<string>)
+                {
+                    value = getValue(value as Propertise<string>);
+                }
+                else if (value is Propertise<Vector3>)
+                {
+                    value = getValue(value as Propertise<Vector3>);
+                }
+                Propertises[i] = value;
+            }
 
             Modding.Configuration.Save();
             return config;
 
-            T getValue<T>(string key, T defaultValue)
+            //T getValue<T>(string key, T defaultValue)
+            //{
+            //    if (xDataHolder.HasKey(key) && !reWrite)
+            //    {
+            //        defaultValue = (T)Convert.ChangeType(typeSpecialAction[typeof(T)](xDataHolder, key), typeof(T));
+            //    }
+            //    else
+            //    {
+            //        xDataHolder.Write(key, defaultValue);
+            //    }
+            //    return defaultValue;
+            //}
+            Propertise<T> getValue<T>(Propertise<T> propertise)
             {
-                foreach (var type in typeSpecialAction.Keys)
+                var key = propertise.Key;
+                var defaultValue = propertise.Value;
+
+                if (xDataHolder.HasKey(key) && !reWrite)
                 {
-                    if (defaultValue.GetType() == type)
-                    {
-                        if (xDataHolder.HasKey(key) && !reWrite)
-                        {
-                            defaultValue = (T)Convert.ChangeType(typeSpecialAction[type](xDataHolder, key), typeof(T));
-                        }
-                        else
-                        {
-                            xDataHolder.Write(key, defaultValue);
-                        }
-                        break;
-                    }
+                    defaultValue = (T)Convert.ChangeType(typeSpecialAction[typeof(T)](xDataHolder, key), typeof(T));
                 }
-                return defaultValue;
+                else
+                {
+                    xDataHolder.Write(key, defaultValue);
+                }
+
+                return new Propertise<T>() { Key = key, Value = defaultValue };
             }
         }
         private static Dictionary<Type, Func<XDataHolder, string, object>> typeSpecialAction = new Dictionary<Type, Func<XDataHolder, string, object>>
@@ -118,14 +190,5 @@ namespace ModernFirearmKitMod
             { typeof(string), (xDataHolder,key)=>xDataHolder.ReadString(key)},
             { typeof(Vector3), (xDataHolder,key)=>xDataHolder.ReadVector3(key)},
         };
-        //public Configuration()
-        //{
-        //    ExplosionEffectScale = Vector3.one;
-        //    GatlingFireEffectScale = Vector3.one;
-        //    MachineGunFireEffectScale = Vector3.one;
-        //    ImpactWoodEffectScale = Vector3.one;
-        //    ImpactStoneEffectScale = Vector3.one;
-        //    ImpactMetalEffectScale = Vector3.one;
-        //}
     }
 }

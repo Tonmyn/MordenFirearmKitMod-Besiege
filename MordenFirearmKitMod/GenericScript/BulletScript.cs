@@ -481,17 +481,15 @@ namespace ModernFirearmKitMod
         }
 
         //public BulletKind Kind { get; set; } = BulletScript.BulletKind.BaseBullet;
+        public Guid Guid { get; } = Guid.NewGuid();
 
         /// <summary>推力</summary>
         public float Strength;
 
-        //public float LaunchTime;
         /// <summary>碰撞开启时间(0.01s)</summary>
-        public float CollisionEnableTime;
-        /// <summary>发射使能</summary>
-        public bool FireEnabled { get; set; }
+        public float ColliderEnableTime;
         /// <summary>已经发射</summary>
-        public bool Fired { get { return isFired; } set { isFired = value; } }
+        public bool Fired { get { return isFired; } } 
         private bool isFired = false;
         public bool Collisioned { get; private set; }
         /// <summary>发射方向</summary>
@@ -500,49 +498,55 @@ namespace ModernFirearmKitMod
         /// <summary>子弹刚体</summary>
         public Rigidbody rigidbody;
         /// <summary>碰撞事件</summary>
-        public event Action OnCollisionEvent;
-        public event Action OnLaunchEvent;
-        //public event Action OnLaunchedEvent;
+        private event Action<Collision> OnCollisionEvent;
+        /// <summary>开火事件</summary>
+        private event Action OnFireEvent;
         Collider collider;
+
 
         void Awake()
         {
-            rigidbody = GetComponent<Rigidbody>();
             collider = GetComponent<Collider>();
+            rigidbody = GetComponent<Rigidbody>();
         }
-
         void OnEnable()
         {
-            FireEnabled = isFired = false;
-            
+            isFired = false;
+            Collisioned = false;
             collider.enabled = false;
-            Collisioned = /*rigidbody.detectCollisions =*/ false;
         }
-
-        void Update()
+        private void OnCollisionEnter(Collision collision)
         {
-            if (FireEnabled && !Fired)
+            if (collider.enabled == true && !Collisioned)
             {
-                isFired = true;
-                OnLaunchEvent?.Invoke();
-                StartCoroutine(Launch());
+                Collisioned = true;
+                OnCollisionEvent?.Invoke(collision);
             }
         }
 
-        void OnCollisionEnter(Collision collision)
-        {         
-            if (/*rigidbody.detectCollisions*/ collider.enabled== true && !Collisioned)
-            {
-                Collisioned = true;
-                OnCollisionEvent?.Invoke();
-            }      
-        }
+        public BulletScript Setup(float strength, float collisionEnableTime, Vector3 direction, Action onFire=null,Action<Collision> onCollision = null)
+        {
+            Strength = strength;
+            ColliderEnableTime = collisionEnableTime;
+            Direction = direction;
+            OnFireEvent += onFire;
+            OnCollisionEvent += onCollision;
 
-        public IEnumerator Launch()
+            return this;
+        }
+        public void Fire()
+        {
+            if (!isFired)
+            {
+                isFired = true;
+                OnFireEvent?.Invoke();
+                StartCoroutine(fire());
+            }
+        }
+        private IEnumerator fire()
         {
             rigidbody.AddRelativeForce(Direction * Strength, ForceMode.Impulse);
-            yield return new WaitForSeconds(CollisionEnableTime * 0.01f);
-            //rigidbody.detectCollisions = true;
+            yield return new WaitForSeconds(ColliderEnableTime * 0.01f);
             collider.enabled = true;
         }
     }

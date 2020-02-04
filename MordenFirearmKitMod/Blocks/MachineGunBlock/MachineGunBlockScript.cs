@@ -42,10 +42,10 @@ namespace ModernFirearmKitMod
         MSlider bulletDragSlider;
         MColourSlider bulletColorSlider;
 
-        #region Network
-        /// <summary>Block, GunbodyVelocity, BulletGuid,</summary>
-        public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Vector3, DataType.String);
-        #endregion
+        //#region Network
+        ///// <summary>Block, GunbodyVelocity, BulletGuid,</summary>
+        //public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Vector3, DataType.String);
+        //#endregion
 
         public override void SafeAwake()
         {
@@ -184,19 +184,19 @@ namespace ModernFirearmKitMod
             }
         }
 
-        public static void FireNetworkingEvent(Message message)
-        {
-            if (StatMaster.isClient)
-            {
-                var block = ((Block)message.GetData(0));
-                var velocity = (Vector3)message.GetData(1);
-                var guid = new Guid(((string)message.GetData(2)));
-                GameObject gameObject = block.GameObject;
+        //public static void FireNetworkingEvent(Message message)
+        //{
+        //    if (StatMaster.isClient)
+        //    {
+        //        var block = ((Block)message.GetData(0));
+        //        var velocity = (Vector3)message.GetData(1);
+        //        var guid = new Guid(((string)message.GetData(2)));
+        //        GameObject gameObject = block.GameObject;
 
-                var mgbs = gameObject.GetComponent<MachineGunBlockScript>();
-                mgbs.fire_Network(velocity, guid);
-            }
-        }
+        //        var mgbs = gameObject.GetComponent<MachineGunBlockScript>();
+        //        mgbs.fire_Network(velocity, guid);
+        //    }
+        //}
     }
 }
 

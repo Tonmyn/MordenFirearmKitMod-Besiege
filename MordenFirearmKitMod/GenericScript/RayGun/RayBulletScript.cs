@@ -47,7 +47,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         private LineRenderer lineRenderer;
         private float _time;
 
-        private LineRenderer lr;
+        //private LineRenderer lr;
 
         private void Start()
         {
@@ -70,13 +70,13 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             var diem = gameObject.GetComponent<DestroyIfEditMode>() ?? gameObject.AddComponent<DestroyIfEditMode>();
             OnCollisionEvent += onCollision;
 
-            var go = new GameObject("test");
-            lr = go.AddComponent<LineRenderer>();
-            go.AddComponent<DestroyIfEditMode>();
+            //var go = new GameObject("test");
+            //lr = go.AddComponent<LineRenderer>();
+            //go.AddComponent<DestroyIfEditMode>();
 
-            lr.material.color = Color.blue;
-            lr.SetPosition(0, sPoint);
-            lr.SetPosition(1, ePoint);
+            //lr.material.color = Color.blue;
+            //lr.SetPosition(0, sPoint);
+            //lr.SetPosition(1, ePoint);
         }
 
         private void Update()
@@ -211,7 +211,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             //{
             //    impact.transform.SetParent(hitInfo.transform);
             //}
-
+            //impact.AddComponent<DestroyIfEditMode>();
             var tsd = impact.AddComponent<TimedSelfDestruct>();
             //tsd.OnDestruct += () => { Destroy(impact); };
             tsd.lifeTime = 50f;

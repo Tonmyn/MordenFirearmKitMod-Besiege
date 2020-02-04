@@ -87,6 +87,7 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
     <Block path="GatlingGunBlock.xml"/>
     <Block path="MachineGunBlock.xml"/>
     <Block path="GunBarrelBlock.xml"/>
+    <Block path="QuickFireGunBlock.xml"/>
 	</Blocks>
 	
 	<!-- Any entities (level objects) your mod adds to the game.
@@ -145,9 +146,13 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
     <Mesh name ="GunBarrel Mesh" path="GunBarrel\GunBarrel.obj"/>
     <Texture name="GunBarrel Texture" path="GunBarrel\GunBarrel.png"/>
     <AudioClip name="GunBarrel AudioClip" path ="GunBarrel\Fire.ogg"/>
-  
-  <Mesh name ="Bullet Mesh" path="MachineGun\Bullet.obj"/>
-    <Texture name="Bullet Texture" path="MachineGun\Bullet.png"/>
+
+    <Mesh name ="QuickFireGun Mesh" path="QuickFireGun\QuickFireGun.obj"/>
+    <Texture name="QuickFireGun Texture" path="QuickFireGun\QuickFireGun.png"/>
+    <AudioClip name="QuickFireGun AudioClip" path="QuickFireGun\Fire.ogg"/>
+
+    <Mesh name ="Bullet Mesh" path="QuickFireGun\Bullet.obj"/>
+    <Texture name="Bullet Texture" path="QuickFireGun\Bullet.png"/>
   
 	</Resources>
 
