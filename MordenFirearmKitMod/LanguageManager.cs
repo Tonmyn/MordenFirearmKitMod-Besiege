@@ -23,11 +23,6 @@ namespace ModernFirearmKitMod
         { "English",new English()},
     };
 
-        void Awake()
-        {
-            OnLanguageChanged += ChangLanguage;
-        }
-
         void Update()
         {
             currentLanguageName = LocalisationManager.Instance.currLangName;
@@ -35,8 +30,8 @@ namespace ModernFirearmKitMod
             if (!lastLanguageName.Equals(currentLanguageName))
             {
                 lastLanguageName = currentLanguageName;
-
-                OnLanguageChanged.Invoke(currentLanguageName);
+                ChangLanguage(currentLanguageName);
+                OnLanguageChanged?.Invoke(currentLanguageName);
             }
         }
 
@@ -69,8 +64,10 @@ namespace ModernFirearmKitMod
         string strength { get; }
         string knockBack { get; }
 
+        string bulletPower { get; }
         string bulletMass { get; }
         string bulletDrag { get; }
+        string bulletTrailLength { get; }
         string bulletTrailColor { get; }
         string distance { get; }
         string damper { get; }
@@ -93,8 +90,10 @@ namespace ModernFirearmKitMod
         public string strength { get; } = "炮力";
         public string knockBack { get; } = "后坐力";
 
+        public string bulletPower { get; } = "子弹能量";
         public string bulletMass { get; } = "子弹质量";
         public string bulletDrag { get; } = "子弹阻力";
+        public string bulletTrailLength { get; } = "子弹拖尾长度";
         public string bulletTrailColor { get; } = "子弹尾迹颜色";
         public string distance { get; } = "枪口距离";
         public string damper { get; } = "阻尼";
@@ -117,14 +116,14 @@ namespace ModernFirearmKitMod
         public string strength { get; } = "Force";
         public string knockBack { get; } = "Knock Back";
 
+        public string bulletPower { get; } = "Bullet Power";
         public string bulletMass { get; } = "Bullet Mass";
         public string bulletDrag { get; } = "Bullet Drag";
+        public string bulletTrailLength { get; } = "Bullet TrailLength";
         public string bulletTrailColor { get; } = "Bullet TrailColor";
         public string distance { get; } = "Spawn Distance";
         public string damper { get; } = "Damper";
         public string hold { get; } = "Hold Fire";
     }
-
-
 
 }

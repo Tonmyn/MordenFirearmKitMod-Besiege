@@ -61,43 +61,67 @@ namespace ModernFirearmKitMod
     public class Configuration
     {
         //public /*static*/ Vector3 RocketTrailEffectScale = Vector3.one;
-        //public /*static*/ Vector3 BigExplosionEffectScale = Vector3.one;
+        //public /*static*/ Vector3 BigExplosionEffectScale = Vector3.one * 5f;
+        //public Vector3 LargeExplosionEffectScale = Vector3.one;
+        //public Vector3 SmallExplosionEffectScale = Vector3.one;
         //public /*static*/ Vector3 SmokeExplosionEffectScale = Vector3.one;
+        //public Vector3 FireworkExplosionEffectScale = Vector3.one;
         //public /*static*/ Vector3 GatlingFireEffectScale = Vector3.one;
         //public /*static*/ Vector3 MachineGunFireEffectScale = Vector3.one;
         //public /*static*/ Vector3 ImpactWoodEffectScale = Vector3.one;
         //public /*static*/ Vector3 ImpactStoneEffectScale = Vector3.one;
         //public /*static*/ Vector3 ImpactMetalEffectScale = Vector3.one;
+        //public float TrailLength = 0.1f;
 
         internal static ArrayList Propertises { get; private set; } = new ArrayList()
         {
-            new Propertise<Vector3>{  Key = "RocketTrail", Value =Vector3.one },
-            new Propertise<Vector3>{  Key = "Explosion", Value =Vector3.one },
-            new Propertise<Vector3>{  Key = "SmokeExplosion", Value =Vector3.one },
-            new Propertise<Vector3>{  Key = "GaltingFire", Value =Vector3.one },
-            new Propertise<Vector3>{  Key = "MachineGunFire", Value =Vector3.one },
-            new Propertise<Vector3>{  Key = "ImpactWood", Value =Vector3.one },
-            new Propertise<Vector3>{  Key = "ImpactStone", Value =Vector3.one },
-            new Propertise<Vector3>{  Key = "ImpactMetal", Value =Vector3.one },
+            new Propertise<Vector3>("RocketTrailEffectScale",  Vector3.one ),
+            new Propertise<Vector3>("BigExplosionEffectScale",  Vector3.one*5f ),
+            new Propertise<Vector3>("LargeExplosionEffectScale",  Vector3.one ),
+            new Propertise<Vector3>("SmokeExplosionEffectScale", Vector3.one ),
+            new Propertise<Vector3>( "SmallExplosionEffectScale", Vector3.one*0.5f),
+            new Propertise<Vector3>( "FireworkExplosionEffectScale", Vector3.one),
+            new Propertise<Vector3>("GaltingFireEffectScale", Vector3.one ),
+            new Propertise<Vector3>("MachineGunFireEffectScale", Vector3.one ),
+            new Propertise<Vector3>("ImpactWoodEffectScale", Vector3.one ),
+            new Propertise<Vector3>("ImpactStoneEffectScale", Vector3.one ),
+            new Propertise<Vector3>("ImpactMetalEffectScale", Vector3.one ),
+            new Propertise<float>("QFG-TrailLength",  0.1f),
+            new Propertise<float>("QFG-TrailWidth",  1f),
+            new Propertise<float>("QFG-CollisionEnableTime",0.1f)
         };
 
         public class Propertise<T>
         {
-            public string Key;
-            public T Value;
+            public string Key = "";
+            public T Value = default;
+
+            public Propertise(string key, T value) { Key = key; Value = value; }
+
+            public override string ToString()
+            {
+                return Key + " - " + Value.ToString();
+            }
         }
 
         public T GetValue<T>(string key)
         {
-            T value = default;
+            T value = default;  
 
-            foreach (Propertise<T> pro in Propertises)
+            foreach (var pro in Propertises)
             {
-                if (pro.Key == key)
+                if (pro is Propertise<T>)
                 {
-                    value = pro.Value;
+                    var _pro  = pro as Propertise<T>;
+                    if (_pro.Key == key)
+                    {
+                        value = _pro.Value;
+                        break;
+                    }
                 }
             }
+
+
             return value;
         }
 
@@ -112,16 +136,20 @@ namespace ModernFirearmKitMod
                 config = new Configuration();
             }
 
-            //string[] keys = new string[] { "RocketTrail", "Explosion","SmokeExplosion", "GaltingFire", "MachineGunFire", "ImpactWood", "ImpactStone", "ImpactMetal" };
+            //string[] keys = new string[] { "RocketTrail", "Explosion", "SmokeExplosion", "GaltingFire", "MachineGunFire", "ImpactWood", "ImpactStone", "ImpactMetal" };
 
             //config.RocketTrailEffectScale = getValue(keys[0], config.RocketTrailEffectScale);
             //config.BigExplosionEffectScale = getValue(keys[1], config.BigExplosionEffectScale);
+            //config.LargeExplosionEffectScale = getValue("LargeExplosion", Vector3.one);
+            //config.SmallExplosionEffectScale = getValue("SmallExplosion", Vector3.one);
             //config.SmokeExplosionEffectScale = getValue(keys[2], config.SmokeExplosionEffectScale);
+            //config.FireworkExplosionEffectScale = getValue("FireworkExplosion", Vector3.one);
             //config.GatlingFireEffectScale = getValue(keys[3], config.GatlingFireEffectScale);
             //config.MachineGunFireEffectScale = getValue(keys[4], config.MachineGunFireEffectScale);
             //config.ImpactWoodEffectScale = getValue(keys[5], config.ImpactWoodEffectScale);
             //config.ImpactStoneEffectScale = getValue(keys[6], config.ImpactStoneEffectScale);
             //config.ImpactMetalEffectScale = getValue(keys[7], config.ImpactMetalEffectScale);
+            //config.TrailLength = getValue("TrailLength", 0.1f);
 
             for (int i = 0; i < Propertises.Count; i++)
             {
@@ -135,7 +163,7 @@ namespace ModernFirearmKitMod
                 {
                     value = getValue(value as Propertise<bool>);
                 }
-                else if (value is Propertise<float>)
+                else if (value is Propertise<float> || value is Propertise<Single>)
                 {
                     value = getValue(value as Propertise<float>);
                 }
@@ -149,6 +177,7 @@ namespace ModernFirearmKitMod
                 }
                 Propertises[i] = value;
             }
+
 
             Modding.Configuration.Save();
             return config;
@@ -179,7 +208,7 @@ namespace ModernFirearmKitMod
                     xDataHolder.Write(key, defaultValue);
                 }
 
-                return new Propertise<T>() { Key = key, Value = defaultValue };
+                return new Propertise<T>(key, defaultValue);
             }
         }
         private static Dictionary<Type, Func<XDataHolder, string, object>> typeSpecialAction = new Dictionary<Type, Func<XDataHolder, string, object>>

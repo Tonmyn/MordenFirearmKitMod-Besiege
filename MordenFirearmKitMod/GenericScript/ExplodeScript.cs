@@ -12,63 +12,96 @@ namespace ModernFirearmKitMod
     {
 
         public bool isExplodey { get; set; } = false;
+        public float Power { get; private set; }
+        public float Radius { get; private set; }
+        public Vector3 Position { get; private set; } = default;
+        public explosionType ExplosionType { get;private set; }
 
-        public float Power { get; set; }
-
-        public float Radius { get; set; }
-
-        public Vector3 Position { get; set; }
-
-        public explosionType ExplosionType { get; set; }
-
-        public Rigidbody rigidbody;
+        //public Rigidbody rigidbody;
 
         public event Action OnExplode;
         public event Action<Collider[]> OnExploded;
         public event Action OnExplodeFinal;
 
         #region Network
-        /// <summary>position</summary>
-        public static MessageType ExplodyMessage = ModNetworking.CreateMessageType(DataType.Vector3);
+        /// <summary>ExplosionType,position</summary>
+        public static MessageType ExplodyMessage = ModNetworking.CreateMessageType(DataType.Integer,DataType.Vector3);
         #endregion
-
+        
         public enum explosionType
         {
-            炸弹 = 0,
-            手雷 = 1,
-            烟花 = 2
+            Large = 0,
+            Small = 1,
+            Firework = 2,
+            Big=3,
+            Smoke=4,
         }
 
         private GameObject fireEffect;
 
-        void Awake()
-        {
-            rigidbody = GetComponent<Rigidbody>();
-            fireEffect = (GameObject)Instantiate(AssetManager.Instance.Explosion.bigExplosionEffect);
-            fireEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
-            fireEffect.transform.localScale *= 5f;
-            fireEffect.SetActive(false);
-        }
+        //void Awake()
+        //{
+        //    //rigidbody = GetComponent<Rigidbody>();
+        //    fireEffect = (GameObject)Instantiate(AssetManager.Instance.Explosion.bigExplosionEffect);
+        //    fireEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
+        //    fireEffect.transform.localScale *= 5f;
+        //    fireEffect.SetActive(false); 
+        //}
 
+        public ExplodeScript Setup(explosionType explosionType,float power,float radius)
+        {
+            ExplosionType = explosionType;
+            Power = power;
+            Radius = radius;
+            return this;
+        }
+        private GameObject getExplodeEffectObject(explosionType explosionType)
+        {
+            GameObject go = null;
+            if (explosionType == explosionType.Large)
+            {
+                go = (GameObject)Instantiate(AssetManager.Instance.Explosion.largeExplosionEffect);
+                //go.SetActive(false);
+            }
+            else if (explosionType == explosionType.Small)
+            {
+                go = (GameObject)Instantiate(AssetManager.Instance.Explosion.smallExplosionEffect);
+                //go.transform.localScale = Vector3.Scale(go.transform.localScale, MordenFirearmKitBlockMod.Configuration.GetValue<Vector3>("SmallExplosion"));
+                //go.SetActive(false);
+            }
+            else if (explosionType == explosionType.Firework)
+            {
+                go = (GameObject)Instantiate(AssetManager.Instance.Explosion.fireworkeExplosionEffect);
+                //go.SetActive(false);
+            }
+            else if (explosionType == explosionType.Big)
+            {
+                go = (GameObject)Instantiate(AssetManager.Instance.Explosion.bigExplosionEffect);
+                //go.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
+                //go.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
+                //go.SetActive(false);
+            }
+            else if (explosionType == explosionType.Smoke)
+            {
+                go = (GameObject)Instantiate(AssetManager.Instance.Explosion.smokeExplosionEffect);
+                //go.SetActive(false);
+            }
+            return go;
+        }
         public void Explodey()
         {
-            StartCoroutine(Explodey(Position, Power, Radius, ExplosionType));
+            StartCoroutine(explodey(ExplosionType, Position, Power, Radius));
         }
-        public void Explody_Network(Vector3 position)
+        public void Explodey(Vector3 position)
         {
-            fireEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
-            fireEffect.transform.position = position;
-
-            StartCoroutine(ParticleEffectEvent());
-
-            IEnumerator ParticleEffectEvent()
-            {
-                fireEffect.SetActive(true);
-                yield return new WaitForSeconds(3f);
-                fireEffect.SetActive(false);
-            }        
+            Position = position;
+            Explodey();
         }
-        private IEnumerator Explodey(Vector3 position, float power,float radius,explosionType explosiontype)
+        public void Explodey(explosionType explosiontype, Vector3 position, float power, float radius)
+        {
+            StartCoroutine(explodey(explosiontype, position, power, radius));
+        }
+        private IEnumerator explodey(explosionType explosiontype,Vector3 position, float power, float radius)
         {
             if (StatMaster.isClient) yield break;
 
@@ -78,12 +111,13 @@ namespace ModernFirearmKitMod
             }
             else
             {
-                fireEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
+                fireEffect = getExplodeEffectObject(explosiontype);
+                if (ExplosionType == explosionType.Big) { fireEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up); }
                 fireEffect.transform.position = position;
 
                 if (!StatMaster.isClient)
                 {
-                    var message = ExplodyMessage.CreateMessage(position);
+                    var message = ExplodyMessage.CreateMessage((int)explosiontype,position);
                     ModNetworking.SendToAll(message);
                 }
             }
@@ -127,17 +161,35 @@ namespace ModernFirearmKitMod
             }
             //---------------------------------------------------------------
         }
+        public void Explody_Network(explosionType explosionType, Vector3 position)
+        {
+            fireEffect = getExplodeEffectObject(explosionType);
+            if (ExplosionType == explosionType.Big) { fireEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up); }
+            fireEffect.transform.position = position;
 
+            StartCoroutine(ParticleEffectEvent());
+
+            IEnumerator ParticleEffectEvent()
+            {
+                yield return new WaitForFixedUpdate();
+                isExplodey = true;
+
+                fireEffect.SetActive(true);
+                fireEffect.AddComponent<TimedSelfDestruct>().Begin(30f);
+                yield return new WaitForSeconds(3f);
+                fireEffect.SetActive(false);
+            }        
+        }
         public static void Explody_Network(Message message)
         {
             if (StatMaster.isClient)
             {
-                var position = (Vector3)message.GetData(0);
+                var explosionType = (explosionType)((int)message.GetData(0));
+                var position = (Vector3)message.GetData(1);
 
-               var go = new GameObject("Exploder");
-                go.AddComponent<DestroyIfEditMode>();
+                var go = new GameObject("Exploder");
+                go.AddComponent<ExplodeScript>().Explody_Network(explosionType, position);
                 go.AddComponent<TimedSelfDestruct>().Begin(30f);
-                go.AddComponent<ExplodeScript>().Explody_Network(position);
             }
         }
     }

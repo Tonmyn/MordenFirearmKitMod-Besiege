@@ -70,12 +70,10 @@ namespace ModernFirearmKitMod
             drager.enabled = false;
 
             exploder = GetComponent<ExplodeScript>() ?? gameObject.AddComponent<ExplodeScript>();
-            exploder.Power = ExplodePower;
-            exploder.Radius = ExplodeRadius;         
-            exploder.ExplosionType = ExplodeScript.explosionType.炸弹;
+            exploder.Setup(ExplodeScript.explosionType.Big, ExplodePower, ExplodeRadius);
             exploder.OnExplode += Explode;
             exploder.OnExploded += Exploded;
-            exploder.OnExplodeFinal += ExplodeFinal;           
+            exploder.OnExplodeFinal += ExplodeFinal;
         }
 
         void initParticle()
@@ -155,7 +153,7 @@ namespace ModernFirearmKitMod
                 configurableJoint.breakForce = configurableJoint.breakTorque = 0;
                 rigidbody.WakeUp();
             }
-            isLaunched = drager.enabled = !exploder.isExplodey;
+            isLaunched = drager.enabled = !isExplode;
 
 
             yield return new WaitForSeconds(ThrustTime);
@@ -179,8 +177,7 @@ namespace ModernFirearmKitMod
 
                 rigidbody.isKinematic = true;
 
-                exploder.Position = transform.position;
-                exploder.Explodey();
+                exploder.Explodey(transform.position);
 
                 gameObject.GetComponentInChildren<CapsuleCollider>().isTrigger = true;
                 gameObject.GetComponentsInChildren<MeshRenderer>().ToList().Find(match => match.name == "Vis").enabled = false;

@@ -40,9 +40,9 @@ namespace ModernFirearmKitMod
             }
         }
         /// <summary>
-        /// 开始销毁倒计时
+        /// 开始销毁倒计时(0.1s)
         /// </summary>
-        /// <param name="liftTime">单位0.1s</param>
+        /// <param name="lifeTime">单位0.1s</param>
         public void Begin(float lifeTime)
         {
             StartCoroutine(Timer(lifeTime));

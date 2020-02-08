@@ -266,10 +266,8 @@ namespace ModernFirearmKitMod
         //    EffectsObject.GetComponent<Reactivator>().Switch = true;
         //}
 
-        void fire_Network(Vector3 velocity, Guid guid)
+        internal override void Launch_Network(Vector3 velocity, Guid guid)
         {
-            BulletCurrentNumber--;
-
             var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
             bullet.GetComponent<RayBulletScript>().Guid = guid;
 
@@ -277,6 +275,18 @@ namespace ModernFirearmKitMod
             EffectsObject.SetActive(true);
             EffectsObject.GetComponent<Reactivator>().Switch = true;
         }
+
+        //void fire_Network(Vector3 velocity, Guid guid)
+        //{
+        //    BulletCurrentNumber--;
+
+        //    var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
+        //    bullet.GetComponent<RayBulletScript>().Guid = guid;
+
+        //    heat = Mathf.Clamp01(heat + 0.01f);
+        //    EffectsObject.SetActive(true);
+        //    EffectsObject.GetComponent<Reactivator>().Switch = true;
+        //}
 
         //public static void FireNetworkingEvent(Message message)
         //{

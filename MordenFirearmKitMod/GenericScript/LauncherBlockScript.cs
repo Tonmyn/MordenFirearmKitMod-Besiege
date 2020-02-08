@@ -110,7 +110,7 @@ namespace ModernFirearmKitMod
                 var guid = new Guid(((string)message.GetData(2)));
                 GameObject gameObject = block.GameObject;
 
-                var component = (LauncherBlockScript)gameObject.GetComponent(typeof(LauncherBlockScript));
+                var component = gameObject.GetComponent<LauncherBlockScript>();
                 component.Launch_Network(velocity, guid);
             }
         }

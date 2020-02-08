@@ -22,7 +22,9 @@ namespace ModernFirearmKitMod
         public override bool LaunchEnable { get; set; }
 
         public float Strength { get; set; }
-
+        private float trailTimeFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-TrailLength");
+        private float trailWidthFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-TrailWidth");
+        private float cetFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-CollisionEnableTime");
         //机枪开火音效
         AudioSource fireAudioSource;
 
@@ -30,8 +32,10 @@ namespace ModernFirearmKitMod
         GameObject EffectsObject;
 
         MSlider StrengthSlider;
+        MSlider bulletPowerSlider;
         MSlider bulletMassSlider;
         MSlider bulletDragSlider;
+        //MSlider bulletTrailLengthSlider;
         MColourSlider bulletColorSlider;
 
         MToggle holdToggle;
@@ -45,11 +49,13 @@ namespace ModernFirearmKitMod
             StrengthSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.strength, "Strength", 1f, 0.5f, 3f);
             RateSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.rate, "Rate", 0.35f, 0.1f, 0.3f);
 
-            KnockBackSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.knockBack, "KnockBack", 1f, 0.1f, 3f);
+            KnockBackSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.knockBack, "KnockBack", 0.5f, 0.1f, 1f);
             BulletNumberSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletNumber, "Number", 200f, 1f, 500f);
 
+            bulletPowerSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletPower, "Power", 0.3f, 0.1f, 1f);
             bulletMassSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletMass, "Mass", 0.1f, 0.1f, 0.5f);
             bulletDragSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletDrag, "Drag", 0.1f, 0.1f, 0.5f);
+            //bulletTrailLengthSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailLength, "Length", 0.1f, 0f, 0.4f);
             bulletColorSlider = AddColourSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailColor, "Color", Color.yellow, false);
 
 
@@ -70,7 +76,10 @@ namespace ModernFirearmKitMod
             fireAudioSource.maxDistance = 15f;
 
             CJ = GetComponent<ConfigurableJoint>();
-            CJ.yMotion = ConfigurableJointMotion.Free;
+            CJ.yMotion = ConfigurableJointMotion.Limited;
+            var cl = CJ.linearLimit;
+            cl.limit = 0.5f;
+            CJ.linearLimit = cl;
             var yd = CJ.yDrive;
             yd.positionDamper = 750f * damperSlider.Value;
             yd.positionSpring = 1000f;
@@ -82,13 +91,13 @@ namespace ModernFirearmKitMod
         public override void OnSimulateStart()
         {
             BulletCurrentNumber = BulletMaxNumber = (int)BulletNumberSlider.Value;
-            Strength = StrengthSlider.Value * 5f;
-            KnockBack = KnockBackSlider.Value * Strength * 4f;
+            Strength = StrengthSlider.Value * 120f;
+            KnockBack = KnockBackSlider.Value * Strength * 0.75f;
             Rate = RateSlider.Value;
 
             var yd = CJ.yDrive;
-            yd.positionDamper = 500f * damperSlider.Value;
-            yd.positionSpring = 3000f;
+            yd.positionDamper = 500f * damperSlider.Value * StrengthSlider.Value;
+            yd.positionSpring = 3000f * StrengthSlider.Value;
             CJ.yDrive = yd;
 
             initBullet();
@@ -109,12 +118,21 @@ namespace ModernFirearmKitMod
                 var rigidbody = BulletObject.AddComponent<Rigidbody>();
                 rigidbody.mass = bulletMassSlider.Value;
                 rigidbody.drag = bulletDragSlider.Value;
+                rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
                 var collider = BulletObject.AddComponent<BoxCollider>();
-
+                
                 var tsd = BulletObject.AddComponent<TimedSelfDestruct>();
 
                 var bs = BulletObject.AddComponent<BulletScript>();
+                bs.Setup(Strength, cetFactor, Direction);
+
+                var tr = BulletObject.AddComponent<TrailRenderer>();
+                tr.startWidth = BulletObject.transform.localScale.magnitude * trailWidthFactor;
+                tr.endWidth = BulletObject.transform.localScale.magnitude * 0.5f * trailWidthFactor;
+                tr.material = new Material(Shader.Find("Particles/Additive"));
+                tr.material.SetColor("_TintColor", bulletColorSlider.Value);
+                tr.time = Mathf.Clamp(trailTimeFactor, 0f, 1f);
 
                 BulletObject.SetActive(false);
             }
@@ -163,17 +181,16 @@ namespace ModernFirearmKitMod
 
             void BulletParticleEffectEvent()
             {
-                var bullet = (GameObject)Instantiate(BulletObject, transform.TransformPoint(SpawnPoint), transform.rotation);
+                var bullet = (GameObject)Instantiate(BulletObject, transform.TransformPoint(SpawnPoint + Direction), transform.rotation);
                 bullet.SetActive(true);
 
                 var bs = bullet.GetComponent<BulletScript>();
-                bs.Setup(Strength, 10f, Direction, null, (value) =>
+                bs.Fire( null, (value) =>
                  {
-                     Instantiate(AssetManager.Instance.Explosion.smokeExplosionEffect, bs.transform.position, Quaternion.identity);
-                     bs.GetComponent<MeshRenderer>().enabled = false;
+                     bs.gameObject.AddComponent<ExplodeScript>().Explodey(ExplodeScript.explosionType.Small, bullet.transform.position, bulletPowerSlider.Value, 3f);
                      bs.GetComponent<TimedSelfDestruct>().Begin(5f);
                  }
-                 ).Fire();
+                 );
   
 
                 if (StatMaster.isMP && Modding.Common.Player.GetAllPlayers().Count > 1)
@@ -191,18 +208,26 @@ namespace ModernFirearmKitMod
         }
         internal override void Launch_Network(Vector3 velocity, Guid guid)
         {
-            //var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value);
-            //bullet.GetComponent<RayBulletScript>().Guid = guid;
+            var bullet = (GameObject)Instantiate(BulletObject, transform.TransformPoint(SpawnPoint + Direction), transform.rotation);
+            bullet.SetActive(true);
 
-            //fireAudioSource.PlayOneShot(fireAudioSource.clip);
+            var bs = bullet.GetComponent<BulletScript>();
+            bs.Guid = guid;
+            bs.Fire(null, (value) =>
+            {
+                bs.GetComponent<TimedSelfDestruct>().Begin(5f);
+            }
+            );
 
-            //EffectsObject.SetActive(true);
-            //EffectsObject.GetComponent<Reactivator>().Switch = true;
+            fireAudioSource.PlayOneShot(fireAudioSource.clip);
+
+            EffectsObject.SetActive(true);
+            EffectsObject.GetComponent<Reactivator>().Switch = true;
         }
 
         public override void Reload(bool constraint = false)
         {
-            if (/*StatMaster.GodTools.InfiniteAmmoMode*/Machine.InfiniteAmmo)
+            if (Machine.InfiniteAmmo)
             {
                 BulletCurrentNumber = BulletMaxNumber;
             }

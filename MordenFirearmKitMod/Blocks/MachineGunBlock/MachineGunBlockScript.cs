@@ -164,7 +164,7 @@ namespace ModernFirearmKitMod
             }
         }
 
-        void fire_Network(Vector3 velocity,Guid guid)
+        internal override void Launch_Network(Vector3 velocity, Guid guid)
         {
             var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), -transform.right, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
             bullet.GetComponent<RayBulletScript>().Guid = guid;
@@ -175,6 +175,18 @@ namespace ModernFirearmKitMod
 
             fireAudioSource.PlayOneShot(fireAudioSource.clip);
         }
+
+        //void fire_Network(Vector3 velocity,Guid guid)
+        //{
+        //    var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), -transform.right, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
+        //    bullet.GetComponent<RayBulletScript>().Guid = guid;
+
+        //    heat = Mathf.Clamp01(heat + 0.01f);
+        //    EffectsObject.SetActive(true);
+        //    EffectsObject.GetComponent<Reactivator>().Switch = true;
+
+        //    fireAudioSource.PlayOneShot(fireAudioSource.clip);
+        //}
 
         public override void Reload(bool constraint = false)
         {

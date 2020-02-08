@@ -481,7 +481,7 @@ namespace ModernFirearmKitMod
         }
 
         //public BulletKind Kind { get; set; } = BulletScript.BulletKind.BaseBullet;
-        public Guid Guid { get; } = Guid.NewGuid();
+        public Guid Guid { get; set; } = Guid.NewGuid();
 
         /// <summary>推力</summary>
         public float Strength;
@@ -502,12 +502,14 @@ namespace ModernFirearmKitMod
         /// <summary>开火事件</summary>
         private event Action OnFireEvent;
         Collider collider;
+        MeshRenderer meshRenderer;
 
 
         void Awake()
         {
             collider = GetComponent<Collider>();
             rigidbody = GetComponent<Rigidbody>();
+            meshRenderer = GetComponent<MeshRenderer>();
         }
         void OnEnable()
         {
@@ -520,6 +522,9 @@ namespace ModernFirearmKitMod
             if (collider.enabled == true && !Collisioned)
             {
                 Collisioned = true;
+                collider.enabled = false;
+                rigidbody.isKinematic = true;
+                meshRenderer.enabled = false;
                 OnCollisionEvent?.Invoke(collision);
             }
         }
@@ -542,6 +547,12 @@ namespace ModernFirearmKitMod
                 OnFireEvent?.Invoke();
                 StartCoroutine(fire());
             }
+        }
+        public void Fire(Action onFire = null, Action<Collision> onCollision = null)
+        {
+            OnFireEvent += onFire;
+            OnCollisionEvent += onCollision;
+            Fire();
         }
         private IEnumerator fire()
         {
