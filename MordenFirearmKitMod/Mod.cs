@@ -115,10 +115,12 @@ namespace ModernFirearmKitMod
         {
             XDataHolder xDataHolder = Modding.Configuration.GetData();
             bool reWrite = true;
+            bool needWrite = false;
 
             if (config == null)
             {
                 reWrite = false;
+                needWrite = true;
                 config = new Configuration();
             }
 
@@ -149,8 +151,8 @@ namespace ModernFirearmKitMod
                 Propertises[i] = value;
             }
 
-
-            Modding.Configuration.Save();
+            if(needWrite) Modding.Configuration.Save();
+            
             return config;
 
             Propertise<T> getValue<T>(Propertise<T> propertise)
@@ -165,6 +167,7 @@ namespace ModernFirearmKitMod
                 else
                 {
                     xDataHolder.Write(key, defaultValue);
+                    needWrite = true;
                 }
 
                 return new Propertise<T>(key, defaultValue);
