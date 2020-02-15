@@ -39,15 +39,6 @@ namespace ModernFirearmKitMod
 
         private GameObject fireEffect;
 
-        //void Awake()
-        //{
-        //    //rigidbody = GetComponent<Rigidbody>();
-        //    fireEffect = (GameObject)Instantiate(AssetManager.Instance.Explosion.bigExplosionEffect);
-        //    fireEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
-        //    fireEffect.transform.localScale *= 5f;
-        //    fireEffect.SetActive(false); 
-        //}
-
         public ExplodeScript Setup(explosionType explosionType,float power,float radius)
         {
             ExplosionType = explosionType;
@@ -61,30 +52,23 @@ namespace ModernFirearmKitMod
             if (explosionType == explosionType.Large)
             {
                 go = (GameObject)Instantiate(AssetManager.Instance.Explosion.largeExplosionEffect);
-                //go.SetActive(false);
+
             }
             else if (explosionType == explosionType.Small)
             {
                 go = (GameObject)Instantiate(AssetManager.Instance.Explosion.smallExplosionEffect);
-                //go.transform.localScale = Vector3.Scale(go.transform.localScale, MordenFirearmKitBlockMod.Configuration.GetValue<Vector3>("SmallExplosion"));
-                //go.SetActive(false);
             }
             else if (explosionType == explosionType.Firework)
             {
                 go = (GameObject)Instantiate(AssetManager.Instance.Explosion.fireworkeExplosionEffect);
-                //go.SetActive(false);
             }
             else if (explosionType == explosionType.Big)
             {
                 go = (GameObject)Instantiate(AssetManager.Instance.Explosion.bigExplosionEffect);
-                //go.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
-                //go.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
-                //go.SetActive(false);
             }
             else if (explosionType == explosionType.Smoke)
             {
                 go = (GameObject)Instantiate(AssetManager.Instance.Explosion.smokeExplosionEffect);
-                //go.SetActive(false);
             }
             return go;
         }

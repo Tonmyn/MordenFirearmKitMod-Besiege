@@ -122,7 +122,8 @@ namespace ModernFirearmKitMod
             smallExplosionEffect = GamePrefabs.InstantiateExplosion(GamePrefabs.ExplosionType.Small);
             fireworkeExplosionEffect = GamePrefabs.InstantiateExplosion(GamePrefabs.ExplosionType.Firework);
 
-            AssetManager.SetObjectScale(bigExplosionEffect, MordenFirearmKitBlockMod.Configuration.GetValue<Vector3>("BigExplosionEffectScale"));
+            //AssetManager.SetObjectScale(bigExplosionEffect, MordenFirearmKitBlockMod.Configuration.GetValue<Vector3>("BigExplosionEffectScale"));
+            bigExplosionEffect.transform.localScale = Vector3.Scale(bigExplosionEffect.transform.localScale, MordenFirearmKitBlockMod.Configuration.GetValue<Vector3>("BigExplosionEffectScale"));
             bigExplosionEffect.transform.FindChild("Debris").localRotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up);
             bigExplosionEffect.transform.localRotation = Quaternion.AngleAxis(90f, Vector3.left);
             bigExplosionEffect.SetActive(false);

@@ -136,7 +136,7 @@ namespace ModernFirearmKitMod
                 {
                     value = getValue(value as Propertise<bool>);
                 }
-                else if (value is Propertise<float> || value is Propertise<Single>)
+                else if (value is Propertise<float>)
                 {
                     value = getValue(value as Propertise<float>);
                 }
