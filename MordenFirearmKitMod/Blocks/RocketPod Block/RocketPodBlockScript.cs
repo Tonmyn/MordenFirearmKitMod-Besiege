@@ -129,7 +129,7 @@ namespace ModernFirearmKitMod
             Reload();
             if (!StatMaster.isClient)
             {
-                if (LaunchKey.IsHeld)
+                if (LaunchKey.IsHeld||LaunchKey.EmulationHeld())
                 {
                     if (!LaunchEnable && BulletCurrentNumber > 0)
                     {

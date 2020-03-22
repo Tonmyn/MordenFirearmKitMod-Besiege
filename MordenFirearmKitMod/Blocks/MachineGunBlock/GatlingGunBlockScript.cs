@@ -190,7 +190,7 @@ namespace ModernFirearmKitMod
                 }
             }
             Reload();
-            if (LaunchKey.IsHeld && BulletCurrentNumber > 0)
+            if ((LaunchKey.IsHeld || LaunchKey.EmulationHeld()) && BulletCurrentNumber > 0)
             {
                 RotationRate = Mathf.MoveTowards(RotationRate, RotationRateLimit, 105f * Time.timeScale * Time.deltaTime);
                 if (!StatMaster.isClient)

@@ -114,7 +114,7 @@ namespace ModernFirearmKitMod
             Reload();
             if ( BulletCurrentNumber > 0)
             {
-                if ((holdToggle.IsActive && LaunchKey.IsHeld)|| (!holdToggle.IsActive&& LaunchKey.IsPressed))
+                if ((holdToggle.IsActive && (LaunchKey.IsHeld|| LaunchKey.EmulationHeld()))|| (!holdToggle.IsActive&& LaunchKey.IsPressed))
                 {
                     if (!StatMaster.isClient)
                     {

@@ -95,7 +95,7 @@ namespace ModernFirearmKitMod
 
         public override void SimulateUpdateAlways()
         {
-            if (launch_key.IsPressed && !rocketScript.Launched)
+            if ((launch_key.IsPressed || launch_key.EmulationPressed())&& !rocketScript.Launched)
             {
                 rocketScript.LaunchEnabled = true;
                 if (StatMaster.isHosting)
