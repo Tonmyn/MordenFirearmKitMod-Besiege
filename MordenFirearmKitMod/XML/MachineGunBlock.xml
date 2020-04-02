@@ -133,7 +133,7 @@
 		<!-- Insert Collider definitions here.
 			 Example: -->
     <BoxCollider>
-      <Position x="-0.34" y="0.0" z="0.3" />
+      <Position x="-0.74" y="0.0" z="0.3" />
       <Rotation x="0.0" y="0.0" z="0.0" />
       <Scale x="3.5" y="0.25" z="0.55" />
     </BoxCollider>

@@ -64,7 +64,7 @@ namespace ModernFirearmKitMod
             bulletColorSlider = AddColourSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailColor, "Color", Color.yellow, false);
 
             //KnockBack = 1f;
-            SpawnPoint = new Vector3(-2.05f,0f, 0.5f);
+            SpawnPoint = new Vector3(-2.65f,0f, 0.5f);
             Direction = -Vector3.right;
             //BulletObject = AssetManager.Instance.MachineGun.bulletTemp;
             //BulletObject = InstanstiateBullet();
@@ -91,6 +91,7 @@ namespace ModernFirearmKitMod
         public override void OnSimulateStart()
         {
             BulletCurrentNumber = BulletMaxNumber = (int)BulletNumberSlider.Value;
+            SpawnPoint = this.BlockBehaviour.BuildingBlock.GetComponent<MachineGunBlockScript>().SpawnPoint;
             Strength = StrengthSlider.Value * 5f;
             KnockBack = KnockBackSlider.Value * Strength * 4f;
             Rate = RateSlider.Value;

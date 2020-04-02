@@ -102,7 +102,6 @@
     <None Include="Resources\GatlingGun\GatlingGun.ps" />
     <None Include="Resources\GunBarrel\GunBarrel.obj" />
     <None Include="Resources\GunBarrel\GunBarrel._U1_V1.ps" />
-    <None Include="Resources\MachineGun\Bullet.obj" />
     <None Include="Resources\MachineGun\MachineGun.ps" />
     <None Include="Resources\MachineGun\MachineGun.obj" />
     <None Include="Resources\RocketPod\Rocket.obj" />
@@ -117,7 +116,6 @@
     <Content Include="Resources\GunBarrel\Fire.ogg" />
     <Content Include="Resources\GunBarrel\GunBarrel.png" />
     <Content Include="Resources\icon.png" />
-    <Content Include="Resources\MachineGun\Bullet.png" />
     <Content Include="Resources\MachineGun\Fire.ogg" />
     <Content Include="Resources\MachineGun\MachineGun-e.png" />
     <Content Include="Resources\MachineGun\MachineGun.png" />
