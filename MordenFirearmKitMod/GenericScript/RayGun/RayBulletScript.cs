@@ -95,59 +95,19 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
                 if (Physics.Raycast(sPoint, bulletPropertise.Velocity, out hitInfo, (sPoint - ePoint).magnitude) )
                 {
-                    if (hitInfo.transform == gunbodyTransform && gunbodyTransform != null)
+                    if ((hitInfo.transform == gunbodyTransform && gunbodyTransform != null))
                     {
-                        lineRenderer.SetPosition(1, ePoint);
-                        sPoint = ePoint;
+                        shootingNothing();
                     }
                     else
                     {
-                        var targetType = "stone";
-
-                        lineRenderer.SetPosition(1, hitInfo.point);
-                        isCollision = true;
-
-                        if (!StatMaster.isClient)
-                        {
-                            try
-                            {
-                                OnCollisionEvent?.Invoke(hitInfo);
-                                targetType = createImpactEffect();
-                            }
-                            catch { }
-
-                            var message = ImpactMessage.CreateMessage(Guid.ToString(), targetType, hitInfo.point, hitInfo.normal);
-                            ModNetworking.SendToAll(message);
-                        }
-                        //else
-                        //{
-                        //    Debug.Log("client " + Guid);
-                        //}
-                        //var go = new GameObject("test");
-                        //go.AddComponent<DestroyIfEditMode>();
-                        //var lr = go.AddComponent<LineRenderer>();
-                        //lr.material.color = Color.red;
-                        //lr.SetWidth(0.2f, 0.2f);
-                        //lr.SetPosition(0, hitInfo.point);
-                        //lr.SetPosition(1, hitInfo.normal + hitInfo.point);
-
-                        //go = new GameObject("test");
-                        //go.AddComponent<DestroyIfEditMode>();
-                        //lr = go.AddComponent<LineRenderer>();
-                        //lr.material.color = Color.red;
-                        //lr.SetWidth(0.2f, 0.2f);
-                        //lr.SetPosition(0, hitInfo.point);
-                        //lr.SetPosition(1, bulletPropertise.direction + hitInfo.point);
+                        shootingSomething();
                     }               
                 }
                 else
                 {
-
-                    lineRenderer.SetPosition(1, ePoint /*+ Vector3.Project(bulletPropertise.Velocity, bulletPropertise.direction).magnitude * bulletPropertise.direction * _time * 0.5f*/);
-                    sPoint = ePoint;
+                    shootingNothing();
                 }
-
-                //bulletPropertise.direction = -(sPoint - ePoint).normalized;
             }
             else
             {
@@ -155,7 +115,28 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 Destroy(gameObject);
             }
 
+            void shootingSomething()
+            {
+                var targetType = "stone";
+
+                lineRenderer.SetPosition(1, hitInfo.point);
+                isCollision = true;
+
+                if (!StatMaster.isClient)
+                {
+                    OnCollisionEvent?.Invoke(hitInfo);
+                    targetType = createImpactEffect();
+
+                    var message = ImpactMessage.CreateMessage(Guid.ToString(), targetType, hitInfo.point, hitInfo.normal);
+                    ModNetworking.SendToAll(message);
+                }
+            }
            
+            void shootingNothing()
+            {
+                lineRenderer.SetPosition(1, ePoint);
+                sPoint = ePoint;
+            }
         }
 
         string createImpactEffect()
@@ -178,7 +159,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 targetType = "stone";
             }
 
-            if (hitInfo.rigidbody != null)
+            if (hitInfo.rigidbody != null || hitInfo.collider.attachedRigidbody !=null)
             {
                 impact.transform.SetParent(hitInfo.transform);
             }
@@ -207,10 +188,10 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 impact = (GameObject)Instantiate(AssetManager.Instance.Bullet.impactStoneEffect, point, Quaternion.LookRotation(normal));
             }
 
-            //if (hitInfo.rigidbody != null)
-            //{
-            //    impact.transform.SetParent(hitInfo.transform);
-            //}
+            if (hitInfo.rigidbody != null || hitInfo.collider.attachedRigidbody!=null)
+            {
+                impact.transform.SetParent(hitInfo.transform);
+            }
             //impact.AddComponent<DestroyIfEditMode>();
             var tsd = impact.AddComponent<TimedSelfDestruct>();
             //tsd.OnDestruct += () => { Destroy(impact); };
@@ -218,86 +199,114 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             tsd.Switch = true;
         }
 
-        private delegate void ActionIfHaveComponent(RaycastHit raycastHit, Vector3 vector3);
+        private delegate void ActionIfHaveComponent_Kenimatic(Rigidbody rigidbody , Vector3 vector3);
+        private delegate void ActionIfHaveComponent_Unkenimatic(RaycastHit hitinfo, Vector3 vector3);
 
-        private Dictionary<Type, ActionIfHaveComponent> action_Kinematic = new Dictionary<Type, ActionIfHaveComponent>()
+        private Dictionary<Type, ActionIfHaveComponent_Kenimatic> action_Kinematic = new Dictionary<Type, ActionIfHaveComponent_Kenimatic>()
         {
-            {typeof(ConfigurableJoint),(hitInfo,f)=>{var cj = hitInfo.rigidbody.gameObject.GetComponent<ConfigurableJoint>();cj.breakForce -= f.magnitude;cj.breakTorque -= f.magnitude; } },
-            {typeof(KillingHandler),(hitInfo,f)=>{var kh = hitInfo.rigidbody.gameObject.GetComponent<KillingHandler>();kh.KillUnit(true, InjuryType.Sharp);} },
-            {typeof(ExplodeOnCollide),(hitInfo,f)=>{var eoc = hitInfo.rigidbody.gameObject.GetComponent<ExplodeOnCollide>(); eoc.Explodey(); } },
-            {typeof(GibOnImpact),(hitInfo,f)=>{var goi = hitInfo.rigidbody.gameObject.GetComponent<GibOnImpact>(); goi.Gib(); } },
+            {typeof(ConfigurableJoint),(rigidbody,f)=>{var cj = rigidbody.gameObject.GetComponent<ConfigurableJoint>();cj.breakForce -= f.magnitude;cj.breakTorque -= f.magnitude; } },
+            {typeof(KillingHandler),(rigidbody,f)=>{var kh = rigidbody.gameObject.GetComponent<KillingHandler>();kh.KillUnit(true, InjuryType.Sharp);} },
+            {typeof(ExplodeOnCollide),(rigidbody,f)=>{var eoc = rigidbody.gameObject.GetComponent<ExplodeOnCollide>(); eoc.Explodey(); } },
+            {typeof(GibOnImpact),(rigidbody,f)=>{var goi = rigidbody.gameObject.GetComponent<GibOnImpact>(); goi.Gib(); } },
 
         };
-        private Dictionary<Type, ActionIfHaveComponent> action_Unkinematic = new Dictionary<Type,ActionIfHaveComponent>()
+        private Dictionary<Type, ActionIfHaveComponent_Unkenimatic> action_Unkinematic = new Dictionary<Type,ActionIfHaveComponent_Unkenimatic>()
         {
-             {typeof(BreakOnForce),(hitInfo,f)=>{ var bof = hitInfo.rigidbody.gameObject.GetComponent<BreakOnForce>();bof.BreakExplosion(f.magnitude, hitInfo.point, bof.breakForceRadius, 0f); } },
-             {typeof(DestroyOnTriggerEnter),(hitInfo,f)=>{var dote = hitInfo.rigidbody.gameObject.GetComponent<DestroyOnTriggerEnter>();dote.SendMessage("OnTriggerEnter", hitInfo.collider); } },
-             {typeof(ParticleOnCollide),(hitInfo,f)=>{ var poc = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>();poc.SendMessage("OnCollisionEnter", hitInfo.collider.GetComponentInChildren<Collision>());} },
-             {typeof(ParticleOnTrigger),(hitInfo,f)=>{ var pot = hitInfo.rigidbody.gameObject.GetComponent<ParticleOnTrigger>();pot.SendMessage("OnTriggerEnter", hitInfo.collider); } },
+             {typeof(BreakOnForce),(hitinfo,f)=>{ var bof = hitinfo.rigidbody.gameObject.GetComponent<BreakOnForce>();bof.BreakExplosion(f.magnitude, hitinfo.point, bof.breakForceRadius, 0f); } },
+             {typeof(DestroyOnTriggerEnter),(hitinfo,f)=>{var dote = hitinfo.rigidbody.gameObject.GetComponent<DestroyOnTriggerEnter>();dote.SendMessage("OnTriggerEnter", hitinfo.collider); } },
+             {typeof(ParticleOnCollide),(hitinfo,f)=>{ var poc = hitinfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>();poc.SendMessage("OnCollisionEnter", hitinfo.collider.GetComponentInChildren<Collision>());} },
+             {typeof(ParticleOnTrigger),(hitinfo,f)=>{ var pot = hitinfo.rigidbody.gameObject.GetComponent<ParticleOnTrigger>();pot.SendMessage("OnTriggerEnter",hitinfo.collider); } },
         };
         private void onCollision(RaycastHit hitInfo)
         {
             try
             {
-                if (hitInfo.rigidbody != null)
+                Rigidbody rigidbody = null;
+
+                if (hitInfo.collider.isTrigger == false)
                 {
-                    //∵MV = mv; I=Ft; F = I/t; I=Δp; Δp = mv
-                    //∴F=mv/t
-                    var f = (bulletPropertise.Velocity * bulletPropertise.Mass) / _time;
-
-                    if (hitInfo.rigidbody.isKinematic == false)
+                    if (hitInfo.rigidbody != null || hitInfo.collider.attachedRigidbody != null)
                     {
-                        if (hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>() != null
-                            && isWoodenBlock((BlockType)hitInfo.rigidbody.gameObject.GetComponent<BlockBehaviour>().BlockID)
-                            || hitInfo.transform.name.ToLower().Contains("tree"))
-                        {
-                            hitInfo.rigidbody.AddForceAtPosition(f * 10f, hitInfo.point);
-                        }
-                        else
-                        {
-                            specialComponentsAction(action_Kinematic);
-                            hitInfo.rigidbody.AddForceAtPosition(f , hitInfo.point);
-                        }
-                        Vector3 com = hitInfo.transform.TransformPoint(hitInfo.rigidbody.centerOfMass);
-                        Vector3 vector3 = hitInfo.point - com;
-                        Vector3 vector31 = f.normalized + hitInfo.point;
-                        Vector3 normal = Vector3.Cross(vector3, vector31);
-                        hitInfo.rigidbody.AddTorque(com + normal * f.magnitude * 0.008f);
-                    }
-                    else
-                    {
-                        specialComponentsAction(action_Unkinematic);
-                    }
-
-                    var bhb = hitInfo.rigidbody.gameObject.GetComponent<BlockHealthBar>();
-                    if (bhb != null)
-                    {
-                        bhb.DamageBlock(f.magnitude * 0.001f);
-                    }
-
-                    void specialComponentsAction(Dictionary<Type, ActionIfHaveComponent> dic)
-                    {
-                        foreach (var com in dic.Keys)
-                        {
-                            if (hitInfo.rigidbody.gameObject.GetComponent(com) != null)
-                            {
-                                dic[com](hitInfo, f);
-                                break;
-                            }
-                        }
+                        rigidbody = hitInfo.collider.attachedRigidbody ?? hitInfo.rigidbody;
                     }
                 }
                 else
                 {
-
+                    var levelEntity = hitInfo.transform.GetComponentInParent<LevelEntity>() ?? hitInfo.transform.GetComponentInChildren<LevelEntity>();
+                    if (levelEntity != null)
+                    {
+                        rigidbody = levelEntity.gameObject.GetComponent<Rigidbody>();
+                    }
                 }
+
+                addForceToRigidBody(rigidbody);
             }
             catch (Exception e)
             {
                 Debug.Log(e.Message);
             }
 
+            void addForceToRigidBody(Rigidbody rigidbody)
+            {
+                if (rigidbody == null) return;
 
+                //∵MV = mv; I=Ft; F = I/t; I=Δp; Δp = mv
+                //∴F=mv/t
+                var f = (bulletPropertise.Velocity * bulletPropertise.Mass) / _time;
+
+                if (rigidbody.isKinematic == false)
+                {
+                    if (rigidbody.gameObject.GetComponent<BlockBehaviour>() != null
+                        && isWoodenBlock((BlockType)rigidbody.gameObject.GetComponent<BlockBehaviour>().BlockID)
+                        || hitInfo.transform.name.ToLower().Contains("tree"))
+                    {
+                        rigidbody.AddForceAtPosition(f * 10f, hitInfo.point);
+                    }
+                    else
+                    {
+                        specialComponentsAction_Kinematic(action_Kinematic);
+                        rigidbody.AddForceAtPosition(f, hitInfo.point);
+                    }
+                    Vector3 com = hitInfo.transform.TransformPoint(rigidbody.centerOfMass);
+                    Vector3 vector3 = hitInfo.point - com;
+                    Vector3 vector31 = f.normalized + hitInfo.point;
+                    Vector3 normal = Vector3.Cross(vector3, vector31);
+                    rigidbody.AddTorque(com + normal * f.magnitude * 0.008f);
+                }
+                else
+                {
+                    specialComponentsAction_Unkinematic(action_Unkinematic);
+                }
+
+                var bhb = rigidbody.gameObject.GetComponent<BlockHealthBar>();
+                if (bhb != null)
+                {
+                    bhb.DamageBlock(f.magnitude * 0.001f);
+                }
+
+                void specialComponentsAction_Kinematic(Dictionary<Type, ActionIfHaveComponent_Kenimatic> dic)
+                {
+                    foreach (var com in dic.Keys)
+                    {
+                        if (rigidbody.gameObject.GetComponent(com) != null)
+                        {
+                            dic[com](rigidbody, f);
+                            break;
+                        }
+                    }
+                }
+                void specialComponentsAction_Unkinematic(Dictionary<Type,ActionIfHaveComponent_Unkenimatic> dic)
+                {
+                    foreach (var com in dic.Keys)
+                    {
+                        if (rigidbody.gameObject.GetComponent(com) != null)
+                        {
+                            dic[com](hitInfo, f);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
 
