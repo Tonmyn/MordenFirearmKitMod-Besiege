@@ -33,7 +33,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
         public bool isCollision { get; private set; } = false;
 
-        public event Action<RaycastHit> OnCollisionEvent;
+        public event Action<Rigidbody> OnCollisionEvent;
 
         public static MessageType ImpactMessage = ModNetworking.CreateMessageType(DataType.String,DataType.String,DataType.Vector3,DataType.Vector3);    
 
@@ -44,6 +44,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         private Vector3 sPoint;
         private Vector3 ePoint;
         private RaycastHit hitInfo;
+        private Rigidbody rigidbody_Aim = null;
         private LineRenderer lineRenderer;
         private float _time;
 
@@ -101,8 +102,19 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                     }
                     else
                     {
-                        shootingSomething();
-                    }               
+                        if (hasRigidbody(hitInfo, out rigidbody_Aim))
+                        {
+                            shootingSomething();
+                        }
+                        else if (hitInfo.collider.isTrigger == false)
+                        {
+                            shootingSomething();
+                        }
+                        else
+                        {
+                            shootingNothing();
+                        }
+                    }
                 }
                 else
                 {
@@ -115,6 +127,49 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                 Destroy(gameObject);
             }
 
+            bool hasRigidbody(RaycastHit hit , out Rigidbody rigidbody)
+            {
+                var value = false;
+                rigidbody = null;
+
+                if (hit.rigidbody != null && hit.rigidbody.isKinematic == false)
+                {
+                    value = true;
+                    rigidbody = hit.rigidbody;
+                    return value;
+                }
+                else if (hit.collider.attachedRigidbody != null && hit.collider.attachedRigidbody.isKinematic == false)
+                {
+                    value = true;
+                    rigidbody = hit.collider.attachedRigidbody;
+                    return value;
+                }
+
+                var blockBehaviour = hit.transform.GetComponentInParent<BlockBehaviour>() ?? hit.transform.GetComponentInChildren<BlockBehaviour>();
+                if (blockBehaviour != null)
+                {
+                    rigidbody = blockBehaviour.transform.GetComponent<Rigidbody>();
+                    if (rigidbody != null && rigidbody.isKinematic == false)
+                    {
+                        value = true;
+                        return value;
+                    }
+                }
+
+                var levelEntity = hit.transform.GetComponentInParent<LevelEntity>() ?? hit.transform.GetComponentInChildren<LevelEntity>();
+                if (levelEntity != null)
+                {
+                    rigidbody = levelEntity.transform.GetComponent<Rigidbody>();
+                    if (rigidbody != null && rigidbody.isKinematic == false)
+                    {
+                        value = true;
+                        return value;
+                    }
+                }
+
+                return value;
+            }
+
             void shootingSomething()
             {
                 var targetType = "stone";
@@ -124,7 +179,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
                 if (!StatMaster.isClient)
                 {
-                    OnCollisionEvent?.Invoke(hitInfo);
+                    OnCollisionEvent?.Invoke(rigidbody_Aim);
                     targetType = createImpactEffect();
 
                     var message = ImpactMessage.CreateMessage(Guid.ToString(), targetType, hitInfo.point, hitInfo.normal);
@@ -217,36 +272,9 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
              {typeof(ParticleOnCollide),(hitinfo,f)=>{ var poc = hitinfo.rigidbody.gameObject.GetComponent<ParticleOnCollide>();poc.SendMessage("OnCollisionEnter", hitinfo.collider.GetComponentInChildren<Collision>());} },
              {typeof(ParticleOnTrigger),(hitinfo,f)=>{ var pot = hitinfo.rigidbody.gameObject.GetComponent<ParticleOnTrigger>();pot.SendMessage("OnTriggerEnter",hitinfo.collider); } },
         };
-        private void onCollision(RaycastHit hitInfo)
+        private void onCollision(Rigidbody rigidbody)
         {
             try
-            {
-                Rigidbody rigidbody = null;
-
-                if (hitInfo.collider.isTrigger == false)
-                {
-                    if (hitInfo.rigidbody != null || hitInfo.collider.attachedRigidbody != null)
-                    {
-                        rigidbody = hitInfo.collider.attachedRigidbody ?? hitInfo.rigidbody;
-                    }
-                }
-                else
-                {
-                    var levelEntity = hitInfo.transform.GetComponentInParent<LevelEntity>() ?? hitInfo.transform.GetComponentInChildren<LevelEntity>();
-                    if (levelEntity != null)
-                    {
-                        rigidbody = levelEntity.gameObject.GetComponent<Rigidbody>();
-                    }
-                }
-
-                addForceToRigidBody(rigidbody);
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e.Message);
-            }
-
-            void addForceToRigidBody(Rigidbody rigidbody)
             {
                 if (rigidbody == null) return;
 
@@ -295,7 +323,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                         }
                     }
                 }
-                void specialComponentsAction_Unkinematic(Dictionary<Type,ActionIfHaveComponent_Unkenimatic> dic)
+                void specialComponentsAction_Unkinematic(Dictionary<Type, ActionIfHaveComponent_Unkenimatic> dic)
                 {
                     foreach (var com in dic.Keys)
                     {
@@ -306,6 +334,10 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                         }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
             }
         }
 
