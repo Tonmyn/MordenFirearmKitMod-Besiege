@@ -144,30 +144,31 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
                     rigidbody = hit.collider.attachedRigidbody;
                     return value;
                 }
-
-                var blockBehaviour = hit.transform.GetComponentInParent<BlockBehaviour>() ?? hit.transform.GetComponentInChildren<BlockBehaviour>();
-                if (blockBehaviour != null)
+                else
                 {
-                    rigidbody = blockBehaviour.transform.GetComponent<Rigidbody>();
-                    if (rigidbody != null && rigidbody.isKinematic == false)
+                    var blockBehaviour = hit.transform.GetComponentInParent<BlockBehaviour>() ?? hit.transform.GetComponentInChildren<BlockBehaviour>();
+                    if (blockBehaviour != null)
                     {
-                        value = true;
-                        return value;
+                        rigidbody = blockBehaviour.transform.GetComponent<Rigidbody>();
+                        if (rigidbody != null && rigidbody.isKinematic == false)
+                        {
+                            value = true;
+                            return value;
+                        }
                     }
-                }
 
-                var levelEntity = hit.transform.GetComponentInParent<LevelEntity>() ?? hit.transform.GetComponentInChildren<LevelEntity>();
-                if (levelEntity != null)
-                {
-                    rigidbody = levelEntity.transform.GetComponent<Rigidbody>();
-                    if (rigidbody != null && rigidbody.isKinematic == false)
+                    var levelEntity = hit.transform.GetComponentInParent<LevelEntity>() ?? hit.transform.GetComponentInChildren<LevelEntity>();
+                    if (levelEntity != null)
                     {
-                        value = true;
-                        return value;
+                        rigidbody = levelEntity.transform.GetComponent<Rigidbody>();
+                        if (rigidbody != null && rigidbody.isKinematic == false)
+                        {
+                            value = true;
+                            return value;
+                        }
                     }
+                    return value;
                 }
-
-                return value;
             }
 
             void shootingSomething()
@@ -284,22 +285,15 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
                 if (rigidbody.isKinematic == false)
                 {
-                    if (rigidbody.gameObject.GetComponent<BlockBehaviour>() != null
-                        && isWoodenBlock((BlockType)rigidbody.gameObject.GetComponent<BlockBehaviour>().BlockID)
-                        || hitInfo.transform.name.ToLower().Contains("tree"))
-                    {
-                        rigidbody.AddForceAtPosition(f * 10f, hitInfo.point);
-                    }
-                    else
-                    {
-                        specialComponentsAction_Kinematic(action_Kinematic);
-                        rigidbody.AddForceAtPosition(f, hitInfo.point);
-                    }
                     Vector3 com = hitInfo.transform.TransformPoint(rigidbody.centerOfMass);
                     Vector3 vector3 = hitInfo.point - com;
                     Vector3 vector31 = f.normalized + hitInfo.point;
                     Vector3 normal = Vector3.Cross(vector3, vector31);
+
+                    rigidbody.AddForceAtPosition(f * 5f, hitInfo.point);
                     rigidbody.AddTorque(com + normal * f.magnitude * 0.008f);
+
+                    specialComponentsAction_Kinematic(action_Kinematic);
                 }
                 else
                 {
