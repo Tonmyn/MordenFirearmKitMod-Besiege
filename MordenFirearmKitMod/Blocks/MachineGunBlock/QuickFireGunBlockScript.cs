@@ -22,9 +22,14 @@ namespace ModernFirearmKitMod
         public override bool LaunchEnable { get; set; }
 
         public float Strength { get; set; }
-        private float trailTimeFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-TrailLength");
-        private float trailWidthFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-TrailWidth");
-        private float cetFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-CollisionEnableTime");
+        #region Bullet's Property
+        //private float trailTimeFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-TrailLength");
+        //private float trailWidthFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-TrailWidth");
+        //private float cetFactor = MordenFirearmKitBlockMod.Configuration.GetValue<float>("QFG-CollisionEnableTime");
+        //public float trailTimeFactor { get; set; }
+        //public float trailWidthFactor { get; set; }
+        //public float cetFactor { get; set; }
+        #endregion
         //机枪开火音效
         AudioSource fireAudioSource;
 
@@ -35,7 +40,9 @@ namespace ModernFirearmKitMod
         MSlider bulletPowerSlider;
         MSlider bulletMassSlider;
         MSlider bulletDragSlider;
-        //MSlider bulletTrailLengthSlider;
+        MSlider bulletCollisionEnableTimeSlider;
+        MSlider bulletTrailLengthSlider;
+        MSlider bulletTrailWidthSlider;
         MColourSlider bulletColorSlider;
 
         MToggle holdToggle;
@@ -55,7 +62,9 @@ namespace ModernFirearmKitMod
             bulletPowerSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletPower, "Power", 0.3f, 0.1f, 1f);
             bulletMassSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletMass, "Mass", 0.1f, 0.1f, 0.5f);
             bulletDragSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletDrag, "Drag", 0.1f, 0.1f, 0.5f);
-            //bulletTrailLengthSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailLength, "Length", 0.1f, 0f, 0.4f);
+            bulletCollisionEnableTimeSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletCollisionEnableTime, "Collision Enable Time", 0.1f, 0.01f, 0.8f);
+            bulletTrailLengthSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailLength, "Length", 0.1f, 0f, 0.4f);
+            bulletTrailWidthSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailWidth, "Width", 1f, 0.1f, 3f);
             bulletColorSlider = AddColourSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailColor, "Color", Color.yellow, false);
 
 
@@ -125,14 +134,14 @@ namespace ModernFirearmKitMod
                 var tsd = BulletObject.AddComponent<TimedSelfDestruct>();
 
                 var bs = BulletObject.AddComponent<BulletScript>();
-                bs.Setup(Strength, cetFactor, Direction);
+                bs.Setup(Strength, bulletCollisionEnableTimeSlider.Value, Direction);
 
                 var tr = BulletObject.AddComponent<TrailRenderer>();
-                tr.startWidth = BulletObject.transform.localScale.magnitude * trailWidthFactor;
-                tr.endWidth = BulletObject.transform.localScale.magnitude * 0.5f * trailWidthFactor;
+                tr.startWidth = BulletObject.transform.localScale.magnitude * bulletTrailWidthSlider.Value;
+                tr.endWidth = BulletObject.transform.localScale.magnitude * 0.5f * bulletTrailWidthSlider.Value;
                 tr.material = new Material(Shader.Find("Particles/Additive"));
                 tr.material.SetColor("_TintColor", bulletColorSlider.Value);
-                tr.time = Mathf.Clamp(trailTimeFactor, 0f, 1f);
+                tr.time = Mathf.Clamp(bulletTrailLengthSlider.Value, 0f, 1f);
 
                 BulletObject.SetActive(false);
             }

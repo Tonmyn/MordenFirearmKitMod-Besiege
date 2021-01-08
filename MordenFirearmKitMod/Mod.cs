@@ -73,9 +73,9 @@ namespace ModernFirearmKitMod
             new Propertise<Vector3>("ImpactWoodEffectScale", Vector3.one ),
             new Propertise<Vector3>("ImpactStoneEffectScale", Vector3.one ),
             new Propertise<Vector3>("ImpactMetalEffectScale", Vector3.one ),
-            new Propertise<float>("QFG-TrailLength",  0.1f),
-            new Propertise<float>("QFG-TrailWidth",  1f),
-            new Propertise<float>("QFG-CollisionEnableTime",0.1f)
+            //new Propertise<float>("QFG-TrailLength",  0.1f),
+            //new Propertise<float>("QFG-TrailWidth",  1f),
+            //new Propertise<float>("QFG-CollisionEnableTime",0.1f)
         };
 
         public class Propertise<T>

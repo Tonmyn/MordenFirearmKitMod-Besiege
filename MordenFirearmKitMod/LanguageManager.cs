@@ -67,7 +67,9 @@ namespace ModernFirearmKitMod
         string bulletPower { get; }
         string bulletMass { get; }
         string bulletDrag { get; }
+        string bulletCollisionEnableTime { get; }
         string bulletTrailLength { get; }
+        string bulletTrailWidth { get; }
         string bulletTrailColor { get; }
         string distance { get; }
         string damper { get; }
@@ -93,7 +95,9 @@ namespace ModernFirearmKitMod
         public string bulletPower { get; } = "子弹能量";
         public string bulletMass { get; } = "子弹质量";
         public string bulletDrag { get; } = "子弹阻力";
+        public string bulletCollisionEnableTime { get; } = "子弹碰撞开启时间";
         public string bulletTrailLength { get; } = "子弹拖尾长度";
+        public string bulletTrailWidth { get; } = "子弹拖尾宽度";
         public string bulletTrailColor { get; } = "子弹尾迹颜色";
         public string distance { get; } = "枪口距离";
         public string damper { get; } = "阻尼";
@@ -119,7 +123,9 @@ namespace ModernFirearmKitMod
         public string bulletPower { get; } = "Bullet Power";
         public string bulletMass { get; } = "Bullet Mass";
         public string bulletDrag { get; } = "Bullet Drag";
-        public string bulletTrailLength { get; } = "Bullet TrailLength";
+        public string bulletCollisionEnableTime { get; } = "Bullet Collision Enable Time";
+        public string bulletTrailLength { get; } = "Bullet Trail Length";
+        public string bulletTrailWidth { get; } = "Bullet Trail Width";
         public string bulletTrailColor { get; } = "Bullet TrailColor";
         public string distance { get; } = "Spawn Distance";
         public string damper { get; } = "Damper";

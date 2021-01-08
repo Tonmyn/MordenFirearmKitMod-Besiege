@@ -19,12 +19,16 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         public BulletPropertise bulletPropertise { get; set; } = new BulletPropertise();
         public Transform gunbodyTransform;
         public Guid Guid  = Guid.NewGuid();
+
         public class BulletPropertise
         {
             public float Strength { get; set; } = 0f;
             public Vector3 Velocity { get; set; } = Vector3.zero;
             public float Drag { get; set; } = 0.1f;
             public float Mass { get; set; } = 0.1f;
+            /// <summary>碰撞开启时间(0.01s)</summary>
+            public float ColliderEnableTime { get; set; } = 0.01f;
+            public bool ColliderEnabled { get; set; } = false;
             public Vector3 GravityAcceleration { get; } = new Vector3(0, -0.23f, 0);
             public Vector3 orginPosition { get; set; } = Vector3.zero;
             public Vector3 direction { get; set; } = Vector3.forward;
@@ -46,7 +50,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         private RaycastHit hitInfo;
         private Rigidbody rigidbody_Aim = null;
         private LineRenderer lineRenderer;
-        private float _time;
+        private float _deltaTime;
 
         //private LineRenderer lr;
 
@@ -78,23 +82,29 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             //lr.material.color = Color.blue;
             //lr.SetPosition(0, sPoint);
             //lr.SetPosition(1, ePoint);
-        }
 
+            InvokeRepeating("enableBulletCollision", bulletPropertise.ColliderEnableTime, Mathf.Infinity);
+        }
+        void enableBulletCollision()
+        {
+            bulletPropertise.ColliderEnabled = true;
+            Debug.Log("??" + bulletPropertise.ColliderEnableTime);
+        }
         private void Update()
         {
             if (!isCollision)
             {
                 if (Time.timeScale == 0f) return;
 
-                _time = Time.smoothDeltaTime / Time.timeScale;
+                _deltaTime = Time.smoothDeltaTime / Time.timeScale;
                 Vector3 gravityVelocity = (!StatMaster.GodTools.GravityDisabled) ? (bulletPropertise.GravityAcceleration) : Vector3.zero;
                 Vector3 dragVelocity = -(bulletPropertise.Velocity.normalized * bulletPropertise.Drag);
                 bulletPropertise.Velocity += gravityVelocity + dragVelocity;
-                ePoint = sPoint + bulletPropertise.Velocity * _time;
+                ePoint = sPoint + bulletPropertise.Velocity * _deltaTime;
 
                 lineRenderer.SetPosition(0, sPoint);
 
-                if (Physics.Raycast(sPoint, bulletPropertise.Velocity, out hitInfo, (sPoint - ePoint).magnitude) )
+                if (Physics.Raycast(sPoint, bulletPropertise.Velocity, out hitInfo, (sPoint - ePoint).magnitude) && bulletPropertise.ColliderEnabled == true)
                 {
                     if ((hitInfo.transform == gunbodyTransform && gunbodyTransform != null))
                     {
@@ -281,7 +291,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
 
                 //∵MV = mv; I=Ft; F = I/t; I=Δp; Δp = mv
                 //∴F=mv/t
-                var f = (bulletPropertise.Velocity * bulletPropertise.Mass) / _time;
+                var f = (bulletPropertise.Velocity * bulletPropertise.Mass) / _deltaTime;
 
                 if (rigidbody.isKinematic == false)
                 {
@@ -389,7 +399,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             return value;
         }
 
-        public static GameObject CreateBullet(float strength,Vector3 spawnPoint,Vector3 direction,Vector3 velocity,float mass,float drag ,Color color, Transform gunbody = null, Action action = null)
+        public static GameObject CreateBullet(float strength,Vector3 spawnPoint,Vector3 direction,Vector3 velocity,float mass,float drag ,Color color, float collisionEnableTime,Transform gunbody = null, Action action = null)
         {
             var bullet = new GameObject("Bullet");
             //var mct = GameObject.Find("Main Camera").transform;
@@ -406,6 +416,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
             bs.bulletPropertise.Mass = mass;
             bs.bulletPropertise.Drag = drag;
             bs.bulletPropertise.color = color;
+            bs.bulletPropertise.ColliderEnableTime = collisionEnableTime;
 
             bs.gunbodyTransform = gunbody;
 
@@ -415,7 +426,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         }
         public static GameObject CreateBullet(BulletPropertise bulletPropertise, Transform gunbody = null, Action action = null)
         {
-            return CreateBullet(bulletPropertise.Strength, bulletPropertise.orginPosition, bulletPropertise.direction, bulletPropertise.Velocity, bulletPropertise.Mass, bulletPropertise.Drag, bulletPropertise.color, gunbody, action);
+            return CreateBullet(bulletPropertise.Strength, bulletPropertise.orginPosition, bulletPropertise.direction, bulletPropertise.Velocity, bulletPropertise.Mass, bulletPropertise.Drag, bulletPropertise.color,bulletPropertise.ColliderEnableTime, gunbody, action);
         }
 
         public static void ImpactNetworkingEvent(Message message)

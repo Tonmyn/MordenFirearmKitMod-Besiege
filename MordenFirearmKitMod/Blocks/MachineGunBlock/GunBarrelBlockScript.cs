@@ -22,8 +22,6 @@ namespace ModernFirearmKitMod
 
         public float Strength { get; set; }
 
-
-
         //机枪开火音效
         AudioSource fireAudioSource;
 
@@ -34,6 +32,7 @@ namespace ModernFirearmKitMod
         MSlider bulletMassSlider;
         MSlider bulletDragSlider;
         MColourSlider bulletColorSlider;
+        MSlider bulletCollisionEnableTimeSlider;
 
         MToggle holdToggle;
         MSlider spawnDistanceSlider;
@@ -56,7 +55,7 @@ namespace ModernFirearmKitMod
             bulletMassSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletMass, "Mass", 0.1f, 0.1f, 0.5f);
             bulletDragSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletDrag, "Drag", 0.1f, 0.1f, 0.5f);
             bulletColorSlider = AddColourSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailColor, "Color", Color.yellow, false);
-
+            bulletCollisionEnableTimeSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletCollisionEnableTime, "Collision Enable Time", 0.01f, 0f, 0.1f);
 
             holdToggle = AddToggle(LanguageManager.Instance.CurrentLanguage.hold, "Hold", true);
             spawnDistanceSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.distance, "Distance", 2f, 0f, 4f);
@@ -132,6 +131,26 @@ namespace ModernFirearmKitMod
             }     
         }
 
+        private void fireBaseMethod(Action<GameObject> additiveAction = null)
+        {
+            var bulletPropertise = new RayBulletScript.BulletPropertise()
+            {
+                Strength = this.Strength,
+                orginPosition = this.transform.TransformPoint(SpawnPoint),
+                direction = this.transform.forward,
+                Velocity = this.Rigidbody.velocity,
+                Mass = this.bulletMassSlider.Value,
+                Drag = this.bulletDragSlider.Value,
+                color = this.bulletColorSlider.Value,
+                ColliderEnableTime = this.bulletCollisionEnableTimeSlider.Value
+            };
+            var bullet = RayBulletScript.CreateBullet(bulletPropertise, transform);
+
+            additiveAction.Invoke(bullet);
+
+            EffectsObject.SetActive(true);
+            EffectsObject.GetComponent<Reactivator>().Switch = true;
+        }
         void fire()
         {
    
@@ -143,26 +162,22 @@ namespace ModernFirearmKitMod
 
             void BulletParticleEffectEvent()
             {
-                var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
+                fireBaseMethod((bullet) =>
+                {
+                    var message = FireMessage.CreateMessage(BlockBehaviour, Rigidbody.velocity, bullet.GetComponent<RayBulletScript>().Guid.ToString());
+                    ModNetworking.SendToAll(message);
 
-                var message = FireMessage.CreateMessage(BlockBehaviour, Rigidbody.velocity, bullet.GetComponent<RayBulletScript>().Guid.ToString());
-                ModNetworking.SendToAll(message);
-
-                fireAudioSource.PlayOneShot(fireAudioSource.clip);
-
-                EffectsObject.SetActive(true);
-                EffectsObject.GetComponent<Reactivator>().Switch = true;
+                    fireAudioSource.PlayOneShot(fireAudioSource.clip);
+                });
             }
         }
         internal override void Launch_Network(Vector3 velocity, Guid guid)
         {
-            var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.TransformDirection(Direction), velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value);
-            bullet.GetComponent<RayBulletScript>().Guid = guid;
-
-            fireAudioSource.PlayOneShot(fireAudioSource.clip);
-
-            EffectsObject.SetActive(true);
-            EffectsObject.GetComponent<Reactivator>().Switch = true;
+            fireBaseMethod((bullet) =>
+            {
+                bullet.GetComponent<RayBulletScript>().Guid = guid;
+                fireAudioSource.PlayOneShot(fireAudioSource.clip);
+            });
         }
 
         public override void Reload(bool constraint = false)

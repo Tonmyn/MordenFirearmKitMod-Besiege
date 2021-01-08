@@ -41,6 +41,7 @@ namespace ModernFirearmKitMod
         MSlider bulletMassSlider;
         MSlider bulletDragSlider;
         MColourSlider bulletColorSlider;
+        MSlider bulletCollisionEnableTimeSlider;
 
         //#region Network
         ///// <summary>Block, GunbodyVelocity, BulletGuid,</summary>
@@ -59,6 +60,7 @@ namespace ModernFirearmKitMod
             bulletMassSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletMass, "Mass", 0.1f, 0.1f, 0.5f);
             bulletDragSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletDrag, "Drag", 0.1f, 0.1f, 0.5f);
             bulletColorSlider = AddColourSlider(LanguageManager.Instance.CurrentLanguage.bulletTrailColor, "Color", Color.yellow, false);
+            bulletCollisionEnableTimeSlider = AddSlider(LanguageManager.Instance.CurrentLanguage.bulletCollisionEnableTime, "Collision Enable Time", 0.01f, 0f, 0.1f);
 
             SpawnPoint = new Vector3(0, 0.125f, 3.75f);
             Direction = Vector3.forward;
@@ -230,7 +232,27 @@ namespace ModernFirearmKitMod
                 BulletCurrentNumber = BulletMaxNumber;
             }
         }
+        private void fireBaseMethod(Action<GameObject> additiveAction = null)
+        {
+            var bulletPropertise = new RayBulletScript.BulletPropertise()
+            {
+                Strength = this.Strength,
+                orginPosition = this.transform.TransformPoint(SpawnPoint),
+                direction = this.transform.forward,
+                Velocity = this.Rigidbody.velocity,
+                Mass = this.bulletMassSlider.Value,
+                Drag = this.bulletDragSlider.Value,
+                color = this.bulletColorSlider.Value,
+                ColliderEnableTime = this.bulletCollisionEnableTimeSlider.Value
+            };
+            var bullet = RayBulletScript.CreateBullet(bulletPropertise, transform);
 
+            additiveAction.Invoke(bullet);
+
+            heat = Mathf.Clamp01(heat + 0.01f);
+            EffectsObject.SetActive(true);
+            EffectsObject.GetComponent<Reactivator>().Switch = true;
+        }
         private void fire()
         {
            
@@ -244,63 +266,18 @@ namespace ModernFirearmKitMod
 
              void BulletParticleEffectEvent()
             {
-                var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, Rigidbody.velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
-
-                var message = FireMessage.CreateMessage(BlockBehaviour, Rigidbody.velocity, bullet.GetComponent<RayBulletScript>().Guid.ToString());
-                ModNetworking.SendToAll(message);
-
-                heat = Mathf.Clamp01(heat + 0.01f);
-                EffectsObject.SetActive(true);
-                EffectsObject.GetComponent<Reactivator>().Switch = true;
+                fireBaseMethod((bullet) =>
+                {
+                    var message = FireMessage.CreateMessage(BlockBehaviour, Rigidbody.velocity, bullet.GetComponent<RayBulletScript>().Guid.ToString());
+                    ModNetworking.SendToAll(message);
+                }
+                );
             }
         }
-        //private void fire_Network(Vector3 velocity, Guid guid)
-        //{
-        //    BulletCurrentNumber--;
-
-        //    var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
-        //    bullet.GetComponent<RayBulletScript>().Guid = guid;
-
-        //    heat = Mathf.Clamp01(heat + 0.01f);
-        //    EffectsObject.SetActive(true);
-        //    EffectsObject.GetComponent<Reactivator>().Switch = true;
-        //}
-
         internal override void Launch_Network(Vector3 velocity, Guid guid)
         {
-            var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
-            bullet.GetComponent<RayBulletScript>().Guid = guid;
-
-            heat = Mathf.Clamp01(heat + 0.01f);
-            EffectsObject.SetActive(true);
-            EffectsObject.GetComponent<Reactivator>().Switch = true;
+            fireBaseMethod((bullet) => { bullet.GetComponent<RayBulletScript>().Guid = guid; });
         }
-
-        //void fire_Network(Vector3 velocity, Guid guid)
-        //{
-        //    BulletCurrentNumber--;
-
-        //    var bullet = RayBulletScript.CreateBullet(Strength, transform.TransformPoint(SpawnPoint), transform.forward, velocity, bulletMassSlider.Value, bulletDragSlider.Value, bulletColorSlider.Value, transform);
-        //    bullet.GetComponent<RayBulletScript>().Guid = guid;
-
-        //    heat = Mathf.Clamp01(heat + 0.01f);
-        //    EffectsObject.SetActive(true);
-        //    EffectsObject.GetComponent<Reactivator>().Switch = true;
-        //}
-
-        //public static void FireNetworkingEvent(Message message)
-        //{
-        //    if (StatMaster.isClient)
-        //    {
-        //        var block = ((Block)message.GetData(0));
-        //        var velocity = (Vector3)message.GetData(1);
-        //        var guid = new Guid(((string)message.GetData(2)));
-        //        GameObject gameObject = block.GameObject;
-
-        //        var ggbs = gameObject.GetComponent<GatlingGunBlockScript>();
-        //        ggbs.fire_Network(velocity, guid);
-        //    }
-        //}
     }
 }
 
