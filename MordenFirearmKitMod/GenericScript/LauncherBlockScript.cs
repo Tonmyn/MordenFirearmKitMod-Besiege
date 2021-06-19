@@ -45,7 +45,13 @@ namespace ModernFirearmKitMod
         public static MessageType FireMessage = ModNetworking.CreateMessageType(DataType.Block, DataType.Vector3, DataType.String);
         #endregion
 
-        public abstract void Reload(bool constraint = false);
+        public virtual void Reload(bool constraint = false)
+        {
+            if (Machine.InfiniteAmmo)
+            {
+                BulletCurrentNumber = BulletMaxNumber;
+            }
+        }
 
         public IEnumerator Launch()
         {

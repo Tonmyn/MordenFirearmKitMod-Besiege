@@ -9,7 +9,7 @@
 	<Name>Modern Firearm Kit Mod</Name>
 	<Author>XultimateX</Author> <!-- FIX: Insert your name here. -->
 	<!-- Major.Minor.Build -->
-	<Version>0.2.10</Version>
+	<Version>0.2.11</Version>
 	
 	<Description>
 Some excited modern firearms. <!-- FIX: Insert a short description here. -->
@@ -33,7 +33,7 @@ Some excited modern firearms. <!-- FIX: Insert a short description here. -->
 		 It is generally recommended to turn this on while developing the mod, but keep it off for any releases.
 		 
 		 Note: This value is independent of the Debug values for specific Blocks and Entities.-->
-	<Debug>false</Debug>
+	<Debug>true</Debug>
 	
 	<!-- Whether the mod can be used in MP or only in SP.
 		 SP-only mods are easier to write but obviously more limited in their uses.

@@ -222,6 +222,7 @@ namespace ModernFirearmKitMod
 
             var bs = bullet.GetComponent<BulletScript>();
             bs.Guid = guid;
+            bs.rigidbody.velocity = velocity;
             bs.Fire(null, (value) =>
             {
                 bs.GetComponent<TimedSelfDestruct>().Begin(5f);
@@ -234,12 +235,12 @@ namespace ModernFirearmKitMod
             EffectsObject.GetComponent<Reactivator>().Switch = true;
         }
 
-        public override void Reload(bool constraint = false)
-        {
-            if (Machine.InfiniteAmmo)
-            {
-                BulletCurrentNumber = BulletMaxNumber;
-            }
-        }    
+        //public override void Reload(bool constraint = false)
+        //{
+        //    if (Machine.InfiniteAmmo)
+        //    {
+        //        BulletCurrentNumber = BulletMaxNumber;
+        //    }
+        //}    
     }
 }

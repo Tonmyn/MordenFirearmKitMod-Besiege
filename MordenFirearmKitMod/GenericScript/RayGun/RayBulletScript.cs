@@ -88,7 +88,7 @@ namespace ModernFirearmKitMod.GenericScript.RayGun
         void enableBulletCollision()
         {
             bulletPropertise.ColliderEnabled = true;
-            Debug.Log("??" + bulletPropertise.ColliderEnableTime);
+            //Debug.Log("??" + bulletPropertise.ColliderEnableTime);
         }
         private void Update()
         {

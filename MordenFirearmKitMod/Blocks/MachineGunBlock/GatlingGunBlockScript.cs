@@ -225,13 +225,13 @@ namespace ModernFirearmKitMod
             }
         }
 
-        public override void Reload(bool constraint = false)
-        {
-            if (/*StatMaster.GodTools.InfiniteAmmoMode*/ Machine.InfiniteAmmo)
-            {
-                BulletCurrentNumber = BulletMaxNumber;
-            }
-        }
+        //public override void Reload(bool constraint = false)
+        //{
+        //    if (/*StatMaster.GodTools.InfiniteAmmoMode*/ Machine.InfiniteAmmo)
+        //    {
+        //        BulletCurrentNumber = BulletMaxNumber;
+        //    }
+        //}
         private void fireBaseMethod(Action<GameObject> additiveAction = null)
         {
             var bulletPropertise = new RayBulletScript.BulletPropertise()
@@ -239,7 +239,7 @@ namespace ModernFirearmKitMod
                 Strength = this.Strength,
                 orginPosition = this.transform.TransformPoint(SpawnPoint),
                 direction = this.transform.forward,
-                Velocity = this.Rigidbody.velocity,
+                Velocity = StatMaster.isClient ? Vector3.zero : this.Rigidbody.velocity,
                 Mass = this.bulletMassSlider.Value,
                 Drag = this.bulletDragSlider.Value,
                 color = this.bulletColorSlider.Value,
