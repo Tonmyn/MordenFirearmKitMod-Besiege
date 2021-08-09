@@ -123,6 +123,7 @@ namespace ModernFirearmKitMod
 
         public override void SimulateUpdateAlways()
         {
+            if (StatMaster.isClient) return;
             Reload();
             if ((LaunchKey.IsHeld||LaunchKey.EmulationHeld()) && BulletCurrentNumber > 0)
             {

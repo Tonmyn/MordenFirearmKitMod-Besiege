@@ -110,6 +110,8 @@ namespace ModernFirearmKitMod
 
         public override void SimulateUpdateAlways()
         {
+
+            if (StatMaster.isClient) return;
             Reload();
             if ( BulletCurrentNumber > 0)
             {
